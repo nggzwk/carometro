@@ -24,13 +24,14 @@ START_MONTH = date(2026, 1, 1)
 
 @dataclass(frozen=True)
 class IpcaRow:
-    month_ref: date
+    month_ref: str
     monthly_inflation_pct: Decimal
     source_url: str
 
 
-def _parse_month(value: str) -> date:
-    return datetime.strptime(value, "%d/%m/%Y").date().replace(day=1)
+def _parse_month(value: str) -> str:
+    parsed_date = datetime.strptime(value, "%d/%m/%Y").date()
+    return parsed_date.replace(day=1).strftime("%Y-%m")
 
 
 def _parse_decimal(value: str) -> Decimal:
@@ -48,9 +49,10 @@ def _fetch_rows(source_url: str, start_month: date) -> list[IpcaRow]:
         payload = json.load(response)
 
     rows: list[IpcaRow] = []
+    start_month_str = start_month.strftime("%Y-%m")
     for record in payload:
         month_ref = _parse_month(record["data"])
-        if month_ref < start_month:
+        if month_ref < start_month_str:
             continue
         rows.append(
             IpcaRow(
@@ -81,9 +83,10 @@ def _upsert_rows(rows: Iterable[IpcaRow], database_url: str) -> int:
 
     with psycopg.connect(database_url) as conn:
         with conn.cursor() as cursor:
+            start_month_str = START_MONTH.strftime("%Y-%m")
             cursor.execute(
                 f"DELETE FROM {TABLE_NAME} WHERE month_ref < %s",
-                (START_MONTH,),
+                (start_month_str,),
             )
             cursor.executemany(
                 f"""
@@ -125,7 +128,7 @@ def main() -> int:
     rows = _fetch_rows(args.source_url, start_month)
     if args.dry_run:
         for row in rows:
-            print(f"{row.month_ref.isoformat()} {row.monthly_inflation_pct}")
+            print(f"{row.month_ref} {row.monthly_inflation_pct}")
         print(f"Fetched {len(rows)} month(s)")
         return 0
 

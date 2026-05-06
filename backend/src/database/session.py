@@ -59,5 +59,11 @@ def get_session() -> Generator[Session, None, None]:
         session.close()
 
 
+def get_db() -> Generator[Session, None, None]:
+    """FastAPI dependency to get a database session."""
+    with get_session() as session:
+        yield session
+
+
 def refresh_item_monthly_price(session: Session) -> None:
     session.execute(text("SELECT inflacao_brasil.refresh_item_monthly_price()"))

@@ -14,7 +14,7 @@ class PriceObservation(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     reference_date: Mapped[date] = mapped_column(Date, nullable=False)
-    month_ref: Mapped[date] = mapped_column(Date, nullable=False)
+    month_ref: Mapped[str] = mapped_column(String(7), nullable=False)
 
     rede: Mapped[str] = mapped_column(Text, nullable=False)
     endereco: Mapped[str | None] = mapped_column(Text)
@@ -74,7 +74,7 @@ class ItemMonthlyPrice(Base):
     __tablename__ = "item_monthly_price"
 
     item_id: Mapped[int] = mapped_column(ForeignKey("inflacao_brasil.item_key.id", ondelete="CASCADE"), nullable=False)
-    month_ref: Mapped[date] = mapped_column(Date, nullable=False)
+    month_ref: Mapped[str] = mapped_column(String(7), nullable=False)
 
     median_price: Mapped[Decimal] = mapped_column(Numeric(12, 4), nullable=False)
     avg_price: Mapped[Decimal] = mapped_column(Numeric(12, 4), nullable=False)
@@ -114,3 +114,16 @@ class BasketItem(Base):
     item: Mapped[ItemKey] = relationship(back_populates="basket_items")
 
     __table_args__ = (PrimaryKeyConstraint("basket_id", "item_id", name="pk_basket_item"),)
+
+
+class IpcaMonthlyPublic(Base):
+    __tablename__ = "ipca_monthly_public"
+
+    month_ref: Mapped[str] = mapped_column(String(7), primary_key=True)
+    monthly_inflation_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
+    source_url: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index("ix_ipca_monthly_public_month_ref", "month_ref"),
+    )
