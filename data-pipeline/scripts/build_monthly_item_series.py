@@ -26,7 +26,7 @@ from typing import Any, Protocol
 @dataclass(frozen=True)
 class PriceObservation:
     reference_date: date
-    month_ref: date
+    month_ref: str
     rede: str
     endereco: str
     produto: str
@@ -157,29 +157,28 @@ class ObservationParser:
 
 
 class MonthRefResolver(Protocol):
-    def resolve(self, reference_date: date, source_file: str) -> date:
+    def resolve(self, reference_date: date, source_file: str) -> str:
         ...
 
 
 class ReferenceDateMonthRefResolver:
-    def resolve(self, reference_date: date, source_file: str) -> date:
-        return reference_date.replace(day=1)
+    def resolve(self, reference_date: date, source_file: str) -> str:
+        return reference_date.replace(day=1).strftime("%Y-%m")
 
 
 class SourceFileMonthRefResolver:
-    def resolve(self, reference_date: date, source_file: str) -> date:
-        # Expected source file format: standardized_YYYY-MM-DD.csv
+    def resolve(self, reference_date: date, source_file: str) -> str:
         stem = Path(source_file).stem
         prefix = "standardized_"
         if not stem.startswith(prefix):
-            return reference_date.replace(day=1)
+            return reference_date.replace(day=1).strftime("%Y-%m")
 
         date_part = stem[len(prefix):]
         try:
             parsed = datetime.strptime(date_part, "%Y-%m-%d").date()
         except ValueError:
-            return reference_date.replace(day=1)
-        return parsed.replace(day=1)
+            return reference_date.replace(day=1).strftime("%Y-%m")
+        return parsed.replace(day=1).strftime("%Y-%m")
 
 
 class RowParser(Protocol):
