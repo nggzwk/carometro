@@ -25,3 +25,14 @@ class BasketResponse(BaseModel):
     basket_code: str
     basket_name: str
     items: list[BasketItemResponse]
+
+
+class BasketValueResponse(BaseModel):
+    """Response model for pre-calculated basket values."""
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    month_ref: str
+    basket_value_brl: Decimal
+    minimum_wage_brl: Decimal | None
+    percentage_of_wage: float | None

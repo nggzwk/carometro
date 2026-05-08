@@ -3,45 +3,70 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ..database.session import get_db
-from ..schemas.basket import BasketItemResponse
+from ..schemas.basket import (
+    BasketItemResponse,
+    BasketValueResponse,
+)
 
 router = APIRouter(prefix="/api/basket", tags=["basket"])
 
 
+def validate_month_ref(month_ref: str, db: Session) -> None:
+    """
+    Validate month_ref parameter for basket endpoints.
+    
+    Args:
+        month_ref: Month in YYYY-MM format to validate
+        db: Database session dependency
+    
+    Raises:
+        HTTPException: 400 if format invalid, 404 if no data exists for the month
+    """
+    if month_ref is None:
+        return
+    
+    if len(month_ref) > 7:
+        raise HTTPException(
+            status_code=400,
+            detail="month_ref cannot exceed 7 characters (YYYY-MM format).",
+        )
+    if len(month_ref) == 0:
+        raise HTTPException(status_code=400, detail="month_ref cannot be empty")
+    
+    # Check if data exists for this month
+    check_query = text("""
+        SELECT COUNT(*) FROM inflacao_brasil.item_monthly_price 
+        WHERE month_ref = :month_ref
+    """)
+    count_result = db.execute(check_query, {"month_ref": month_ref}).scalar()
+    if count_result == 0:
+        raise HTTPException(status_code=404, detail="No data found for the month.")
+
+
 @router.get("/items", response_model=list[BasketItemResponse])
 def get_basket_items(
-    month_ref: str | None = Query(None, description="Month in YYYY-MM format. If null, returns latest month available."),
-    db: Session = Depends(get_db)
+    month_ref: str | None = Query(
+        None,
+        description="Month in YYYY-MM format. If null, returns latest month available.",
+    ),
+    db: Session = Depends(get_db),
 ) -> list[BasketItemResponse]:
     """
     Fetch all items in the default basket with their prices and month-over-month data.
-    
+
     Args:
         month_ref: Optional month in YYYY-MM format. If not provided, returns latest month data.
         db: Database session dependency.
-    
+
     Returns:
         List of basket items with pricing information.
-    
+
     Raises:
         HTTPException: 400 if month_ref is invalid format, 404 if no data exists for the month.
     """
-    # Validate month_ref format if provided
-    if month_ref is not None:
-        if len(month_ref) > 7:
-            raise HTTPException(status_code=400, detail="month_ref cannot exceed 7 characters (YYYY-MM format).")
-        if len(month_ref) == '':
-            raise HTTPException(status_code=400, detail="month_ref cannot be empty")
-        
-        # Check if data exists for this month
-        check_query = text("""
-            SELECT COUNT(*) FROM inflacao_brasil.item_monthly_price 
-            WHERE month_ref = :month_ref
-        """)
-        count_result = db.execute(check_query, {"month_ref": month_ref}).scalar()
-        if count_result == 0:
-            raise HTTPException(status_code=404, detail="No data found for the month.")
-    
+    # Validate month_ref if provided
+    validate_month_ref(month_ref, db)
+
     if month_ref:
         query = text("""
         SELECT
@@ -143,7 +168,7 @@ def get_basket_items(
         """)
         result = db.execute(query)
     rows = result.fetchall()
-    
+
     return [
         BasketItemResponse(
             produto_categoria=row[0],
@@ -154,6 +179,58 @@ def get_basket_items(
             current_price=row[5],
             previous_price=row[6],
             mom_pct=row[7],
+        )
+        for row in rows
+    ]
+
+
+@router.get("/value", response_model=list[BasketValueResponse])
+def get_basket_values(
+    month_ref: str | None = Query(
+        None, description="Month in YYYY-MM format. If null, returns all months."
+    ),
+    db: Session = Depends(get_db),
+) -> list[BasketValueResponse]:
+    """
+    Fetch pre-calculated basket values with minimum wage equivalence.
+
+    Args:
+        month_ref: Optional specific month (YYYY-MM format).
+        db: Database session dependency.
+
+    Returns:
+        List of basket values with wage percentages.
+    
+    Raises:
+        HTTPException: 400 if month_ref is invalid format, 404 if no data exists for the month.
+    """
+    # Validate month_ref if provided
+    validate_month_ref(month_ref, db)
+    if month_ref:
+        query = text("""
+            SELECT month_ref, basket_value_brl, minimum_wage_brl, percentage_of_wage
+            FROM inflacao_brasil.basket_monthly_value
+            WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+            AND month_ref = :month_ref
+            ORDER BY month_ref DESC
+        """)
+        result = db.execute(query, {"month_ref": month_ref})
+    else:
+        query = text("""
+            SELECT month_ref, basket_value_brl, minimum_wage_brl, percentage_of_wage
+            FROM inflacao_brasil.basket_monthly_value
+            WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+            ORDER BY month_ref DESC
+        """)
+        result = db.execute(query)
+
+    rows = result.fetchall()
+    return [
+        BasketValueResponse(
+            month_ref=row[0],
+            basket_value_brl=row[1],
+            minimum_wage_brl=row[2],
+            percentage_of_wage=row[3],
         )
         for row in rows
     ]
