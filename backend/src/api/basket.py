@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -22,7 +22,26 @@ def get_basket_items(
     
     Returns:
         List of basket items with pricing information.
+    
+    Raises:
+        HTTPException: 400 if month_ref is invalid format, 404 if no data exists for the month.
     """
+    # Validate month_ref format if provided
+    if month_ref is not None:
+        if len(month_ref) > 7:
+            raise HTTPException(status_code=400, detail="month_ref cannot exceed 7 characters (YYYY-MM format).")
+        if len(month_ref) == '':
+            raise HTTPException(status_code=400, detail="month_ref cannot be empty")
+        
+        # Check if data exists for this month
+        check_query = text("""
+            SELECT COUNT(*) FROM inflacao_brasil.item_monthly_price 
+            WHERE month_ref = :month_ref
+        """)
+        count_result = db.execute(check_query, {"month_ref": month_ref}).scalar()
+        if count_result == 0:
+            raise HTTPException(status_code=404, detail="No data found for the month.")
+    
     if month_ref:
         query = text("""
         SELECT
@@ -42,8 +61,11 @@ def get_basket_items(
             (lp.qtd_embalagem || lp.unidade_sigla) AS qtd_embalagem,
             :month_ref AS month_ref,
             lp.median_price AS current_price,
-            CAST(NULL AS NUMERIC(12,4)) AS previous_price,
-            CAST(NULL AS NUMERIC(5,2)) AS mom_pct
+            lp.prev_price AS previous_price,
+            CASE
+                WHEN lp.prev_price IS NULL OR lp.prev_price = 0 THEN NULL
+                ELSE round(((lp.median_price / lp.prev_price) - 1) * 100, 2)
+            END AS mom_pct
         FROM (
             SELECT
                 ik.id,
@@ -52,14 +74,20 @@ def get_basket_items(
                 ik.produto_categoria,
                 ik.produto_subcategoria,
                 imp.month_ref,
-                imp.median_price
+                imp.median_price,
+                lag(imp.median_price) OVER (
+                    PARTITION BY ik.id
+                    ORDER BY imp.month_ref
+                ) AS prev_price
             FROM inflacao_brasil.item_key ik
             LEFT JOIN inflacao_brasil.item_monthly_price imp
-                ON ik.id = imp.item_id AND imp.month_ref = :month_ref
+                ON ik.id = imp.item_id
+            WHERE ik.id IN (
+                SELECT item_id FROM inflacao_brasil.basket_item
+                WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+            )
         ) lp
-        INNER JOIN inflacao_brasil.basket_item bi ON lp.id = bi.item_id
-        INNER JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
-        WHERE b.code = 'default_basket'
+        WHERE lp.month_ref = :month_ref
         ORDER BY lp.produto_categoria, lp.produto_subcategoria
         """)
         result = db.execute(query, {"month_ref": month_ref})
