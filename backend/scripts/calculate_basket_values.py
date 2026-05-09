@@ -2,43 +2,55 @@
 """
 Calculate monthly basket values with minimum wage equivalence.
 
-Basket composition:
-1. Arroz 2.5kg - 2.5x Arroz Polido (produto_subcategoria: 40003)
-2. Feijão 1kg - 1x Feijão Carioca (produto_subcategoria: 40012)
-3. Farinha 1kg - 1x Farinha de Trigo (produto_subcategoria: 40017)
-4. Óleo 900ml - 1x Óleo de Soja (produto_subcategoria: 60001)
-5. Café 500g - 1x Café (produto_subcategoria: 90001)
-6. Leite 5l - 5x Leite Integral (produto_subcategoria: 30001)
-7. Açúcar 1kg - 1x Açúcar Cristal (produto_subcategoria: 80002)
-8. Ovos 2dz - 2x Ovos Brancos (produto_subcategoria: 20001)
-9. Carne 3kg - 3x Carne (produto_subcategoria: 10023)
-10. Frango 4kg - 4x Filé de Frango (produto_subcategoria: 10011)
+Basket composition is loaded from database (basket_item table) to guarantee
+use of correct product sizes and quantities. This ensures:
+- No hardcoded product sizes (preventing Arroz 5kg vs 1kg confusion)
+- Exact synchronization with database configuration
+- Validation via produto_subcategoria + qtd_embalagem + unidade_sigla
 """
 
 import os
 import sys
-from pathlib import Path
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timezone
 
 import psycopg
 
-# Basket composition: produto_subcategoria -> quantity
-BASKET_COMPOSITION = {
-    40003: Decimal("2.5"),    # Arroz Polido (2.5kg)
-    40012: Decimal("1"),      # Feijão Carioca (1kg)
-    40017: Decimal("1"),      # Farinha de Trigo (1kg)
-    60001: Decimal("1"),      # Óleo de Soja (1 bottle)
-    90001: Decimal("1"),      # Café (500g)
-    30001: Decimal("5"),      # Leite Integral (5L)
-    80002: Decimal("1"),      # Açúcar Cristal (1kg)
-    20001: Decimal("2"),      # Ovos Brancos (2 dz)
-    10023: Decimal("3"),      # Carne/Coxão Mole (3kg)
-    10011: Decimal("4"),      # Filé de Frango (4kg)
-}
+
+def get_basket_items(conn, basket_code: str = "default_basket") -> list[tuple[int, str, str, Decimal]] | None:
+    """
+    Load basket composition from database, ensuring exact product sizes.
+    
+    Returns list of (item_id, qtd_embalagem, unidade_sigla, weight) for basket items.
+    This guarantees correct product identification: produto_subcategoria is NOT unique,
+    but (qtd_embalagem, unidade_sigla, produto_categoria, produto_subcategoria) is unique.
+    
+    Args:
+        conn: Database connection
+        basket_code: Basket identifier (default: 'default_basket')
+    
+    Returns:
+        List of (item_id, qtd_embalagem, unidade_sigla, weight) or None if basket not found
+    """
+    with conn.cursor() as cur:
+        query = """
+            SELECT
+                ik.id,
+                ik.qtd_embalagem,
+                ik.unidade_sigla,
+                bi.weight
+            FROM inflacao_brasil.basket_item bi
+            JOIN inflacao_brasil.item_key ik ON bi.item_id = ik.id
+            JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
+            WHERE b.code = %s
+            ORDER BY ik.id
+        """
+        cur.execute(query, (basket_code,))
+        rows = cur.fetchall()
+        return rows if rows else None
 
 
-def get_basket_value(conn, month_ref: str) -> Decimal | None:
+def get_basket_value(conn, month_ref: str, basket_items: list[tuple[int, str, str, Decimal]]) -> Decimal | None:
     """
     Calculate total basket value for a given month using available items.
     
@@ -48,44 +60,50 @@ def get_basket_value(conn, month_ref: str) -> Decimal | None:
     Args:
         conn: Database connection
         month_ref: Month in YYYY-MM format
+        basket_items: List of (item_id, qtd_embalagem, unidade_sigla, weight) from get_basket_items()
     
     Returns:
         Total basket value in BRL or None if no data available for any items
     """
     with conn.cursor() as cur:
-        # Get median prices for basket items with fallback pricing logic
-        # For each item, if no price for exact month, use latest anterior price
-        placeholders = ",".join([str(p) for p in BASKET_COMPOSITION.keys()])
+        # Build item_ids from basket_items for query
+        item_ids = [str(item[0]) for item in basket_items]
+        item_ids_str = ",".join(item_ids)
+        
+        # Get prices for all basket items with fallback pricing
         query = f"""
             SELECT
-                ik.produto_subcategoria,
+                imp.item_id,
                 (
-                    SELECT imp.median_price
-                    FROM inflacao_brasil.item_monthly_price imp
-                    WHERE imp.item_id = ik.id
-                    AND imp.month_ref <= %s
-                    ORDER BY imp.month_ref DESC
+                    SELECT median_price
+                    FROM inflacao_brasil.item_monthly_price
+                    WHERE item_id = imp.item_id
+                    AND month_ref <= %s
+                    ORDER BY month_ref DESC
                     LIMIT 1
                 ) AS median_price
-            FROM inflacao_brasil.item_key ik
-            WHERE ik.produto_subcategoria IN ({placeholders})
-            ORDER BY ik.produto_subcategoria
+            FROM inflacao_brasil.item_monthly_price imp
+            WHERE imp.item_id IN ({item_ids_str})
+            GROUP BY imp.item_id
         """
         
         cur.execute(query, (month_ref,))
-        rows = cur.fetchall()
+        price_rows = cur.fetchall()
         
-        if not rows:
-            return None  # No items found in basket composition
+        if not price_rows:
+            return None  # No prices found for any items
         
-        # Calculate total value using available items (with fallback pricing)
+        # Create price lookup dict: item_id -> median_price
+        prices = {row[0]: Decimal(str(row[1])) if row[1] else None for row in price_rows}
+        
+        # Calculate total value: iterate through basket_items to apply weights
         total = Decimal("0")
         items_with_prices = 0
         
-        for subcategoria, median_price in rows:
-            if median_price is not None:  # Only include items that have some historical data
-                quantity = BASKET_COMPOSITION[subcategoria]
-                total += Decimal(str(median_price)) * quantity
+        for item_id, qtd_embalagem, unidade_sigla, weight in basket_items:
+            price = prices.get(item_id)
+            if price is not None:
+                total += price * Decimal(str(weight))
                 items_with_prices += 1
         
         # Return total only if at least one item has pricing data
@@ -128,7 +146,7 @@ def calculate_and_store_basket_values(database_url: str, month_ref: str | None =
     try:
         with psycopg.connect(database_url) as conn:
             with conn.cursor() as cur:
-                # Get default basket ID
+                # Get default basket ID and load basket composition
                 cur.execute(
                     "SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket'"
                 )
@@ -138,6 +156,17 @@ def calculate_and_store_basket_values(database_url: str, month_ref: str | None =
                     return
                 
                 basket_id = basket_result[0]
+                
+                # Load basket items from database (guarantees exact product sizes)
+                basket_items = get_basket_items(conn, "default_basket")
+                if not basket_items:
+                    print("✗ No items configured in default basket")
+                    return
+                
+                print(f"Loaded {len(basket_items)} items from basket_item table:")
+                for item_id, qtd_emb, unit, weight in basket_items:
+                    print(f"  - Item {item_id}: {qtd_emb}{unit} (weight factor: {weight})")
+                print()
                 
                 # Determine months to process
                 if month_ref:
@@ -153,7 +182,7 @@ def calculate_and_store_basket_values(database_url: str, month_ref: str | None =
                 skipped = 0
                 
                 for month in months_to_process:
-                    basket_value = get_basket_value(conn, month)
+                    basket_value = get_basket_value(conn, month, basket_items)
                     if basket_value is None:
                         print(f"⊘ {month}: Incomplete data (skipped)")
                         skipped += 1
@@ -180,7 +209,7 @@ def calculate_and_store_basket_values(database_url: str, month_ref: str | None =
                         float(basket_value),
                         float(minimum_wage) if minimum_wage else None,
                         percentage_of_wage,
-                        datetime.utcnow()
+                        datetime.now(timezone.utc)
                     ))
                     conn.commit()
                     print(f"✓ {month}: R${basket_value:.2f}" + (f" ({percentage_of_wage:.2f}% of wage)" if percentage_of_wage else ""))
