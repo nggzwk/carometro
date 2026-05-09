@@ -6,6 +6,8 @@ from ..database.session import get_db
 from ..schemas.basket import (
     BasketItemResponse,
     BasketValueResponse,
+    BasketInflationResponse,
+    BasketAnnualInflationResponse
 )
 
 router = APIRouter(prefix="/api/basket", tags=["basket"])
@@ -14,17 +16,17 @@ router = APIRouter(prefix="/api/basket", tags=["basket"])
 def validate_month_ref(month_ref: str, db: Session) -> None:
     """
     Validate month_ref parameter for basket endpoints.
-    
+
     Args:
         month_ref: Month in YYYY-MM format to validate
         db: Database session dependency
-    
+
     Raises:
         HTTPException: 400 if format invalid, 404 if no data exists for the month
     """
     if month_ref is None:
         return
-    
+
     if len(month_ref) > 7:
         raise HTTPException(
             status_code=400,
@@ -32,7 +34,7 @@ def validate_month_ref(month_ref: str, db: Session) -> None:
         )
     if len(month_ref) == 0:
         raise HTTPException(status_code=400, detail="month_ref cannot be empty")
-    
+
     # Check if data exists for this month
     check_query = text("""
         SELECT COUNT(*) FROM inflacao_brasil.item_monthly_price 
@@ -69,6 +71,38 @@ def get_basket_items(
 
     if month_ref:
         query = text("""
+        WITH basket_items AS (
+            SELECT item_id FROM inflacao_brasil.basket_item
+            WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+        ),
+        item_prices AS (
+            SELECT
+                ik.id,
+                ik.qtd_embalagem,
+                ik.unidade_sigla,
+                ik.produto_categoria,
+                ik.produto_subcategoria,
+                imp.median_price,
+                imp.month_ref,
+                lag(imp.median_price) OVER (PARTITION BY ik.id ORDER BY imp.month_ref) AS prev_price
+            FROM inflacao_brasil.item_key ik
+            INNER JOIN inflacao_brasil.item_monthly_price imp ON ik.id = imp.item_id
+            INNER JOIN basket_items bi ON ik.id = bi.item_id
+            WHERE imp.month_ref <= :month_ref
+        ),
+        latest_prices AS (
+            SELECT
+                id,
+                qtd_embalagem,
+                unidade_sigla,
+                produto_categoria,
+                produto_subcategoria,
+                median_price,
+                month_ref,
+                prev_price,
+                row_number() OVER (PARTITION BY id ORDER BY month_ref DESC) AS rn
+            FROM item_prices
+        )
         SELECT
             lp.produto_categoria,
             lp.produto_subcategoria,
@@ -76,43 +110,25 @@ def get_basket_items(
                 WHEN lp.produto_subcategoria = 10011 THEN 'Filé de peito de frango sem osso'
                 WHEN lp.produto_subcategoria = 10023 THEN 'Coxão mole sem osso'
                 WHEN lp.produto_subcategoria = 20001 THEN 'Ovos brancos'
+                WHEN lp.produto_subcategoria = 30001 THEN 'Leite Integral'
                 WHEN lp.produto_subcategoria = 40003 THEN 'Arroz polido'
                 WHEN lp.produto_subcategoria = 40012 THEN 'Feijão carioca'
                 WHEN lp.produto_subcategoria = 40017 THEN 'Farinha de trigo'
                 WHEN lp.produto_subcategoria = 60001 THEN 'Óleo de soja'
                 WHEN lp.produto_subcategoria = 80002 THEN 'Açúcar cristal'
+                WHEN lp.produto_subcategoria = 90001 THEN 'Café'
                 ELSE 'Produto'
             END AS item_name,
             (lp.qtd_embalagem || lp.unidade_sigla) AS qtd_embalagem,
             :month_ref AS month_ref,
-            lp.median_price AS current_price,
+            lp.median_price AS month_price,
             lp.prev_price AS previous_price,
             CASE
                 WHEN lp.prev_price IS NULL OR lp.prev_price = 0 THEN NULL
                 ELSE round(((lp.median_price / lp.prev_price) - 1) * 100, 2)
             END AS mom_pct
-        FROM (
-            SELECT
-                ik.id,
-                ik.qtd_embalagem,
-                ik.unidade_sigla,
-                ik.produto_categoria,
-                ik.produto_subcategoria,
-                imp.month_ref,
-                imp.median_price,
-                lag(imp.median_price) OVER (
-                    PARTITION BY ik.id
-                    ORDER BY imp.month_ref
-                ) AS prev_price
-            FROM inflacao_brasil.item_key ik
-            LEFT JOIN inflacao_brasil.item_monthly_price imp
-                ON ik.id = imp.item_id
-            WHERE ik.id IN (
-                SELECT item_id FROM inflacao_brasil.basket_item
-                WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
-            )
-        ) lp
-        WHERE lp.month_ref = :month_ref
+        FROM latest_prices lp
+        WHERE lp.rn = 1
         ORDER BY lp.produto_categoria, lp.produto_subcategoria
         """)
         result = db.execute(query, {"month_ref": month_ref})
@@ -125,16 +141,18 @@ def get_basket_items(
                 WHEN lp.produto_subcategoria = 10011 THEN 'Filé de peito de frango sem osso'
                 WHEN lp.produto_subcategoria = 10023 THEN 'Coxão mole sem osso'
                 WHEN lp.produto_subcategoria = 20001 THEN 'Ovos brancos'
+                WHEN lp.produto_subcategoria = 30001 THEN 'Leite Integral'
                 WHEN lp.produto_subcategoria = 40003 THEN 'Arroz polido'
                 WHEN lp.produto_subcategoria = 40012 THEN 'Feijão carioca'
                 WHEN lp.produto_subcategoria = 40017 THEN 'Farinha de trigo'
                 WHEN lp.produto_subcategoria = 60001 THEN 'Óleo de soja'
                 WHEN lp.produto_subcategoria = 80002 THEN 'Açúcar cristal'
+                WHEN lp.produto_subcategoria = 90001 THEN 'Café'
                 ELSE 'Produto'
             END AS item_name,
             (lp.qtd_embalagem || lp.unidade_sigla) AS qtd_embalagem,
             lp.month_ref,
-            lp.median_price AS current_price,
+            lp.median_price AS month_price,
             lp.prev_price AS previous_price,
             CASE
                 WHEN lp.prev_price IS NULL OR lp.prev_price = 0 THEN NULL
@@ -176,7 +194,7 @@ def get_basket_items(
             item_name=row[2],
             qtd_embalagem=row[3],
             month_ref=row[4],
-            current_price=row[5],
+            month_price=row[5],
             previous_price=row[6],
             mom_pct=row[7],
         )
@@ -200,7 +218,7 @@ def get_basket_values(
 
     Returns:
         List of basket values with wage percentages.
-    
+
     Raises:
         HTTPException: 400 if month_ref is invalid format, 404 if no data exists for the month.
     """
@@ -231,6 +249,176 @@ def get_basket_values(
             basket_value_brl=row[1],
             minimum_wage_brl=row[2],
             percentage_of_wage=row[3],
+        )
+        for row in rows
+    ]
+
+
+@router.get("/inflation", response_model=list[BasketInflationResponse])
+def get_basket_inflation(
+    month_ref: str | None = Query(
+        None,
+        description="Month in YYYY-MM format. If null, returns all months with inflation data.",
+    ),
+    db: Session = Depends(get_db),
+) -> list[BasketInflationResponse]:
+    """
+    Fetch basket inflation (MoM) comparing current month to previous month.
+
+    Args:
+        month_ref: Optional specific month (YYYY-MM format). If not provided, returns all months.
+        db: Database session dependency.
+
+    Returns:
+        List of basket inflation data with MoM percentage changes and absolute differences.
+
+    Raises:
+        HTTPException: 400 if month_ref is invalid format, 404 if no data exists for the month.
+    """
+    # Validate month_ref if provided
+    validate_month_ref(month_ref, db)
+
+    if month_ref:
+        # Get current month and previous month separately
+        query = text("""
+            WITH current_month AS (
+                SELECT
+                    bmv.month_ref,
+                    bmv.basket_value_brl
+                FROM inflacao_brasil.basket_monthly_value bmv
+                WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+                AND bmv.month_ref = :month_ref
+            ),
+            previous_month AS (
+                SELECT
+                    bmv.basket_value_brl AS prev_value
+                FROM inflacao_brasil.basket_monthly_value bmv
+                WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+                AND bmv.month_ref < :month_ref
+                ORDER BY bmv.month_ref DESC
+                LIMIT 1
+            )
+            SELECT
+                cm.month_ref,
+                cm.basket_value_brl,
+                pm.prev_value,
+                CASE
+                    WHEN pm.prev_value IS NULL
+                    THEN NULL
+                    ELSE cm.basket_value_brl - pm.prev_value
+                END AS basket_difference,
+                CASE
+                    WHEN pm.prev_value IS NULL OR pm.prev_value = 0
+                    THEN NULL
+                    ELSE round(((cm.basket_value_brl / pm.prev_value) - 1) * 100, 2)
+                END AS inflation_pct
+            FROM current_month cm
+            LEFT JOIN previous_month pm ON true
+        """)
+        result = db.execute(query, {"month_ref": month_ref})
+    else:
+        query = text("""
+            SELECT
+                bmv.month_ref,
+                bmv.basket_value_brl,
+                lag(bmv.basket_value_brl) OVER (ORDER BY bmv.month_ref) AS previous_month_value,
+                bmv.basket_value_brl - lag(bmv.basket_value_brl) OVER (ORDER BY bmv.month_ref) AS basket_difference,
+                CASE
+                    WHEN lag(bmv.basket_value_brl) OVER (ORDER BY bmv.month_ref) IS NULL 
+                        OR lag(bmv.basket_value_brl) OVER (ORDER BY bmv.month_ref) = 0 
+                    THEN NULL
+                    ELSE round(((bmv.basket_value_brl / lag(bmv.basket_value_brl) OVER (ORDER BY bmv.month_ref)) - 1) * 100, 2)
+                END AS inflation_pct
+            FROM inflacao_brasil.basket_monthly_value bmv
+            WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+            ORDER BY bmv.month_ref DESC
+        """)
+        result = db.execute(query)
+
+    rows = result.fetchall()
+    return [
+        BasketInflationResponse(
+            month_ref=row[0],
+            actual_month_value_brl=row[1],
+            previous_month_value_brl=row[2],
+            basket_difference_brl=row[3],
+            inflation_pct=row[4],
+        )
+        for row in rows
+    ]
+
+@router.get("/inflation/annual", response_model=list[BasketAnnualInflationResponse])
+def get_basket_annual_inflation(
+    db: Session = Depends(get_db),
+) -> list[BasketAnnualInflationResponse]:
+    """
+    Fetch annual accumulated basket inflation starting from 2023.
+    
+    Uses YEAR-OVER-YEAR comparison:
+    - 2024 annual inflation = (Dec 2024 vs Dec 2023)
+    - 2025 annual inflation = (Dec 2025 vs Dec 2024)
+    - 2026 annual inflation = (Latest 2026 vs Dec 2025)
+    
+    Uses fallback logic: if exact month missing, uses latest available from prior months.
+    2023 is excluded (no December 2022 data available).
+    
+    Returns:
+        List of annual YoY inflation data with start/end month values.
+    """
+    query = text("""
+        WITH years AS (
+            SELECT 2023 AS year
+            UNION ALL
+            SELECT 2024
+            UNION ALL
+            SELECT 2025
+            UNION ALL
+            SELECT 2026
+        ),
+        year_end_values AS (
+            -- Get last available month for each year
+            SELECT
+                SUBSTRING(month_ref, 1, 4)::INTEGER AS year,
+                month_ref,
+                basket_value_brl,
+                row_number() OVER (PARTITION BY SUBSTRING(month_ref, 1, 4) ORDER BY month_ref DESC) AS rn
+            FROM inflacao_brasil.basket_monthly_value bmv
+            WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+        )
+        SELECT
+            y.year,
+            -- Current year end month and value
+            cy.month_ref AS end_month_ref,
+            cy.basket_value_brl AS end_month_value_brl,
+            -- Previous year end month and value (for YoY comparison)
+            py.month_ref AS previous_year_end_month_ref,
+            py.basket_value_brl AS previous_year_end_value_brl,
+            -- Calculate difference (current year - previous year)
+            cy.basket_value_brl - py.basket_value_brl AS annual_difference_brl,
+            -- Calculate YoY inflation percentage
+            CASE
+                WHEN py.basket_value_brl IS NULL OR py.basket_value_brl = 0 THEN NULL
+                ELSE ROUND(((cy.basket_value_brl - py.basket_value_brl) / py.basket_value_brl) * 100, 2)
+            END AS annual_inflation_pct
+        FROM years y
+        LEFT JOIN year_end_values cy ON cy.year = y.year AND cy.rn = 1
+        LEFT JOIN year_end_values py ON py.year = y.year - 1 AND py.rn = 1
+        WHERE cy.basket_value_brl IS NOT NULL AND py.basket_value_brl IS NOT NULL
+        ORDER BY y.year
+    """)
+    
+    result = db.execute(query)
+    rows = result.fetchall()
+    
+    return [
+        BasketAnnualInflationResponse(
+            year=row[0],
+            start_month_ref=row[3],  # Previous year end month
+            start_month_value_brl=row[4],  # Previous year end value
+            end_month_ref=row[1],  # Current year end month
+            end_month_value_brl=row[2],  # Current year end value
+            annual_difference_brl=row[5],
+            annual_inflation_pct=row[6],
         )
         for row in rows
     ]

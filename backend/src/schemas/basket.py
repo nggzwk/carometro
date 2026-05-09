@@ -12,7 +12,7 @@ class BasketItemResponse(BaseModel):
     item_name: str
     qtd_embalagem: str
     month_ref: str
-    current_price: Decimal | None
+    month_price: Decimal | None
     previous_price: Decimal | None
     mom_pct: float | None
 
@@ -36,3 +36,28 @@ class BasketValueResponse(BaseModel):
     basket_value_brl: Decimal
     minimum_wage_brl: Decimal | None
     percentage_of_wage: float | None
+
+
+class BasketInflationResponse(BaseModel):
+    """Response model for basket inflation (MoM) data."""
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    month_ref: str
+    actual_month_value_brl: Decimal
+    previous_month_value_brl: Decimal | None
+    basket_difference_brl: Decimal | None
+    inflation_pct: float | None
+
+class BasketAnnualInflationResponse(BaseModel):
+    """Response model for annual basket inflation data."""
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    year: int
+    start_month_ref: str
+    start_month_value_brl: Decimal
+    end_month_ref: str
+    end_month_value_brl: Decimal
+    annual_difference_brl: Decimal
+    annual_inflation_pct: float

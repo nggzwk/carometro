@@ -42,24 +42,32 @@ def get_basket_value(conn, month_ref: str) -> Decimal | None:
     """
     Calculate total basket value for a given month using available items.
     
+    Uses fallback pricing: if an item doesn't have data for the requested month,
+    uses the most recent available price from any prior month (month_ref <= requested).
+    
     Args:
         conn: Database connection
         month_ref: Month in YYYY-MM format
     
     Returns:
-        Total basket value in BRL or None if no data available
+        Total basket value in BRL or None if no data available for any items
     """
     with conn.cursor() as cur:
-        # Get median prices for basket items that have data in this month
+        # Get median prices for basket items with fallback pricing logic
+        # For each item, if no price for exact month, use latest anterior price
         placeholders = ",".join([str(p) for p in BASKET_COMPOSITION.keys()])
         query = f"""
             SELECT
                 ik.produto_subcategoria,
-                imp.median_price
+                (
+                    SELECT imp.median_price
+                    FROM inflacao_brasil.item_monthly_price imp
+                    WHERE imp.item_id = ik.id
+                    AND imp.month_ref <= %s
+                    ORDER BY imp.month_ref DESC
+                    LIMIT 1
+                ) AS median_price
             FROM inflacao_brasil.item_key ik
-            INNER JOIN inflacao_brasil.item_monthly_price imp
-                ON ik.id = imp.item_id
-                AND imp.month_ref = %s
             WHERE ik.produto_subcategoria IN ({placeholders})
             ORDER BY ik.produto_subcategoria
         """
@@ -68,15 +76,20 @@ def get_basket_value(conn, month_ref: str) -> Decimal | None:
         rows = cur.fetchall()
         
         if not rows:
-            return None  # No data for this month
+            return None  # No items found in basket composition
         
-        # Calculate total value using available items
+        # Calculate total value using available items (with fallback pricing)
         total = Decimal("0")
-        for subcategoria, median_price in rows:
-            quantity = BASKET_COMPOSITION[subcategoria]
-            total += Decimal(str(median_price)) * quantity
+        items_with_prices = 0
         
-        return total if total > 0 else None
+        for subcategoria, median_price in rows:
+            if median_price is not None:  # Only include items that have some historical data
+                quantity = BASKET_COMPOSITION[subcategoria]
+                total += Decimal(str(median_price)) * quantity
+                items_with_prices += 1
+        
+        # Return total only if at least one item has pricing data
+        return total if items_with_prices > 0 else None
 
 
 def get_minimum_wage_for_month(conn, month_ref: str) -> Decimal | None:
@@ -93,10 +106,10 @@ def get_minimum_wage_for_month(conn, month_ref: str) -> Decimal | None:
     with conn.cursor() as cur:
         year = month_ref[:4]
         query = """
-            SELECT wage_value
+            SELECT wage_amount
             FROM inflacao_brasil.minimum_wage_history
-            WHERE EXTRACT(YEAR FROM effective_date) = %s
-            ORDER BY effective_date DESC
+            WHERE EXTRACT(YEAR FROM effective_from) = %s
+            ORDER BY effective_from DESC
             LIMIT 1
         """
         cur.execute(query, (int(year),))
