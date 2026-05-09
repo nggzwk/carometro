@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from ..database.session import get_db
 from ..schemas.basket import (
     BasketItemResponse,
     BasketValueResponse,
     BasketInflationResponse,
-    BasketAnnualInflationResponse
+    BasketAnnualInflationResponse,
+    MonthlyVillains
 )
 
 router = APIRouter(prefix="/api/basket", tags=["basket"])
@@ -49,6 +51,7 @@ def validate_month_ref(month_ref: str, db: Session) -> None:
 def get_basket_items(
     month_ref: str | None = Query(
         None,
+        max_length=8,
         description="Month in YYYY-MM format. If null, returns latest month available.",
     ),
     db: Session = Depends(get_db),
@@ -205,7 +208,9 @@ def get_basket_items(
 @router.get("/value", response_model=list[BasketValueResponse])
 def get_basket_values(
     month_ref: str | None = Query(
-        None, description="Month in YYYY-MM format. If null, returns all months."
+        None,
+        max_length=8,
+        description="Month in YYYY-MM format. If null, returns all months."
     ),
     db: Session = Depends(get_db),
 ) -> list[BasketValueResponse]:
@@ -258,6 +263,7 @@ def get_basket_values(
 def get_basket_inflation(
     month_ref: str | None = Query(
         None,
+        max_length=8,
         description="Month in YYYY-MM format. If null, returns all months with inflation data.",
     ),
     db: Session = Depends(get_db),
@@ -347,21 +353,153 @@ def get_basket_inflation(
         for row in rows
     ]
 
+
+@router.get("/villains", response_model=list[MonthlyVillains])
+def get_basket_villains(
+    year: int | None = Query(
+        None,
+        description="Year (YYYY) to filter; if omitted returns all months (latest months first).",
+        ge=2023,
+        le=datetime.now().year,
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Top-3 villain items per month (highest MoM inflation).
+    - If `year` provided: return only months in that year.
+    - If `year` omitted: return all months, ordered by month_ref DESC (latest first).
+    Validates `year` and returns 400 for invalid values, 404 if no data for the year.
+    """
+    # basic validation
+    if year is not None:
+        ys = str(year)
+        if len(ys) != 4:
+            raise HTTPException(
+                status_code=400, detail="`year` must be a 4-digit value (YYYY)."
+            )
+
+        # ensure there is data for this year
+        check_q = text("""
+            SELECT COUNT(*) FROM inflacao_brasil.basket_monthly_value bmv
+            WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+                AND SUBSTRING(bmv.month_ref, 1, 4) = :year
+        """)
+        cnt = db.execute(check_q, {"year": ys}).scalar()
+        if cnt == 0:
+            raise HTTPException(
+                status_code=404, detail=f"No data found for year {year}."
+            )
+
+    # build optional year filter for months CTE
+    year_filter = "AND SUBSTRING(month_ref, 1, 4) = :year" if year is not None else ""
+
+    query_sql = f"""
+        WITH months AS (
+            SELECT DISTINCT month_ref
+            FROM inflacao_brasil.basket_monthly_value bmv
+            WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+            {year_filter}
+            ORDER BY month_ref DESC
+        ),
+        basket_items AS (
+            SELECT ik.id, ik.produto_subcategoria
+            FROM inflacao_brasil.item_key ik
+            INNER JOIN inflacao_brasil.basket_item bi ON ik.id = bi.item_id
+            WHERE bi.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+        ),
+        item_months AS (
+            SELECT
+                m.month_ref,
+                bi.id AS item_id,
+                bi.produto_subcategoria,
+                (
+                    SELECT imp.median_price
+                    FROM inflacao_brasil.item_monthly_price imp
+                    WHERE imp.item_id = bi.id
+                        AND imp.month_ref <= m.month_ref
+                    ORDER BY imp.month_ref DESC LIMIT 1
+                ) AS cur_price,
+                (
+                    SELECT imp2.median_price
+                    FROM inflacao_brasil.item_monthly_price imp2
+                    WHERE imp2.item_id = bi.id
+                        AND imp2.month_ref < m.month_ref
+                    ORDER BY imp2.month_ref DESC LIMIT 1
+                ) AS prev_price
+            FROM months m
+            CROSS JOIN basket_items bi
+        ),
+        computed AS (
+            SELECT
+                im.month_ref,
+                im.produto_subcategoria,
+                CASE
+                    WHEN im.produto_subcategoria = 10011 THEN 'Filé de peito de frango sem osso'
+                    WHEN im.produto_subcategoria = 10023 THEN 'Coxão mole sem osso'
+                    WHEN im.produto_subcategoria = 20001 THEN 'Ovos brancos'
+                    WHEN im.produto_subcategoria = 30001 THEN 'Leite Integral'
+                    WHEN im.produto_subcategoria = 40003 THEN 'Arroz polido'
+                    WHEN im.produto_subcategoria = 40012 THEN 'Feijão carioca'
+                    WHEN im.produto_subcategoria = 40017 THEN 'Farinha de trigo'
+                    WHEN im.produto_subcategoria = 60001 THEN 'Óleo de soja'
+                    WHEN im.produto_subcategoria = 80002 THEN 'Açúcar cristal'
+                    WHEN im.produto_subcategoria = 90001 THEN 'Café'
+                    ELSE 'Produto'
+                END AS item_name,
+                im.cur_price AS value,
+                ROUND(((im.cur_price / im.prev_price) - 1) * 100, 2) AS inflation
+            FROM item_months im
+            WHERE im.cur_price IS NOT NULL AND im.prev_price IS NOT NULL
+        ),
+        ranked AS (
+            SELECT
+                month_ref, item_name, value, inflation,
+                row_number() OVER (PARTITION BY month_ref ORDER BY inflation DESC) AS rn
+            FROM computed
+        )
+        SELECT month_ref, item_name, inflation, value
+        FROM ranked
+        WHERE rn <= 3
+        ORDER BY month_ref DESC, inflation DESC
+    """
+    query = text(query_sql)
+    params = {"year": str(year)} if year is not None else {}
+    result = db.execute(query, params)
+    rows = result.fetchall()
+
+    # group rows by month_ref and build output
+    out = []
+    current_month = None
+    items = []
+    for month_ref, item_name, inflation, value in rows:
+        if current_month != month_ref:
+            if current_month is not None:
+                out.append({"month_ref": current_month, "villains": items})
+            current_month = month_ref
+            items = []
+        items.append(
+            {"name": item_name, "inflation": float(inflation), "value": str(value)}
+        )
+    if current_month is not None:
+        out.append({"month_ref": current_month, "villains": items})
+    return out
+
+
 @router.get("/inflation/annual", response_model=list[BasketAnnualInflationResponse])
 def get_basket_annual_inflation(
     db: Session = Depends(get_db),
 ) -> list[BasketAnnualInflationResponse]:
     """
     Fetch annual accumulated basket inflation starting from 2023.
-    
+
     Uses YEAR-OVER-YEAR comparison:
     - 2024 annual inflation = (Dec 2024 vs Dec 2023)
     - 2025 annual inflation = (Dec 2025 vs Dec 2024)
     - 2026 annual inflation = (Latest 2026 vs Dec 2025)
-    
+
     Uses fallback logic: if exact month missing, uses latest available from prior months.
     2023 is excluded (no December 2022 data available).
-    
+
     Returns:
         List of annual YoY inflation data with start/end month values.
     """
@@ -406,10 +544,10 @@ def get_basket_annual_inflation(
         WHERE cy.basket_value_brl IS NOT NULL AND py.basket_value_brl IS NOT NULL
         ORDER BY y.year
     """)
-    
+
     result = db.execute(query)
     rows = result.fetchall()
-    
+
     return [
         BasketAnnualInflationResponse(
             year=row[0],

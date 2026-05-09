@@ -20,9 +20,3 @@ app.add_middleware(
 
 # Include routers
 app.include_router(basket.router)
-
-
-@app.get("/health")
-def health_check():
-    """Health check endpoint."""
-    return {"status": "ok"}

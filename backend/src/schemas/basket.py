@@ -61,3 +61,14 @@ class BasketAnnualInflationResponse(BaseModel):
     end_month_value_brl: Decimal
     annual_difference_brl: Decimal
     annual_inflation_pct: float
+
+class VillainItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    name: str
+    inflation: float | None
+    value: Decimal | None
+
+class MonthlyVillains(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    month_ref: str
+    villains: list[VillainItem]
