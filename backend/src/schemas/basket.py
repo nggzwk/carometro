@@ -15,6 +15,7 @@ class BasketItemResponse(BaseModel):
     month_price: Decimal | None
     previous_price: Decimal | None
     mom_pct: float | None
+    ipca_monthly_pct: float | None
 
 
 class BasketResponse(BaseModel):
@@ -24,6 +25,15 @@ class BasketResponse(BaseModel):
     
     basket_code: str
     basket_name: str
+    items: list[BasketItemResponse]
+
+
+class BasketItemsWithReferenceResponse(BaseModel):
+    """Response model for basket items with reference list."""
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    basket_items: list[str]
     items: list[BasketItemResponse]
 
 
@@ -48,6 +58,8 @@ class BasketInflationResponse(BaseModel):
     previous_month_value_brl: Decimal | None
     basket_difference_brl: Decimal | None
     inflation_pct: float | None
+    ipca_monthly_pct: float | None
+    annual_ipca_pct: float | None
 
 class BasketAnnualInflationResponse(BaseModel):
     """Response model for annual basket inflation data."""
@@ -61,6 +73,7 @@ class BasketAnnualInflationResponse(BaseModel):
     end_month_value_brl: Decimal
     annual_difference_brl: Decimal
     annual_inflation_pct: float
+    annual_ipca_pct: float | None
 
 class VillainItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -71,4 +84,5 @@ class VillainItem(BaseModel):
 class MonthlyVillains(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     month_ref: str
+    ipca_monthly_pct: float | None
     villains: list[VillainItem]

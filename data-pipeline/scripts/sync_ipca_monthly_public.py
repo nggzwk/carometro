@@ -19,7 +19,8 @@ from urllib.request import urlopen
 
 SOURCE_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?formato=json"
 TABLE_NAME = "inflacao_brasil.ipca_monthly_public"
-START_MONTH = date(2026, 1, 1)
+# Keep monthly IPCA from 2023-01 onward for inline use in endpoints
+START_MONTH = date(2023, 1, 1)
 
 
 @dataclass(frozen=True)
