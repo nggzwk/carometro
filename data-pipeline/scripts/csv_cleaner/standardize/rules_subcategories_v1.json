@@ -1375,7 +1375,7 @@
     "id": 80002,
     "category_id": 8,
     "name": "Açúcar cristal",
-    "items": ["AÇÚCAR CRISTAL", "AÇÚCAR REFINADO"]
+    "items": ["AÇÚCAR CRISTAL", "AÇÚCAR REFINADO", "ACUCAR REFINADO", "ACUCAR CRISTAL"]
   },
   {
     "id": 80003,
