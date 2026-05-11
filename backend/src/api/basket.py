@@ -65,6 +65,193 @@ def _get_annual_ipca_pct(db: Session, month_ref: str) -> float | None:
     return db.execute(query, {"year": year}).scalar()
 
 
+def _previous_month_ref(month_ref: str) -> str:
+    parsed_month = datetime.strptime(month_ref, "%Y-%m")
+    if parsed_month.month == 1:
+        return f"{parsed_month.year - 1:04d}-12"
+    return f"{parsed_month.year:04d}-{parsed_month.month - 1:02d}"
+
+
+def _parse_pack_size(qtd_embalagem: str) -> float | None:
+    try:
+        return float(str(qtd_embalagem).replace(",", "."))
+    except (TypeError, ValueError):
+        return None
+
+
+def _get_item_key_row(db: Session, item_id: int):
+    query = text("""
+        SELECT id, produto_categoria, produto_subcategoria, qtd_embalagem, unidade_sigla
+        FROM inflacao_brasil.item_key
+        WHERE id = :item_id
+    """)
+    return db.execute(query, {"item_id": item_id}).fetchone()
+
+
+def _get_item_monthly_median_price(
+    db: Session, item_id: int, month_ref: str
+) -> float | None:
+    query = text("""
+        SELECT median_price
+        FROM inflacao_brasil.item_monthly_price
+        WHERE item_id = :item_id
+          AND month_ref <= :month_ref
+        ORDER BY month_ref DESC
+        LIMIT 1
+    """)
+    result = db.execute(query, {"item_id": item_id, "month_ref": month_ref}).scalar()
+    return float(result) if result is not None else None
+
+
+def _get_alternative_item_keys(
+    db: Session,
+    produto_categoria: int,
+    produto_subcategoria: int,
+    unidade_sigla: str,
+    excluded_item_ids: set[int],
+) -> list[tuple[int, int, int, str, str]]:
+    params: dict[str, object] = {
+        "produto_categoria": produto_categoria,
+        "produto_subcategoria": produto_subcategoria,
+        "unidade_sigla": unidade_sigla,
+    }
+    excluded_clause = ""
+    if excluded_item_ids:
+        placeholders = ", ".join(
+            [f":excluded_{index}" for index in range(len(excluded_item_ids))]
+        )
+        excluded_clause = f"AND id NOT IN ({placeholders})"
+        for index, excluded_item_id in enumerate(sorted(excluded_item_ids)):
+            params[f"excluded_{index}"] = excluded_item_id
+
+    query = text(f"""
+        SELECT id, produto_categoria, produto_subcategoria, qtd_embalagem, unidade_sigla
+        FROM inflacao_brasil.item_key
+        WHERE produto_categoria = :produto_categoria
+            AND produto_subcategoria = :produto_subcategoria
+            AND unidade_sigla = :unidade_sigla
+            {excluded_clause}
+        ORDER BY CAST(NULLIF(qtd_embalagem, '') AS NUMERIC) DESC, id
+    """)
+    return list(db.execute(query, params).all())
+
+
+def _resolve_unit_price(
+    db: Session,
+    item_id: int,
+    month_ref: str,
+    fallback_item_id: int | None = None,
+) -> tuple[float | None, int | None]:
+    base_row = _get_item_key_row(db, item_id)
+    if base_row is None:
+        return None, None
+
+    _, produto_categoria, produto_subcategoria, qtd_embalagem, unidade_sigla = base_row
+    candidate_rows: list[tuple[int, int, int, str, str]] = [
+        (item_id, produto_categoria, produto_subcategoria, qtd_embalagem, unidade_sigla)
+    ]
+    candidate_rows.extend(
+        _get_alternative_item_keys(
+            db,
+            produto_categoria,
+            produto_subcategoria,
+            unidade_sigla,
+            excluded_item_ids={item_id},
+        )
+    )
+
+    if fallback_item_id is not None and fallback_item_id != item_id:
+        fallback_row = _get_item_key_row(db, fallback_item_id)
+        if fallback_row is not None:
+            (
+                _,
+                fallback_categoria,
+                fallback_subcategoria,
+                fallback_qtd_embalagem,
+                fallback_unidade_sigla,
+            ) = fallback_row
+            candidate_rows.append(fallback_row)
+            candidate_rows.extend(
+                _get_alternative_item_keys(
+                    db,
+                    fallback_categoria,
+                    fallback_subcategoria,
+                    fallback_unidade_sigla,
+                    excluded_item_ids={item_id, fallback_item_id},
+                )
+            )
+
+    seen_item_ids: set[int] = set()
+    for candidate_item_id, _, _, candidate_qtd_embalagem, _ in candidate_rows:
+        if candidate_item_id in seen_item_ids:
+            continue
+        seen_item_ids.add(candidate_item_id)
+
+        median_price = _get_item_monthly_median_price(db, candidate_item_id, month_ref)
+        if median_price is None:
+            continue
+
+        pack_size = _parse_pack_size(candidate_qtd_embalagem)
+        if pack_size is None or pack_size <= 0:
+            continue
+
+        return median_price / pack_size, candidate_item_id
+
+    return None, None
+
+
+def _item_name_from_subcategory(produto_subcategoria: int) -> str:
+    return {
+        10011: "Filé de peito de frango sem osso",
+        10023: "Coxão mole sem osso",
+        20001: "Ovos brancos",
+        30001: "Leite Integral",
+        40003: "Arroz polido",
+        40012: "Feijão carioca",
+        40017: "Farinha de trigo",
+        60001: "Óleo de soja",
+        80002: "Açúcar cristal",
+        90001: "Café",
+    }.get(produto_subcategoria, "Produto")
+
+
+def _get_ipca_monthly_pct(db: Session, month_ref: str) -> float | None:
+    query = text("""
+        SELECT monthly_inflation_pct
+        FROM inflacao_brasil.ipca_monthly_public
+        WHERE month_ref = :month_ref
+        LIMIT 1
+    """)
+    return db.execute(query, {"month_ref": month_ref}).scalar()
+
+
+def _load_basket_items(
+    db: Session,
+) -> list[tuple[int, int, int, str, str, float, int | None]]:
+    query = text("""
+        SELECT
+            ik.id,
+            ik.produto_categoria,
+            ik.produto_subcategoria,
+            ik.qtd_embalagem,
+            ik.unidade_sigla,
+            bi.weight,
+            fallback_ik.id AS fallback_item_id
+        FROM inflacao_brasil.basket_item bi
+        INNER JOIN inflacao_brasil.item_key ik ON bi.item_id = ik.id
+        INNER JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
+        LEFT JOIN inflacao_brasil.item_key fallback_ik
+            ON fallback_ik.produto_categoria = ik.produto_categoria
+            AND fallback_ik.qtd_embalagem = ik.qtd_embalagem
+            AND fallback_ik.unidade_sigla = ik.unidade_sigla
+            AND ik.produto_subcategoria = 40012
+            AND fallback_ik.produto_subcategoria = 40011
+        WHERE b.code = 'default_basket'
+        ORDER BY ik.id
+    """)
+    return list(db.execute(query).all())
+
+
 def validate_month_ref(month_ref: str, db: Session) -> None:
     """
     Validate month_ref parameter for basket endpoints.
@@ -123,29 +310,140 @@ def get_basket_items(
     validate_month_ref(month_ref, db)
 
     if month_ref:
+        basket_items = _load_basket_items(db)
+        previous_month_ref = _previous_month_ref(month_ref)
+        month_ipca = _get_ipca_monthly_pct(db, month_ref)
+
+        rows = []
+        for (
+            item_id,
+            produto_categoria,
+            produto_subcategoria,
+            qtd_embalagem,
+            unidade_sigla,
+            weight,
+            fallback_item_id,
+        ) in basket_items:
+            unit_normalized_price, _ = _resolve_unit_price(
+                db, item_id, month_ref, fallback_item_id
+            )
+            if unit_normalized_price is None:
+                continue
+
+            previous_unit_price, _ = _resolve_unit_price(
+                db, item_id, previous_month_ref, fallback_item_id
+            )
+            
+            # Convert unit price back to package price
+            pack_size = _parse_pack_size(qtd_embalagem)
+            if pack_size is None or pack_size <= 0:
+                continue
+                
+            month_price = unit_normalized_price * pack_size
+            previous_price = (previous_unit_price * pack_size) if previous_unit_price is not None else None
+            
+            mom_pct = None
+            if previous_price is not None and previous_price != 0:
+                mom_pct = round(((month_price / previous_price) - 1) * 100, 2)
+
+            rows.append(
+                (
+                    produto_categoria,
+                    produto_subcategoria,
+                    _item_name_from_subcategory(produto_subcategoria),
+                    f"{qtd_embalagem}{unidade_sigla}",
+                    month_ref,
+                    f"{month_price:.4f}",
+                    f"{previous_price:.4f}" if previous_price is not None else None,
+                    mom_pct,
+                    month_ipca,
+                )
+            )
+    else:
         query = text("""
         WITH basket_items AS (
-            SELECT item_id FROM inflacao_brasil.basket_item
-            WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
-        ),
-        item_prices AS (
             SELECT
-                ik.id,
+                ik.id AS item_id,
                 ik.qtd_embalagem,
                 ik.unidade_sigla,
                 ik.produto_categoria,
                 ik.produto_subcategoria,
-                imp.median_price,
+                CASE
+                    WHEN ik.produto_subcategoria = 40012 THEN fallback_ik.id
+                    ELSE NULL
+                END AS fallback_item_id
+            FROM inflacao_brasil.basket_item bi
+            INNER JOIN inflacao_brasil.item_key ik ON bi.item_id = ik.id
+            INNER JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
+            LEFT JOIN inflacao_brasil.item_key fallback_ik
+                ON fallback_ik.produto_categoria = ik.produto_categoria
+                AND fallback_ik.qtd_embalagem = ik.qtd_embalagem
+                AND fallback_ik.unidade_sigla = ik.unidade_sigla
+                AND fallback_ik.produto_subcategoria = 40011
+            WHERE b.code = 'default_basket'
+        ),
+        price_candidates AS (
+            SELECT
+                bi.item_id,
+                bi.qtd_embalagem,
+                bi.unidade_sigla,
+                bi.produto_categoria,
+                bi.produto_subcategoria,
                 imp.month_ref,
-                lag(imp.median_price) OVER (PARTITION BY ik.id ORDER BY imp.month_ref) AS prev_price
-            FROM inflacao_brasil.item_key ik
-            INNER JOIN inflacao_brasil.item_monthly_price imp ON ik.id = imp.item_id
-            INNER JOIN basket_items bi ON ik.id = bi.item_id
-            WHERE imp.month_ref <= :month_ref
+                imp.median_price,
+                0 AS source_priority
+            FROM basket_items bi
+            INNER JOIN inflacao_brasil.item_monthly_price imp ON bi.item_id = imp.item_id
+
+            UNION ALL
+
+            SELECT
+                bi.item_id,
+                bi.qtd_embalagem,
+                bi.unidade_sigla,
+                bi.produto_categoria,
+                bi.produto_subcategoria,
+                imp.month_ref,
+                imp.median_price,
+                1 AS source_priority
+            FROM basket_items bi
+            INNER JOIN inflacao_brasil.item_monthly_price imp ON bi.fallback_item_id = imp.item_id
+            WHERE bi.fallback_item_id IS NOT NULL
+        ),
+        resolved_prices AS (
+            SELECT
+                item_id,
+                qtd_embalagem,
+                unidade_sigla,
+                produto_categoria,
+                produto_subcategoria,
+                month_ref,
+                median_price,
+                row_number() OVER (
+                    PARTITION BY item_id, month_ref
+                    ORDER BY source_priority
+                ) AS source_rn
+            FROM price_candidates
+        ),
+        item_prices AS (
+            SELECT
+                item_id,
+                qtd_embalagem,
+                unidade_sigla,
+                produto_categoria,
+                produto_subcategoria,
+                month_ref,
+                median_price,
+                lag(median_price) OVER (
+                    PARTITION BY item_id
+                    ORDER BY month_ref
+                ) AS prev_price
+            FROM resolved_prices
+            WHERE source_rn = 1
         ),
         latest_prices AS (
             SELECT
-                id,
+                item_id,
                 qtd_embalagem,
                 unidade_sigla,
                 produto_categoria,
@@ -153,41 +451,12 @@ def get_basket_items(
                 median_price,
                 month_ref,
                 prev_price,
-                row_number() OVER (PARTITION BY id ORDER BY month_ref DESC) AS rn
+                row_number() OVER (
+                    PARTITION BY item_id
+                    ORDER BY month_ref DESC
+                ) AS rn
             FROM item_prices
         )
-        SELECT
-            lp.produto_categoria,
-            lp.produto_subcategoria,
-            CASE
-                WHEN lp.produto_subcategoria = 10011 THEN 'Filé de peito de frango sem osso'
-                WHEN lp.produto_subcategoria = 10023 THEN 'Coxão mole sem osso'
-                WHEN lp.produto_subcategoria = 20001 THEN 'Ovos brancos'
-                WHEN lp.produto_subcategoria = 30001 THEN 'Leite Integral'
-                WHEN lp.produto_subcategoria = 40003 THEN 'Arroz polido'
-                WHEN lp.produto_subcategoria = 40012 THEN 'Feijão carioca'
-                WHEN lp.produto_subcategoria = 40017 THEN 'Farinha de trigo'
-                WHEN lp.produto_subcategoria = 60001 THEN 'Óleo de soja'
-                WHEN lp.produto_subcategoria = 80002 THEN 'Açúcar cristal'
-                WHEN lp.produto_subcategoria = 90001 THEN 'Café'
-                ELSE 'Produto'
-            END AS item_name,
-            (lp.qtd_embalagem || lp.unidade_sigla) AS qtd_embalagem,
-            :month_ref AS month_ref,
-            lp.median_price AS month_price,
-            lp.prev_price AS previous_price,
-            CASE
-                WHEN lp.prev_price IS NULL OR lp.prev_price = 0 THEN NULL
-                ELSE round(((lp.median_price / lp.prev_price) - 1) * 100, 2)
-            END AS mom_pct
-            , (SELECT monthly_inflation_pct FROM inflacao_brasil.ipca_monthly_public ip WHERE ip.month_ref = :month_ref) AS ipca_monthly_pct
-        FROM latest_prices lp
-        WHERE lp.rn = 1
-        ORDER BY lp.produto_categoria, lp.produto_subcategoria
-        """)
-        result = db.execute(query, {"month_ref": month_ref})
-    else:
-        query = text("""
         SELECT
             lp.produto_categoria,
             lp.produto_subcategoria,
@@ -213,34 +482,13 @@ def get_basket_items(
                 ELSE round(((lp.median_price / lp.prev_price) - 1) * 100, 2)
             END AS mom_pct
             , (SELECT monthly_inflation_pct FROM inflacao_brasil.ipca_monthly_public ip WHERE ip.month_ref = lp.month_ref) AS ipca_monthly_pct
-        FROM (
-            SELECT
-                ik.id,
-                ik.qtd_embalagem,
-                ik.unidade_sigla,
-                ik.produto_categoria,
-                ik.produto_subcategoria,
-                imp.month_ref,
-                imp.median_price,
-                lag(imp.median_price) OVER (
-                    PARTITION BY ik.id
-                    ORDER BY imp.month_ref
-                ) AS prev_price,
-                row_number() OVER (
-                    PARTITION BY ik.id
-                    ORDER BY imp.month_ref DESC
-                ) AS rn
-            FROM inflacao_brasil.item_key ik
-            INNER JOIN inflacao_brasil.item_monthly_price imp
-                ON ik.id = imp.item_id
-        ) lp
-        INNER JOIN inflacao_brasil.basket_item bi ON lp.id = bi.item_id
-        INNER JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
-        WHERE b.code = 'default_basket' AND lp.rn = 1
-        ORDER BY lp.produto_categoria, lp.produto_subcategoria
+        FROM latest_prices lp
+        WHERE lp.rn = 1
+        ORDER BY lp.produto_categoria, lp.produto_subcategoria, lp.month_ref
         """)
         result = db.execute(query)
-    rows = result.fetchall()
+    if not month_ref:
+        rows = result.fetchall()
 
     basket_items_list = [
         "Filé de peito de frango sem osso",
@@ -262,8 +510,8 @@ def get_basket_items(
             item_name=row[2],
             qtd_embalagem=row[3],
             month_ref=row[4],
-            month_price=row[5],
-            previous_price=row[6],
+            month_price=round(float(row[5]), 2), # round(float(row[1]), 2)
+            previous_price=round(float(row[6]), 2),
             mom_pct=row[7],
             ipca_monthly_pct=row[8],
         )
@@ -280,54 +528,103 @@ def get_basket_values(
     month_ref: str | None = Query(
         None,
         max_length=8,
-        description="Month in YYYY-MM format. If null, returns all months.",
+        description="Mês no formato YYYY-MM. Se nulo, retorna todos os meses.",
     ),
     db: Session = Depends(get_db),
 ) -> list[BasketValueResponse]:
     """
-    Fetch pre-calculated basket values with minimum wage equivalence.
-
-    Args:
-        month_ref: Optional specific month (YYYY-MM format).
-        db: Database session dependency.
-
-    Returns:
-        List of basket values with wage percentages.
-
-    Raises:
-        HTTPException: 400 if month_ref is invalid format, 404 if no data exists for the month.
+    Calcula o valor da cesta respeitando:
+    1. Normalização de preço (Preço / Tamanho da Embalagem).
+    2. Fallback de itens (Se subcat 40012 não tem preço, usa 40011).
+    3. Multiplicadores de quantidade real (Arroz * 2.5, Leite * 5, etc).
+    ** Valor para UMA pessoa.
     """
-    # Validate month_ref if provided
     validate_month_ref(month_ref, db)
-    if month_ref:
-        query = text("""
-            SELECT month_ref, basket_value_brl, minimum_wage_brl, percentage_of_wage
-            FROM inflacao_brasil.basket_monthly_value
-            WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
-            AND month_ref = :month_ref
-            ORDER BY month_ref DESC
-        """)
-        result = db.execute(query, {"month_ref": month_ref})
-    else:
-        query = text("""
-            SELECT month_ref, basket_value_brl, minimum_wage_brl, percentage_of_wage
-            FROM inflacao_brasil.basket_monthly_value
-            WHERE basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
-            ORDER BY month_ref DESC
-        """)
-        result = db.execute(query)
 
+    query_sql = """
+        WITH basket_composition AS (
+            -- Identifica os itens da cesta e seus respectivos fallbacks (ex: 40012 -> 40011)
+            SELECT
+                bi.item_id,
+                ik.produto_subcategoria,
+                ik.qtd_embalagem,
+                fallback_ik.id AS fallback_item_id
+            FROM inflacao_brasil.basket_item bi
+            JOIN inflacao_brasil.item_key ik ON bi.item_id = ik.id
+            JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
+            LEFT JOIN inflacao_brasil.item_key fallback_ik
+                ON fallback_ik.produto_categoria = ik.produto_categoria
+                AND fallback_ik.qtd_embalagem = ik.qtd_embalagem
+                AND fallback_ik.unidade_sigla = ik.unidade_sigla
+                AND ik.produto_subcategoria = 40012
+                AND fallback_ik.produto_subcategoria = 40011
+            WHERE b.code = 'default_basket'
+        ),
+        monthly_prices AS (
+            -- Obtém o preço normalizado, tentando o item principal e depois o fallback
+            SELECT
+                bc.produto_subcategoria,
+                imp_main.month_ref,
+                COALESCE(
+                    imp_main.median_price, 
+                    imp_fallback.median_price
+                ) / CAST(REPLACE(bc.qtd_embalagem, ',', '.') AS NUMERIC) AS unit_price
+            FROM basket_composition bc
+            -- Join com o preço do item principal
+            LEFT JOIN inflacao_brasil.item_monthly_price imp_main 
+                ON bc.item_id = imp_main.item_id
+            -- Join com o preço do item de fallback (opcional)
+            LEFT JOIN inflacao_brasil.item_monthly_price imp_fallback 
+                ON bc.fallback_item_id = imp_fallback.item_id 
+                AND imp_main.month_ref = imp_fallback.month_ref
+            WHERE imp_main.month_ref IS NOT NULL OR imp_fallback.month_ref IS NOT NULL
+        ),
+        basket_totals AS (
+            -- Aplica os multiplicadores de consumo sobre o preço unitário normalizado
+            SELECT
+                month_ref,
+                SUM(unit_price * CASE 
+                    WHEN produto_subcategoria = 40003 THEN 2.81 -- Arroz 2.5kg
+                    WHEN produto_subcategoria = 30001 THEN 6.19 -- Leite 5L
+                    WHEN produto_subcategoria = 20001 THEN 3.0 -- Ovos 2dz
+                    WHEN produto_subcategoria = 10023 THEN 2.81 -- Carne 3kg
+                    WHEN produto_subcategoria = 10011 THEN 3.57 -- Frango 4kg
+                    When produto_subcategoria = 40012 THEN 1.23 -- Feijão 2kg
+                    When produto_subcategoria = 40017 THEN 0.92 -- Farinha 1kg
+                    When produto_subcategoria = 80002 THEN 1.4 -- Açúcar 1kg
+                    ELSE 1.0 -- Óleo, Café (1 un/kg)
+                END) AS total_brl
+            FROM monthly_prices
+            GROUP BY month_ref
+        )
+        SELECT 
+            bt.month_ref,
+            bt.total_brl,
+            mwh.wage_amount AS minimum_wage_brl,
+            ROUND((bt.total_brl / mwh.wage_amount) * 100, 2) AS percentage_of_wage
+        FROM basket_totals bt
+        LEFT JOIN inflacao_brasil.minimum_wage_history mwh 
+            ON mwh.effective_from = (
+                SELECT MAX(effective_from) 
+                FROM inflacao_brasil.minimum_wage_history 
+                WHERE effective_from <= (bt.month_ref || '-01')::DATE
+            )
+        WHERE (:month_ref IS NULL OR bt.month_ref = :month_ref)
+        ORDER BY bt.month_ref DESC
+    """
+
+    result = db.execute(text(query_sql), {"month_ref": month_ref})
     rows = result.fetchall()
+
     return [
         BasketValueResponse(
             month_ref=row[0],
-            basket_value_brl=row[1],
+            basket_value_brl=round(float(row[1]), 2),
             minimum_wage_brl=row[2],
             percentage_of_wage=row[3],
         )
         for row in rows
     ]
-
 
 @router.get("/villains", response_model=list[MonthlyVillains])
 def get_basket_villains(
@@ -582,9 +879,9 @@ def get_basket_inflation(
     return [
         BasketInflationResponse(
             month_ref=row[0],
-            actual_month_value_brl=row[1],
-            previous_month_value_brl=row[2],
-            basket_difference_brl=row[3],
+            actual_month_value_brl=round(float(row[1]), 2),
+            previous_month_value_brl=round(float(row[2]), 2) if row[2] is not None else None,
+            basket_difference_brl=round(float(row[3]), 2) if row[3] is not None else None,
             inflation_pct=row[4],
             ipca_monthly_pct=row[5],
             annual_ipca_pct=_get_annual_ipca_pct(db, row[0]),
@@ -667,10 +964,10 @@ def get_basket_annual_inflation(
         BasketAnnualInflationResponse(
             year=row[0],
             start_month_ref=row[3],  # Previous year end month
-            start_month_value_brl=row[4],  # Previous year end value
+            start_month_value_brl=round(float(row[4]), 2),  # Previous year end value
             end_month_ref=row[1],  # Current year end month
-            end_month_value_brl=row[2],  # Current year end value
-            annual_difference_brl=row[5],
+            end_month_value_brl=round(float(row[2]), 2),  # Current year end value
+            annual_difference_brl=round(float(row[5]), 2),  # Annual difference
             annual_inflation_pct=row[6],
             annual_ipca_pct=_get_annual_ipca_pct(db, row[1]),
         )
