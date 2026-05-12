@@ -523,109 +523,6 @@ def get_basket_items(
     )
 
 
-@router.get("/wage", response_model=list[BasketValueResponse])
-def get_basket_values(
-    month_ref: str | None = Query(
-        None,
-        max_length=8,
-        description="Mês no formato YYYY-MM. Se nulo, retorna todos os meses.",
-    ),
-    db: Session = Depends(get_db),
-) -> list[BasketValueResponse]:
-    """
-    Calcula o valor da cesta respeitando:
-    1. Normalização de preço (Preço / Tamanho da Embalagem).
-    2. Fallback de itens (Se subcat 40012 não tem preço, usa 40011).
-    3. Multiplicadores de quantidade real (Arroz * 2.5, Leite * 5, etc).
-    ** Valor para UMA pessoa.
-    """
-    validate_month_ref(month_ref, db)
-
-    query_sql = """
-        WITH basket_composition AS (
-            -- Identifica os itens da cesta e seus respectivos fallbacks (ex: 40012 -> 40011)
-            SELECT
-                bi.item_id,
-                ik.produto_subcategoria,
-                ik.qtd_embalagem,
-                fallback_ik.id AS fallback_item_id
-            FROM inflacao_brasil.basket_item bi
-            JOIN inflacao_brasil.item_key ik ON bi.item_id = ik.id
-            JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
-            LEFT JOIN inflacao_brasil.item_key fallback_ik
-                ON fallback_ik.produto_categoria = ik.produto_categoria
-                AND fallback_ik.qtd_embalagem = ik.qtd_embalagem
-                AND fallback_ik.unidade_sigla = ik.unidade_sigla
-                AND ik.produto_subcategoria = 40012
-                AND fallback_ik.produto_subcategoria = 40011
-            WHERE b.code = 'default_basket'
-        ),
-        monthly_prices AS (
-            -- Obtém o preço normalizado, tentando o item principal e depois o fallback
-            SELECT
-                bc.produto_subcategoria,
-                imp_main.month_ref,
-                COALESCE(
-                    imp_main.median_price, 
-                    imp_fallback.median_price
-                ) / CAST(REPLACE(bc.qtd_embalagem, ',', '.') AS NUMERIC) AS unit_price
-            FROM basket_composition bc
-            -- Join com o preço do item principal
-            LEFT JOIN inflacao_brasil.item_monthly_price imp_main 
-                ON bc.item_id = imp_main.item_id
-            -- Join com o preço do item de fallback (opcional)
-            LEFT JOIN inflacao_brasil.item_monthly_price imp_fallback 
-                ON bc.fallback_item_id = imp_fallback.item_id 
-                AND imp_main.month_ref = imp_fallback.month_ref
-            WHERE imp_main.month_ref IS NOT NULL OR imp_fallback.month_ref IS NOT NULL
-        ),
-        basket_totals AS (
-            -- Aplica os multiplicadores de consumo sobre o preço unitário normalizado
-            SELECT
-                month_ref,
-                SUM(unit_price * CASE 
-                    WHEN produto_subcategoria = 40003 THEN 2.81 -- Arroz 2.5kg
-                    WHEN produto_subcategoria = 30001 THEN 6.19 -- Leite 5L
-                    WHEN produto_subcategoria = 20001 THEN 3.0 -- Ovos 2dz
-                    WHEN produto_subcategoria = 10023 THEN 2.81 -- Carne 3kg
-                    WHEN produto_subcategoria = 10011 THEN 3.57 -- Frango 4kg
-                    When produto_subcategoria = 40012 THEN 1.23 -- Feijão 2kg
-                    When produto_subcategoria = 40017 THEN 0.92 -- Farinha 1kg
-                    When produto_subcategoria = 80002 THEN 1.4 -- Açúcar 1kg
-                    ELSE 1.0 -- Óleo, Café (1 un/kg)
-                END) AS total_brl
-            FROM monthly_prices
-            GROUP BY month_ref
-        )
-        SELECT 
-            bt.month_ref,
-            bt.total_brl,
-            mwh.wage_amount AS minimum_wage_brl,
-            ROUND((bt.total_brl / mwh.wage_amount) * 100, 2) AS percentage_of_wage
-        FROM basket_totals bt
-        LEFT JOIN inflacao_brasil.minimum_wage_history mwh 
-            ON mwh.effective_from = (
-                SELECT MAX(effective_from) 
-                FROM inflacao_brasil.minimum_wage_history 
-                WHERE effective_from <= (bt.month_ref || '-01')::DATE
-            )
-        WHERE (:month_ref IS NULL OR bt.month_ref = :month_ref)
-        ORDER BY bt.month_ref DESC
-    """
-
-    result = db.execute(text(query_sql), {"month_ref": month_ref})
-    rows = result.fetchall()
-
-    return [
-        BasketValueResponse(
-            month_ref=row[0],
-            basket_value_brl=round(float(row[1]), 2),
-            minimum_wage_brl=row[2],
-            percentage_of_wage=row[3],
-        )
-        for row in rows
-    ]
-
 @router.get("/villains", response_model=list[MonthlyVillains])
 def get_basket_villains(
     year: int | None = Query(
@@ -775,6 +672,161 @@ def get_basket_villains(
             }
         )
     return out
+
+
+@router.get("/wage", response_model=list[BasketValueResponse])
+def get_basket_values(
+    month_ref: str | None = Query(
+        None,
+        max_length=8,
+        description="Mês no formato YYYY-MM. Se nulo, retorna todos os meses.",
+    ),
+    db: Session = Depends(get_db),
+) -> list[BasketValueResponse]:
+    """
+    Calcula o valor da cesta respeitando:
+    1. Normalização de preço (Preço / Tamanho da Embalagem).
+    2. Fallback de itens (Se subcat 40012 não tem preço, usa 40011).
+    3. Multiplicadores de quantidade real (Arroz * 2.5, Leite * 5, etc).
+    ** Valor para UMA pessoa.
+    """
+    validate_month_ref(month_ref, db)
+
+    query_sql = """
+        WITH basket_composition AS (
+            -- Identifica os itens da cesta e seus respectivos fallbacks (ex: 40012 -> 40011)
+            SELECT
+                bi.item_id,
+                ik.produto_subcategoria,
+                ik.qtd_embalagem,
+                fallback_ik.id AS fallback_item_id
+            FROM inflacao_brasil.basket_item bi
+            JOIN inflacao_brasil.item_key ik ON bi.item_id = ik.id
+            JOIN inflacao_brasil.basket b ON bi.basket_id = b.id
+            LEFT JOIN inflacao_brasil.item_key fallback_ik
+                ON fallback_ik.produto_categoria = ik.produto_categoria
+                AND fallback_ik.qtd_embalagem = ik.qtd_embalagem
+                AND fallback_ik.unidade_sigla = ik.unidade_sigla
+                AND ik.produto_subcategoria = 40012
+                AND fallback_ik.produto_subcategoria = 40011
+            WHERE b.code = 'default_basket'
+        ),
+        monthly_prices AS (
+            -- Obtém o preço normalizado, tentando o item principal e depois o fallback
+            SELECT
+                bc.produto_subcategoria,
+                imp_main.month_ref,
+                COALESCE(
+                    imp_main.median_price, 
+                    imp_fallback.median_price
+                ) / CAST(REPLACE(bc.qtd_embalagem, ',', '.') AS NUMERIC) AS unit_price
+            FROM basket_composition bc
+            -- Join com o preço do item principal
+            LEFT JOIN inflacao_brasil.item_monthly_price imp_main 
+                ON bc.item_id = imp_main.item_id
+            -- Join com o preço do item de fallback (opcional)
+            LEFT JOIN inflacao_brasil.item_monthly_price imp_fallback 
+                ON bc.fallback_item_id = imp_fallback.item_id 
+                AND imp_main.month_ref = imp_fallback.month_ref
+            WHERE imp_main.month_ref IS NOT NULL OR imp_fallback.month_ref IS NOT NULL
+        ),
+        basket_totals AS (
+            -- Aplica os multiplicadores de consumo sobre o preço unitário normalizado
+            SELECT
+                month_ref,
+                SUM(unit_price * CASE 
+                    WHEN produto_subcategoria = 40003 THEN 2.81 -- Arroz 2.5kg
+                    WHEN produto_subcategoria = 30001 THEN 6.19 -- Leite 5L
+                    WHEN produto_subcategoria = 20001 THEN 3.0 -- Ovos 2dz
+                    WHEN produto_subcategoria = 10023 THEN 2.81 -- Carne 3kg
+                    WHEN produto_subcategoria = 10011 THEN 3.57 -- Frango 4kg
+                    When produto_subcategoria = 40012 THEN 1.23 -- Feijão 2kg
+                    When produto_subcategoria = 40017 THEN 0.92 -- Farinha 1kg
+                    When produto_subcategoria = 80002 THEN 1.4 -- Açúcar 1kg
+                    ELSE 1.0 -- Óleo, Café (1 un/kg)
+                END) AS total_brl
+            FROM monthly_prices
+            GROUP BY month_ref
+        )
+        SELECT 
+            bt.month_ref,
+            bt.total_brl,
+            mwh.wage_amount AS minimum_wage_brl,
+            ROUND((bt.total_brl / mwh.wage_amount) * 100, 2) AS percentage_of_wage
+        FROM basket_totals bt
+        LEFT JOIN inflacao_brasil.minimum_wage_history mwh 
+            ON mwh.effective_from = (
+                SELECT MAX(effective_from) 
+                FROM inflacao_brasil.minimum_wage_history 
+                WHERE effective_from <= (bt.month_ref || '-01')::DATE
+            )
+        WHERE (:month_ref IS NULL OR bt.month_ref = :month_ref)
+        ORDER BY bt.month_ref DESC
+    """
+
+    result = db.execute(text(query_sql), {"month_ref": month_ref})
+    rows = result.fetchall()
+
+    return [
+        BasketValueResponse(
+            month_ref=row[0],
+            basket_value_brl=round(float(row[1]), 2),
+            minimum_wage_brl=row[2],
+            percentage_of_wage=row[3],
+        )
+        for row in rows
+    ]
+
+
+@router.get("/hours")
+def get_basket_hours(
+    month_ref: str | None = Query(
+        None,
+        max_length=8,
+        description="Mês no formato YYYY-MM. Se nulo, retorna todos os meses.",
+    ),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """
+    Calculate how many hours of minimum wage work are needed to buy the basket.
+    
+    Uses standard 160 hours per month (8 hours/day × 20 working days).
+    
+    Args:
+        month_ref: Optional month in YYYY-MM format. If not provided, returns all months.
+        db: Database session dependency.
+    
+    Returns:
+        List with month_ref and working_hours needed.
+    """
+    validate_month_ref(month_ref, db)
+
+    query_sql = """
+        SELECT 
+            bmv.month_ref,
+            ROUND(bmv.basket_value_brl / (mwh.wage_amount / 160.0), 2) AS working_hours
+        FROM inflacao_brasil.basket_monthly_value bmv
+        LEFT JOIN inflacao_brasil.minimum_wage_history mwh 
+            ON mwh.effective_from = (
+                SELECT MAX(effective_from) 
+                FROM inflacao_brasil.minimum_wage_history 
+                WHERE effective_from <= (bmv.month_ref || '-01')::DATE
+            )
+        WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+        AND (:month_ref IS NULL OR bmv.month_ref = :month_ref)
+        ORDER BY bmv.month_ref DESC
+    """
+
+    result = db.execute(text(query_sql), {"month_ref": month_ref})
+    rows = result.fetchall()
+
+    return [
+        {
+            "month_ref": row[0],
+            "working_hours": row[1],
+        }
+        for row in rows
+    ]
 
 
 @router.get("/inflation/month", response_model=list[BasketInflationResponse])

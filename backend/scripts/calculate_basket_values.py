@@ -17,11 +17,6 @@ from datetime import datetime, timezone
 import psycopg
 
 
-BASKET_FALLBACK_SUBCATEGORIES = {
-    40012: 40011,
-}
-
-
 def _parse_pack_size(qtd_embalagem: str) -> Decimal | None:
     try:
         return Decimal(str(qtd_embalagem).replace(",", "."))
@@ -147,7 +142,7 @@ def get_normalized_monthly_price(
     if base_item is None:
         return None
 
-    _, produto_categoria, produto_subcategoria, qtd_embalagem, unidade_sigla = base_item
+    _, produto_categoria, produto_subcategoria, unidade_sigla = base_item
     candidate_items: list[tuple[int, int, int, str, str]] = [base_item]
     candidate_items.extend(
         _get_alternative_item_keys(
@@ -162,7 +157,7 @@ def get_normalized_monthly_price(
     if fallback_item_id is not None and fallback_item_id != item_id:
         fallback_item = _get_item_key(conn, fallback_item_id)
         if fallback_item is not None:
-            _, fallback_categoria, fallback_subcategoria, fallback_qtd_embalagem, fallback_unidade = fallback_item
+            _, fallback_categoria, fallback_subcategoria, fallback_unidade = fallback_item
             candidate_items.append(fallback_item)
             candidate_items.extend(
                 _get_alternative_item_keys(
