@@ -1,18 +1,3 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
-dist/
-build/
-
-# Virtual Environment
-.venv/
-venv/
-env/
-
 # IDE
 .vscode/
 .idea/
@@ -24,19 +9,58 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data files (large CSV/database files)
+# Environment
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+
+# Node.js
+node_modules/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Data
+data-pipeline/data/raw/
+data-pipeline/data/cleaned/
+data-pipeline/data/standardized/
 *.csv
 *.db
 *.sqlite
 *.sqlite3
-downloaded_files*/
-/data-pipeline/data/cleaned/new_format/
-/data-pipeline/data/cleaned/old_format/
+*.parquet
 
 # Temporary files
 *.tmp
 *.temp
-.pytest_cache/
-.coverage
-
-.env
