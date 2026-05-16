@@ -32,42 +32,54 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
     ? "arrow-blink-inflation"
     : "arrow-bounce-down";
 
-  // Calcula a diferença absoluta em R$
   const deltaBrl = previous_price
     ? parseFloat(month_price) - parseFloat(previous_price)
     : 0;
 
+  const displayName = (() => {
+    const name = (item_name || "").toLowerCase();
+    if (name.includes("coxão")) return "CARNE";
+    if (name.includes("filé")) return "FRANGO";
+    return shortName(item_name);
+  })();
+
   return (
     <div
-      className={`flex flex-col bg-brand border-4 ${themeColor} rounded-[3px] overflow-hidden h-full min-h-[84px] lg:min-h-[116px]`}
+      className={`flex flex-col bg-brand border-3 ${themeColor} rounded-[3px] overflow-hidden h-full min-h-[84px] lg:min-h-[116px]`}
     >
-      <div className="relative flex-1 flex items-end justify-center gap-2 px-2 pt-3 pb-0 lg:px-4 lg:pt-5 lg:pb-0 text-center">
-        <span className="text-lg lg:text-2xl select-none mb-0.5">
-          {getBasketItemIcon(produto_subcategoria)}
-        </span>
+      <div className="relative flex-1 flex items-center justify-between gap-2 px-2 pt-3 pb-0 lg:px-4 lg:pt-5 lg:pb-0">
+        <div className="flex items-center gap-2 flex-1 justify-center">
+          <span className="text-lg lg:text-2xl select-none">
+            {getBasketItemIcon(produto_subcategoria)}
+          </span>
 
-        <h3
-          className="font-sans font-black text-2xl lg:text-[34px] tracking-wide text-black select-none leading-none"
-          style={{ WebkitTextStroke: "1px black", color: "#fff8eb" }}
-        >
-          {shortName(item_name)}
-        </h3>
+          <h3
+            className="font-sans font-black text-3xl lg:text-[34px] tracking-wide text-black select-none leading-none text-center"
+            style={{ WebkitTextStroke: "1px black", color: "#fff8eb" }}
+          >
+            {displayName}
+          </h3>
+        </div>
 
         <span
-          className={`text-lg font-bold ${arrowColor} ${arrowMotionClass} select-none mb-0.5`}
+          className={`flex-none text-lg font-bold ${arrowColor} ${arrowMotionClass} select-none`}
         >
           {arrowDirection}
         </span>
       </div>
 
       <div
-        className="w-full text-white px-2.5 py-1.5 lg:px-4 lg:py-2.5 flex justify-between items-center border-t border-white"
+        className="w-full text-white px-2.5 py-1 lg:px-4 lg:py-2 flex justify-between items-end border-t border-white"
         style={{ backgroundColor: statusBgColor }}
       >
-        <span className="font-mono text-[16px] lg:text-[19px] font-bold tracking-tight">
+        <span className="font-mono text-[17px] lg:text-[20px] font-bold tracking-tight self-end leading-none "
+          style={{ WebkitTextStroke: "0.5px black" }}
+        >
           {formatPct(mom_pct, true)}
         </span>
-        <span className="font-mono text-[16px] lg:text-[19px] font-bold tracking-tight">
+        <span className="font-mono text-[17px] lg:text-[20px] font-bold tracking-tight self-end leading-none"
+          style={{ WebkitTextStroke: "0.5px black" }}
+        >
           {formatBrl(deltaBrl)}
         </span>
       </div>

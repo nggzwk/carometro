@@ -19,7 +19,7 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
           style={{ WebkitTextStroke: "1.5px black", color: "#fff8eb" }}
         >
           BASICÃO
-          <span className="absolute -top-1 -right-3 text-lg text-blue-700 font-bold font-sans">
+          <span className="absolute -top-1 -right-3 text-lg text-blue-300 font-bold font-sans">
             ?
           </span>
         </h2>
@@ -29,9 +29,9 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
           style={{ WebkitTextStroke: "0.5px black" }}
         >
           <span>{formatPct(totalInflationPct, true)}</span>
-          <span>＝</span>
+          <span style={{ WebkitTextStroke: "1px black"}}>＝</span>
           <span>{formatBrl(totalValue)}</span>
-          <span>💸</span>
+          <span className="text-3xl">💸</span>
         </div>
       </div>
 

@@ -10,18 +10,30 @@ type BasketItemsApiResponse = {
     month_price: number | string | null;
     previous_price: number | string | null;
     mom_pct: number | null;
+    ipca_monthly_pct: number | null;
   }>;
 };
+
+type BasketInflationApiResponse = Array<{
+  month_ref: string;
+  ipca_monthly_pct: number | null;
+  annual_ipca_pct: number | null;
+}>;
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
 
 export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/basket/items/price`, {
-      cache: "no-store",
-    });
+    const [itemsResponse, inflationResponse] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/basket/items/price`, {
+        cache: "no-store",
+      }),
+      fetch(`${API_BASE_URL}/api/basket/inflation/month`, {
+        cache: "no-store",
+      }),
+    ]);
 
-    if (!response.ok) {
+    if (!itemsResponse.ok || !inflationResponse.ok) {
       return {
         items: [],
         totalValue: 0,
@@ -31,10 +43,14 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
       };
     }
 
-    const data = (await response.json()) as BasketItemsApiResponse;
+    const itemsData = (await itemsResponse.json()) as BasketItemsApiResponse;
+    const inflationData = (await inflationResponse.json()) as BasketInflationApiResponse;
+
+    const firstItem = itemsData.items[0];
+    const latestInflation = inflationData[0];
 
     return {
-      items: data.items.map((item) => ({
+      items: itemsData.items.map((item) => ({
         ...item,
         month_price: item.month_price === null ? "0" : String(item.month_price),
         previous_price:
@@ -42,8 +58,8 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
       })),
       totalValue: 0,
       totalInflationPct: 0,
-      monthlyIpca: null,
-      annualIpca: null,
+      monthlyIpca: firstItem?.ipca_monthly_pct ?? latestInflation?.ipca_monthly_pct ?? null,
+      annualIpca: latestInflation?.annual_ipca_pct ?? null,
     };
   } catch {
     return {
