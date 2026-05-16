@@ -40,3 +40,5 @@ downloaded_files*/
 .coverage
 
 .env
+node_modules
+.next
