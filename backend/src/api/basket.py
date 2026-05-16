@@ -167,6 +167,7 @@ def _resolve_unit_price(
                 _,
                 fallback_categoria,
                 fallback_subcategoria,
+                fallback_qtd_embalagem,
                 fallback_unidade_sigla,
             ) = fallback_row
             candidate_rows.append(fallback_row)
