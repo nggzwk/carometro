@@ -333,15 +333,18 @@ def get_basket_items(
             previous_unit_price, _ = _resolve_unit_price(
                 db, item_id, previous_month_ref, fallback_item_id
             )
-            
-            # Convert unit price back to package price
+
             pack_size = _parse_pack_size(qtd_embalagem)
             if pack_size is None or pack_size <= 0:
                 continue
-                
+
             month_price = unit_normalized_price * pack_size
-            previous_price = (previous_unit_price * pack_size) if previous_unit_price is not None else None
-            
+            previous_price = (
+                (previous_unit_price * pack_size)
+                if previous_unit_price is not None
+                else None
+            )
+
             mom_pct = None
             if previous_price is not None and previous_price != 0:
                 mom_pct = round(((month_price / previous_price) - 1) * 100, 2)
@@ -510,7 +513,7 @@ def get_basket_items(
             item_name=row[2],
             qtd_embalagem=row[3],
             month_ref=row[4],
-            month_price=round(float(row[5]), 2), # round(float(row[1]), 2)
+            month_price=round(float(row[5]), 2),
             previous_price=round(float(row[6]), 2),
             mom_pct=row[7],
             ipca_monthly_pct=row[8],
@@ -789,13 +792,13 @@ def get_basket_hours(
 ) -> list[dict]:
     """
     Calculate how many hours of minimum wage work are needed to buy the basket.
-    
+
     Uses standard 160 hours per month (8 hours/day × 20 working days).
-    
+
     Args:
         month_ref: Optional month in YYYY-MM format. If not provided, returns all months.
         db: Database session dependency.
-    
+
     Returns:
         List with month_ref and working_hours needed.
     """
@@ -932,8 +935,12 @@ def get_basket_inflation(
         BasketInflationResponse(
             month_ref=row[0],
             actual_month_value_brl=round(float(row[1]), 2),
-            previous_month_value_brl=round(float(row[2]), 2) if row[2] is not None else None,
-            basket_difference_brl=round(float(row[3]), 2) if row[3] is not None else None,
+            previous_month_value_brl=(
+                round(float(row[2]), 2) if row[2] is not None else None
+            ),
+            basket_difference_brl=(
+                round(float(row[3]), 2) if row[3] is not None else None
+            ),
             inflation_pct=row[4],
             ipca_monthly_pct=row[5],
             annual_ipca_pct=_get_annual_ipca_pct(db, row[0]),
@@ -949,26 +956,15 @@ def get_basket_annual_inflation(
     """
     Fetch annual accumulated basket inflation starting from 2023.
 
-    Uses YEAR-OVER-YEAR comparison:
-    - 2024 annual inflation = (Dec 2024 vs Dec 2023)
-    - 2025 annual inflation = (Dec 2025 vs Dec 2024)
-    - 2026 annual inflation = (Latest 2026 vs Dec 2025)
-
-    Uses fallback logic: if exact month missing, uses latest available from prior months.
-    2023 is excluded (no December 2022 data available).
-
-    Returns:
-        List of annual YoY inflation data with start/end month values.
+    Uses YEAR-OVER-YEAR comparison for standard years, but applies an
+    exception for 2023 (Jan 23 vs Dec 23) due to unreliable 2022 baseline data.
     """
     query = text("""
         WITH years AS (
             SELECT 2023 AS year
-            UNION ALL
-            SELECT 2024
-            UNION ALL
-            SELECT 2025
-            UNION ALL
-            SELECT 2026
+            UNION ALL SELECT 2024
+            UNION ALL SELECT 2025
+            UNION ALL SELECT 2026
         ),
         year_end_values AS (
             -- Get last available month for each year
@@ -979,22 +975,45 @@ def get_basket_annual_inflation(
                 row_number() OVER (PARTITION BY SUBSTRING(month_ref, 1, 4) ORDER BY month_ref DESC) AS rn
             FROM inflacao_brasil.basket_monthly_value bmv
             WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+        ),
+        january_2023_baseline AS (
+            -- Explicit exception baseline for the start of 2023
+            SELECT month_ref, basket_value_brl
+            FROM inflacao_brasil.basket_monthly_value
+            WHERE month_ref = '2023-01'
+              AND basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+            LIMIT 1
         )
         SELECT
             y.year,
             -- Current year end month and value
             cy.month_ref AS end_month_ref,
             cy.basket_value_brl AS end_month_value_brl,
-            -- Previous year end month and value (for YoY comparison)
-            py.month_ref AS previous_year_end_month_ref,
-            py.basket_value_brl AS previous_year_end_value_brl,
-            -- Calculate difference (current year - previous year)
-            cy.basket_value_brl - py.basket_value_brl AS annual_difference_brl,
-            -- Calculate YoY inflation percentage
+            
+            -- EXCEPTION LOGIC: Use Jan-23 for 2023, otherwise use previous year's end
+            CASE 
+                WHEN y.year = 2023 THEN j23.month_ref
+                ELSE py.month_ref
+            END AS previous_year_end_month_ref,
+            CASE 
+                WHEN y.year = 2023 THEN j23.basket_value_brl
+                ELSE py.basket_value_brl
+            END AS previous_year_end_value_brl,
+            
+            -- Calculate differences conditionally
+            CASE 
+                WHEN y.year = 2023 THEN cy.basket_value_brl - j23.basket_value_brl
+                ELSE cy.basket_value_brl - py.basket_value_brl
+            END AS annual_difference_brl,
+            
+            -- Calculate YoY/Intra-year inflation percentage conditionally
             CASE
-                WHEN py.basket_value_brl IS NULL OR py.basket_value_brl = 0 THEN NULL
-                ELSE ROUND(((cy.basket_value_brl - py.basket_value_brl) / py.basket_value_brl) * 100, 2)
+                WHEN y.year = 2023 THEN
+                    ROUND(((cy.basket_value_brl - j23.basket_value_brl) / j23.basket_value_brl) * 100, 2)
+                ELSE
+                    ROUND(((cy.basket_value_brl - py.basket_value_brl) / py.basket_value_brl) * 100, 2)
             END AS annual_inflation_pct,
+            
             (
                 SELECT annual_inflation_pct
                 FROM inflacao_brasil.ipca_monthly ip
@@ -1005,7 +1024,9 @@ def get_basket_annual_inflation(
         FROM years y
         LEFT JOIN year_end_values cy ON cy.year = y.year AND cy.rn = 1
         LEFT JOIN year_end_values py ON py.year = y.year - 1 AND py.rn = 1
-        WHERE cy.basket_value_brl IS NOT NULL AND py.basket_value_brl IS NOT NULL
+        LEFT JOIN january_2023_baseline j23 ON y.year = 2023
+        WHERE cy.basket_value_brl IS NOT NULL 
+          AND (y.year = 2023 OR py.basket_value_brl IS NOT NULL)
         ORDER BY y.year
     """)
 
@@ -1015,11 +1036,15 @@ def get_basket_annual_inflation(
     return [
         BasketAnnualInflationResponse(
             year=row[0],
-            start_month_ref=row[3],  # Previous year end month
-            start_month_value_brl=round(float(row[4]), 2),  # Previous year end value
-            end_month_ref=row[1],  # Current year end month
-            end_month_value_brl=round(float(row[2]), 2),  # Current year end value
-            annual_difference_brl=round(float(row[5]), 2),  # Annual difference
+            start_month_ref=row[3],
+            start_month_value_brl=(
+                round(float(row[4]), 2) if row[4] is not None else None
+            ),
+            end_month_ref=row[1],
+            end_month_value_brl=round(float(row[2]), 2) if row[2] is not None else None,
+            annual_difference_brl=(
+                round(float(row[5]), 2) if row[5] is not None else None
+            ),
             annual_inflation_pct=row[6],
             annual_ipca_pct=_get_annual_ipca_pct(db, row[1]),
         )
