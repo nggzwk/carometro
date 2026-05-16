@@ -142,7 +142,7 @@ def get_normalized_monthly_price(
     if base_item is None:
         return None
 
-    _, produto_categoria, produto_subcategoria, unidade_sigla = base_item
+    _, produto_categoria, produto_subcategoria, qtd_embalagem, unidade_sigla = base_item
     candidate_items: list[tuple[int, int, int, str, str]] = [base_item]
     candidate_items.extend(
         _get_alternative_item_keys(
@@ -157,7 +157,7 @@ def get_normalized_monthly_price(
     if fallback_item_id is not None and fallback_item_id != item_id:
         fallback_item = _get_item_key(conn, fallback_item_id)
         if fallback_item is not None:
-            _, fallback_categoria, fallback_subcategoria, fallback_unidade = fallback_item
+            _, fallback_categoria, fallback_subcategoria, fallback_qtd, fallback_unidade = fallback_item
             candidate_items.append(fallback_item)
             candidate_items.extend(
                 _get_alternative_item_keys(
@@ -189,6 +189,17 @@ def get_normalized_monthly_price(
     return None
 
 
+BASKET_MULTIPLIERS = {
+    40003: Decimal("2.81"),  # Arroz
+    30001: Decimal("6.19"),  # Leite
+    20001: Decimal("30.0"),  # Ovos (30 unidades individuais)
+    10023: Decimal("2.81"),  # Carne
+    10011: Decimal("3.57"),  # Frango
+    40012: Decimal("1.23"),  # Feijão
+    40017: Decimal("0.92"),  # Farinha
+    80002: Decimal("1.4"),   # Açúcar
+}
+
 def get_basket_value(
     conn,
     month_ref: str,
@@ -212,16 +223,17 @@ def get_basket_value(
     total = Decimal("0")
     items_with_prices = 0
 
-    for item_id, _, _, _, _, weight, fallback_item_id in basket_items:
+    for item_id, _, subcat, _, _, _, fallback_item_id in basket_items:
         price = get_normalized_monthly_price(conn, item_id, month_ref, fallback_item_id)
         if price is None:
             continue
 
-        total += price * Decimal(str(weight))
+        multiplier = BASKET_MULTIPLIERS.get(subcat, Decimal("1.0"))
+        
+        total += price * multiplier
         items_with_prices += 1
 
     return total if items_with_prices > 0 else None
-
 
 def get_minimum_wage_for_month(conn, month_ref: str) -> Decimal | None:
     """

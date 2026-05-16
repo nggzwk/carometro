@@ -61,51 +61,64 @@ def test_get_latest_median_price_returns_decimal():
 
 
 def test_get_normalized_monthly_price_uses_first_valid_candidate():
-    with patch.object(cbv, "_get_item_key") as get_item_key, \
-        patch.object(cbv, "_get_alternative_item_keys") as get_alternatives, \
-        patch.object(cbv, "_get_latest_median_price") as get_latest:
+    with patch.object(cbv, "_get_item_key") as get_item_key, patch.object(
+        cbv, "_get_alternative_item_keys"
+    ) as get_alternatives, patch.object(cbv, "_get_latest_median_price") as get_latest:
 
         get_item_key.return_value = (1, 10, 20, "2", "kg")
         get_alternatives.return_value = [(2, 10, 20, "1", "kg")]
+
         get_latest.side_effect = [None, Decimal("10")]
 
-        with pytest.raises(ValueError):
-            cbv.get_normalized_monthly_price(MagicMock(), 1, "2024-01")
+        result = cbv.get_normalized_monthly_price(MagicMock(), 1, "2024-01")
+
+        assert result == Decimal("10")
 
 
 def test_get_normalized_monthly_price_uses_fallback_item():
-    with patch.object(cbv, "_get_item_key") as get_item_key, \
-        patch.object(cbv, "_get_alternative_item_keys") as get_alternatives, \
-        patch.object(cbv, "_get_latest_median_price") as get_latest:
+    with patch.object(cbv, "_get_item_key") as get_item_key, patch.object(
+        cbv, "_get_alternative_item_keys"
+    ) as get_alternatives, patch.object(cbv, "_get_latest_median_price") as get_latest:
 
         get_item_key.side_effect = [
             (1, 10, 20, "2", "kg"),
             (3, 11, 21, "4", "kg"),
         ]
         get_alternatives.return_value = []
+
         get_latest.side_effect = [None, Decimal("40")]
 
-        with pytest.raises(ValueError):
-            cbv.get_normalized_monthly_price(
-                MagicMock(),
-                1,
-                "2024-01",
-                fallback_item_id=3,
-            )
+        result = cbv.get_normalized_monthly_price(
+            MagicMock(),
+            1,
+            "2024-01",
+            fallback_item_id=3,
+        )
+
+        assert result == Decimal("10")
 
 
 def test_get_basket_value_sums_weighted_items():
     basket_items = [
-        (1, 0, 0, "1", "kg", Decimal("2"), None),
-        (2, 0, 0, "1", "kg", Decimal("1"), None),
-        (3, 0, 0, "1", "kg", Decimal("0.5"), None),
+        (1, 4, 40003, "1", "kg", Decimal("1"), None),  # Arroz: multiplier = 2.81
+        (2, 4, 40012, "1", "kg", Decimal("1"), None),  # Feijão: multiplier = 1.23
+        (
+            3,
+            9,
+            99999,
+            "1",
+            "kg",
+            Decimal("1"),
+            None,
+        ),
     ]
 
     with patch.object(cbv, "get_normalized_monthly_price") as get_price:
         get_price.side_effect = [Decimal("2"), None, Decimal("3")]
-        assert cbv.get_basket_value(MagicMock(), "2024-01", basket_items) == Decimal(
-            "5.5"
-        )
+
+        result = cbv.get_basket_value(MagicMock(), "2024-01", basket_items)
+
+        assert result == Decimal("8.62")
 
 
 def test_get_basket_value_returns_none_when_no_prices():

@@ -139,26 +139,77 @@ class ObservationParser:
         if preco <= 0:
             return None
 
+        # Extract raw unit values
+        qtd_embalagem = (raw.get("qtd_embalagem") or "").strip()
+        unidade_sigla = (raw.get("unidade_sigla") or "").strip()
+        produto_subcategoria = _parse_optional_int(raw.get("produto_subcategoria", ""))
+
+        if produto_subcategoria == 20001:
+            unidade_upper = unidade_sigla.upper()
+            if "DZ" in unidade_upper or "DUZIA" in unidade_upper or "DÚZIA" in unidade_upper:
+                qtd_embalagem = "12"
+                unidade_sigla = "UNIDADES"
+
         return PriceObservation(
             reference_date=reference_date,
             month_ref=self._month_ref_resolver.resolve(reference_date, source_file),
-            rede=(raw.get("rede") or "").strip(),
+            rede=(raw.get("rede") or "").strip(),  # Corrigido de text_rede para rede
             endereco=(raw.get("endereco") or "").strip(),
             produto=(raw.get("produto") or "").strip(),
             marca=(raw.get("marca") or "").strip(),
             preco=preco,
-            qtd_embalagem=(raw.get("qtd_embalagem") or "").strip(),
-            unidade_sigla=(raw.get("unidade_sigla") or "").strip(),
+            qtd_embalagem=qtd_embalagem,
+            unidade_sigla=unidade_sigla,
             categoria_score=_parse_optional_decimal(raw.get("categoria_score", "")),
             produto_categoria=_parse_optional_int(raw.get("produto_categoria", "")),
-            produto_subcategoria=_parse_optional_int(raw.get("produto_subcategoria", "")),
+            produto_subcategoria=produto_subcategoria,
             source_file=source_file,
         )
 
 
+def parse(self, raw: dict[str, str], source_file: str) -> PriceObservation | None:
+    try:
+        reference_date = _parse_date(raw.get("data_pesquisa", ""))
+        preco = _parse_decimal(raw.get("preco", ""))
+    except ValueError:
+        return None
+
+    if preco <= 0:
+        return None
+
+    qtd_embalagem = (raw.get("qtd_embalagem") or "").strip()
+    unidade_sigla = (raw.get("unidade_sigla") or "").strip()
+    produto_subcategoria = _parse_optional_int(raw.get("produto_subcategoria", ""))
+
+    if produto_subcategoria == 20001:
+        unidade_upper = unidade_sigla.upper()
+        if (
+            "DZ" in unidade_upper
+            or "DUZIA" in unidade_upper
+            or "DÚZIA" in unidade_upper
+        ):
+            qtd_embalagem = "12"
+            unidade_sigla = "UNIDADES"
+
+    return PriceObservation(
+        reference_date=reference_date,
+        month_ref=self._month_ref_resolver.resolve(reference_date, source_file),
+        text_rede=(raw.get("rede") or "").strip(),
+        endereco=(raw.get("endereco") or "").strip(),
+        produto=(raw.get("produto") or "").strip(),
+        marca=(raw.get("marca") or "").strip(),
+        preco=preco,
+        qtd_embalagem=qtd_embalagem,
+        unidade_sigla=unidade_sigla,
+        categoria_score=_parse_optional_decimal(raw.get("categoria_score", "")),
+        produto_categoria=_parse_optional_int(raw.get("produto_categoria", "")),
+        produto_subcategoria=produto_subcategoria,
+        source_file=source_file,
+    )
+
+
 class MonthRefResolver(Protocol):
-    def resolve(self, reference_date: date, source_file: str) -> str:
-        ...
+    def resolve(self, reference_date: date, source_file: str) -> str: ...
 
 
 class ReferenceDateMonthRefResolver:
@@ -173,7 +224,7 @@ class SourceFileMonthRefResolver:
         if not stem.startswith(prefix):
             return reference_date.replace(day=1).strftime("%Y-%m")
 
-        date_part = stem[len(prefix):]
+        date_part = stem[len(prefix) :]
         try:
             parsed = datetime.strptime(date_part, "%Y-%m-%d").date()
         except ValueError:
@@ -182,8 +233,9 @@ class SourceFileMonthRefResolver:
 
 
 class RowParser(Protocol):
-    def parse(self, raw: dict[str, str], source_file: str) -> PriceObservation | None:
-        ...
+    def parse(
+        self, raw: dict[str, str], source_file: str
+    ) -> PriceObservation | None: ...
 
 
 class CsvObservationLoader:
@@ -244,20 +296,19 @@ class MonthlySeriesRepository:
 
 
 class ObservationLoader(Protocol):
-    def iter_rows(self, file_path: Path) -> list[tuple]:
-        ...
+    def iter_rows(self, file_path: Path) -> list[tuple]: ...
 
 
 class MonthlyRepository(Protocol):
-    def replace_source_file_rows(self, source_file: str, rows: list[tuple]) -> None:
-        ...
+    def replace_source_file_rows(self, source_file: str, rows: list[tuple]) -> None: ...
 
-    def refresh_item_monthly_price(self) -> None:
-        ...
+    def refresh_item_monthly_price(self) -> None: ...
 
 
 class MonthlySeriesService:
-    def __init__(self, loader: ObservationLoader, repository: MonthlyRepository) -> None:
+    def __init__(
+        self, loader: ObservationLoader, repository: MonthlyRepository
+    ) -> None:
         self._loader = loader
         self._repository = repository
 

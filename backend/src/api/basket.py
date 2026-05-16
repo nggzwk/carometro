@@ -737,7 +737,7 @@ def get_basket_values(
                 SUM(unit_price * CASE 
                     WHEN produto_subcategoria = 40003 THEN 2.81 -- Arroz 2.5kg
                     WHEN produto_subcategoria = 30001 THEN 6.19 -- Leite 5L
-                    WHEN produto_subcategoria = 20001 THEN 3.0 -- Ovos 2dz
+                    WHEN produto_subcategoria = 20001 THEN 30.0 -- Ovos 2dz
                     WHEN produto_subcategoria = 10023 THEN 2.81 -- Carne 3kg
                     WHEN produto_subcategoria = 10011 THEN 3.57 -- Frango 4kg
                     When produto_subcategoria = 40012 THEN 1.23 -- Feijão 2kg
