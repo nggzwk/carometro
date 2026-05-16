@@ -22,6 +22,24 @@ SIDRA_ANNUAL_IPCA_URL = (
     "https://apisidra.ibge.gov.br/values/t/1737/p/all/v/69/n1/all?formato=json"
 )
 
+ITEM_NAME_BY_SUBCATEGORY = {
+    10011: "Filé de peito de frango sem osso",
+    10023: "Coxão mole sem osso",
+    20001: "Ovos brancos",
+    30001: "Leite Integral",
+    40003: "Arroz polido",
+    40012: "Feijão carioca",
+    40017: "Farinha de trigo",
+    60001: "Óleo de soja",
+    80002: "Açúcar cristal",
+    90001: "Café",
+}
+
+BASKET_ITEM_NAMES = list(ITEM_NAME_BY_SUBCATEGORY.values())
+BASKET_ITEM_ORDER = {
+    subcategory: index for index, subcategory in enumerate(ITEM_NAME_BY_SUBCATEGORY)
+}
+
 
 @lru_cache(maxsize=1)
 def _load_sidra_annual_ipca() -> dict[str, float]:
@@ -201,18 +219,26 @@ def _resolve_unit_price(
 
 
 def _item_name_from_subcategory(produto_subcategoria: int) -> str:
-    return {
-        10011: "Filé de peito de frango sem osso",
-        10023: "Coxão mole sem osso",
-        20001: "Ovos brancos",
-        30001: "Leite Integral",
-        40003: "Arroz polido",
-        40012: "Feijão carioca",
-        40017: "Farinha de trigo",
-        60001: "Óleo de soja",
-        80002: "Açúcar cristal",
-        90001: "Café",
-    }.get(produto_subcategoria, "Produto")
+    return ITEM_NAME_BY_SUBCATEGORY.get(produto_subcategoria, "Produto")
+
+
+def _item_name_case_sql(column_name: str) -> str:
+    cases = "\n".join(
+        [
+            f"                WHEN {column_name} = {subcategory} THEN '{item_name}'"
+            for subcategory, item_name in ITEM_NAME_BY_SUBCATEGORY.items()
+        ]
+    )
+    return f"CASE\n{cases}\n                ELSE 'Produto'\n            END"
+
+
+def _basket_item_sort_key(row: tuple) -> tuple[int, str, str]:
+    subcategory = row[1]
+    return (
+        BASKET_ITEM_ORDER.get(subcategory, len(BASKET_ITEM_ORDER)),
+        str(row[4]),
+        str(row[2]),
+    )
 
 
 def _get_ipca_monthly_pct(db: Session, month_ref: str) -> float | None:
@@ -223,6 +249,14 @@ def _get_ipca_monthly_pct(db: Session, month_ref: str) -> float | None:
         LIMIT 1
     """)
     return db.execute(query, {"month_ref": month_ref}).scalar()
+
+
+def _get_latest_month_ref(db: Session) -> str | None:
+    query = text("""
+        SELECT MAX(month_ref)
+        FROM inflacao_brasil.item_monthly_price
+    """)
+    return db.execute(query).scalar()
 
 
 def _load_basket_items(
@@ -360,7 +394,8 @@ def get_basket_items(
                 )
             )
     else:
-        query = text("""
+        item_name_case_sql = _item_name_case_sql("lp.produto_subcategoria")
+        query = text(f"""
         WITH basket_items AS (
             SELECT
                 ik.id AS item_id,
@@ -460,19 +495,7 @@ def get_basket_items(
         SELECT
             lp.produto_categoria,
             lp.produto_subcategoria,
-            CASE
-                WHEN lp.produto_subcategoria = 10011 THEN 'Filé de peito de frango sem osso'
-                WHEN lp.produto_subcategoria = 10023 THEN 'Coxão mole sem osso'
-                WHEN lp.produto_subcategoria = 20001 THEN 'Ovos brancos'
-                WHEN lp.produto_subcategoria = 30001 THEN 'Leite Integral'
-                WHEN lp.produto_subcategoria = 40003 THEN 'Arroz polido'
-                WHEN lp.produto_subcategoria = 40012 THEN 'Feijão carioca'
-                WHEN lp.produto_subcategoria = 40017 THEN 'Farinha de trigo'
-                WHEN lp.produto_subcategoria = 60001 THEN 'Óleo de soja'
-                WHEN lp.produto_subcategoria = 80002 THEN 'Açúcar cristal'
-                WHEN lp.produto_subcategoria = 90001 THEN 'Café'
-                ELSE 'Produto'
-            END AS item_name,
+            {item_name_case_sql} AS item_name,
             (lp.qtd_embalagem || lp.unidade_sigla) AS qtd_embalagem,
             lp.month_ref,
             lp.median_price AS month_price,
@@ -490,18 +513,9 @@ def get_basket_items(
     if not month_ref:
         rows = result.fetchall()
 
-    basket_items_list = [
-        "Filé de peito de frango sem osso",
-        "Coxão mole sem osso",
-        "Ovos brancos",
-        "Leite Integral",
-        "Arroz polido",
-        "Feijão carioca",
-        "Farinha de trigo",
-        "Óleo de soja",
-        "Açúcar cristal",
-        "Café",
-    ]
+    rows = sorted(rows, key=_basket_item_sort_key)
+
+    basket_items_list = BASKET_ITEM_NAMES
 
     items_response = [
         BasketItemResponse(
@@ -602,19 +616,7 @@ def get_basket_villains(
             SELECT
                 im.month_ref,
                 im.produto_subcategoria,
-                CASE
-                    WHEN im.produto_subcategoria = 10011 THEN 'Filé de peito de frango sem osso'
-                    WHEN im.produto_subcategoria = 10023 THEN 'Coxão mole sem osso'
-                    WHEN im.produto_subcategoria = 20001 THEN 'Ovos brancos'
-                    WHEN im.produto_subcategoria = 30001 THEN 'Leite Integral'
-                    WHEN im.produto_subcategoria = 40003 THEN 'Arroz polido'
-                    WHEN im.produto_subcategoria = 40012 THEN 'Feijão carioca'
-                    WHEN im.produto_subcategoria = 40017 THEN 'Farinha de trigo'
-                    WHEN im.produto_subcategoria = 60001 THEN 'Óleo de soja'
-                    WHEN im.produto_subcategoria = 80002 THEN 'Açúcar cristal'
-                    WHEN im.produto_subcategoria = 90001 THEN 'Café'
-                    ELSE 'Produto'
-                END AS item_name,
+                {_item_name_case_sql("im.produto_subcategoria")} AS item_name,
                 im.cur_price AS value,
                 ROUND(((im.cur_price / im.prev_price) - 1) * 100, 2) AS inflation
             FROM item_months im

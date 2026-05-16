@@ -114,13 +114,39 @@ def test_validate_month_ref_no_data(db_session):
 
 
 # Endpoint tests
-def test_get_basket_items(client, db_session):
-    db_session.execute.return_value.fetchall.return_value = mock_basket_items
-    response = client.get("/api/basket/items/price?month_ref=2023-01")
+@patch("backend.src.api.basket._get_ipca_monthly_pct", return_value=0.71)
+@patch("backend.src.api.basket._resolve_unit_price")
+@patch("backend.src.api.basket._load_basket_items")
+def test_get_basket_items(
+    mock_load_basket_items,
+    mock_resolve_unit_price,
+    mock_get_ipca,
+    client,
+    db_session,
+):
+    db_session.execute.return_value.scalar.return_value = 1
+    mock_load_basket_items.return_value = [
+        (2, 2, 20001, "1", "DZ", 1.0, None),
+        (1, 1, 10011, "1", "KG", 1.0, None),
+    ]
+
+    def resolve_side_effect(db, item_id, month_ref, fallback_item_id=None):
+        prices = {
+            (1, "2023-03"): (15.9, 1),
+            (1, "2023-02"): (15.9, 1),
+            (2, "2023-03"): (10.99, 2),
+            (2, "2023-02"): (7.98, 2),
+        }
+        return prices.get((item_id, month_ref), (None, None))
+
+    mock_resolve_unit_price.side_effect = resolve_side_effect
+
+    response = client.get("/api/basket/items/price?month_ref=2023-03")
     assert response.status_code == 200
     data = response.json()
     assert "basket_items" in data
     assert "items" in data
+    assert [item["produto_subcategoria"] for item in data["items"]] == [10011, 20001]
 
 
 @patch("backend.src.api.basket._get_annual_ipca_pct", return_value=5.77)
