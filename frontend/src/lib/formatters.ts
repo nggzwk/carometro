@@ -2,11 +2,14 @@ export function formatPct(value: number | null, withSign = true): string {
   if (value === null || Number.isNaN(value)) {
     return "0%";
   }
-  const sign = withSign && value >= 0 ? "+" : "";
-  return `${sign}${value.toFixed(0)}%`;
+  const sign = withSign && value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(2)}%`;
 }
 
 export function formatBrl(value: number): string {
+  if (value === 0) {
+    return "R$ 0,00";
+  }
   return `R$ ${Math.abs(value).toFixed(2).replace(".", ",")}`;
 }
 

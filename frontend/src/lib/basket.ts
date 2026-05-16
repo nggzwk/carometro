@@ -16,6 +16,8 @@ type BasketItemsApiResponse = {
 
 type BasketInflationApiResponse = Array<{
   month_ref: string;
+  basket_difference_brl: number;
+  inflation_pct: number | null;
   ipca_monthly_pct: number | null;
   annual_ipca_pct: number | null;
 }>;
@@ -56,8 +58,8 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
         previous_price:
           item.previous_price === null ? null : String(item.previous_price),
       })),
-      totalValue: 0,
-      totalInflationPct: 0,
+      totalValue: latestInflation?.basket_difference_brl ?? 0,
+      totalInflationPct: latestInflation?.inflation_pct ?? 0,
       monthlyIpca: firstItem?.ipca_monthly_pct ?? latestInflation?.ipca_monthly_pct ?? null,
       annualIpca: latestInflation?.annual_ipca_pct ?? null,
     };
