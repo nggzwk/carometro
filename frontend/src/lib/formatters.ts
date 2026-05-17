@@ -10,7 +10,7 @@ export function formatBrl(value: number): string {
   if (value === 0) {
     return "R$ 0,00";
   }
-  return `R$ ${Math.abs(value).toFixed(2).replace(".", ",")}`;
+  return `R$${Math.abs(value).toFixed(2).replace(".", ",")}`;
 }
 
 export function shortName(name: string): string {

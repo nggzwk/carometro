@@ -1,6 +1,7 @@
 import UpdateBanner from "../components/shared/UpdateBanner";
 import BasketSummary from "../components/dashboard/index";
 import { getBasketSummaryProps } from "../lib/basket";
+import VillainsChart from "../components/graphs/VillainsChart";
 
 export default async function Home() {
   const basketSummary = await getBasketSummaryProps();
@@ -32,16 +33,18 @@ export default async function Home() {
       </header>
 
       <main className="px-6 pt-8 pb-12 sm:px-10 lg:px-16">
-        <div className="flex items-center gap-2 text-xl sm:text-2xl font-black uppercase tracking-normal mb-6 small-header">
+        <div className="flex items-center gap-2 text-xl sm:text-2xl font-black uppercase tracking-normal mb-2 small-header">
           <span className="text-black select-none" aria-hidden="true">
             ›
           </span>
           <h2 className="small-header">Cesta Básica</h2>
         </div>
 
-        <div>
+        <section>
           <BasketSummary {...basketSummary} />
-        </div>
+        </section>
+
+        <VillainsChart />
       </main>
     </div>
   );

@@ -27,8 +27,13 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
   const arrowColor = isInflation
     ? "text-[var(--color-inflation)]"
     : "text-[var(--color-deflation)]";
-  const arrowDirection = mom_pct === 0 ? "=" : (isInflation ? "▲" : "▼");
-  const arrowMotionClass = mom_pct === 0 ? "" : (isInflation ? "arrow-blink-inflation" : "arrow-bounce-down");
+  const arrowDirection = mom_pct === 0 ? "=" : isInflation ? "▲" : "▼";
+  const arrowMotionClass =
+    mom_pct === 0
+      ? ""
+      : isInflation
+        ? "arrow-blink-inflation"
+        : "arrow-bounce-down";
 
   const deltaBrl = previous_price
     ? parseFloat(month_price) - parseFloat(previous_price)
@@ -52,7 +57,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
           </span>
 
           <h3
-            className="font-sans font-black text-3xl lg:text-[34px] tracking-wide text-black select-none leading-none text-center"
+            className="subheader font-black text-3xl lg:text-[34px] tracking-wide text-black select-none leading-none text-center"
             style={{ WebkitTextStroke: "1px black", color: "#fff8eb" }}
           >
             {displayName}
@@ -70,15 +75,15 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         className="w-full text-white px-2 md:px-1.5 lg:px-2.5 py-1.5 flex justify-between items-center border-t border-white"
         style={{ backgroundColor: statusBgColor }}
       >
-        <span 
-          className="font-mono text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] font-bold tracking-tighter whitespace-nowrap leading-none"
-          style={{ WebkitTextStroke: "0.5px black" }}
+        <span
+          className="font-subtitle text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] tracking-tighter leading-none"
+          style={{ WebkitTextStroke: "1.5px white" }}
         >
           {formatPct(mom_pct, true)}
         </span>
-        <span 
-          className="font-mono text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] font-bold tracking-tighter whitespace-nowrap leading-none"
-          style={{ WebkitTextStroke: "0.5px black" }}
+        <span
+          className="font-subtitle text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] leading-none"
+          style={{ WebkitTextStroke: "1.5px white" }}
         >
           {formatBrl(deltaBrl)}
         </span>
