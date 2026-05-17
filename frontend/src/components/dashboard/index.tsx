@@ -13,29 +13,25 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
   annualIpca,
 }) => {
   return (
-    <div className="w-full max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-5xl mx-auto">
-      <div className="w-full pt-4 pb-0 md:pt-6 md:pb-0 text-center flex flex-col items-center justify-center">
-        <h2
-          className="font-subheader text-3xl sm:text-4xl lg:text-5xl font-black tracking-widest relative select-none mb-3"
-          style={{ WebkitTextStroke: "1px black", color: "#fff8eb" }}
-        >
-          BASICÃO
-          <span className="absolute -top-1 -right-3 text-lg text-blue-300 font-bold font-sans">
-            ?
-          </span>
-        </h2>
+    <div className="w-full text-center flex flex-col items-center">
+      <h2
+        className="font-subheader text-3xl sm:text-4xl font-bold tracking-[0.2em] relative select-none items-center justify-center flex mb-4 border-[1px] border-black p-4 w-fit"
+        style={{ WebkitTextStroke: "1px black", color: "#fff8eb" }}
+      >
+        BASICÃO
+      </h2>
 
-        <div className="align-center">
+      <div className="w-full pt-4 text-center flex flex-col items-center justify-center">
+        <div className="align-center flex items-center gap-2">
           <span
-            className="font-subheader text-[18px] md:text-[18px] lg:text-[24px] xl:text-[28px] tracking-tighter whitespace-nowrap leading-none
-            "
+            className="font-subheader text-[22px] text-white whitespace-nowrap leading-none"
             style={{ WebkitTextStroke: "1px black", color: "#fff8eb" }}
           >
             {formatPct(totalInflationPct, true)}
           </span>
           <span style={{ WebkitTextStroke: "1px black" }}>＝</span>
           <span
-            className="font-subheader text-[22px] md:text-[22px] lg:text-[28px] xl:text-[32px] text-white whitespace-nowrap leading-none"
+            className="font-subheader text-[22px] text-white whitespace-nowrap leading-none"
             style={{
               WebkitTextStroke: `1.5px ${
                 totalInflationPct < 0
@@ -53,11 +49,11 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
         </div>
       </div>
 
-      <div className="bg-brand border-1 border-[#242424] rounded-[10px] overflow-hidden p-0.5">
-        <ItemGrid items={items} />
-
+      <div className="bg-brand border-1 border-[#242424] rounded-[10px] p-0.5 w-full overflow-hidden">
+        <ItemGrid items={items}/>
         <BasketFooter monthlyIpca={monthlyIpca} annualIpca={annualIpca} />
       </div>
+      
       <ScrollIndicator />
     </div>
   );

@@ -28,9 +28,7 @@ export default async function VillainsChart() {
 
   return (
     <section className="w-full min-h-screen flex flex-col items-center justify-between bg-color-background pt-10 pb-12 px-6 snap-start selection:bg-black selection:text-white relative z-10">
-      
       <div className="w-full flex flex-col items-center justify-start flex-1">
-        
         <div className="w-auto min-w-[240px] border-1 border-black py-2.5 px-4 text-center mb-8 bg-color-background rounded-nonetext-">
           <h2 className="font-sans text-3xl sm:text-3xl font-bold tracking-[0.2em] text-black uppercase whitespace-nowrap">
             Vilões do Mês
@@ -42,26 +40,35 @@ export default async function VillainsChart() {
         <div className="w-full max-w-sm text-center flex flex-col gap-1.5 subtitle text-sm sm:text-base font-normal uppercase tracking-[0.2em] text-black leading-relaxed">
           <p>A cesta básica em {currentMonthName}</p>
           <p>
-            custa {Math.trunc(Number(latestMonth?.percentage_of_wage ?? 0))}% do salário mínimo.
+            custa {Math.trunc(Number(latestMonth?.percentage_of_wage ?? 0))}% do
+            salário mínimo.
           </p>
-          <p className="subtitle text-xl">=</p>
-          <p>
-            R${Math.trunc(Number(latestMonth?.basket_value_brl ?? 0))}
-          </p>
+          <p className="subtitle text-xl text-center">=</p>
+          <p className="text-center subtitle text-lg">R$ {Math.trunc(Number(latestMonth?.basket_value_brl ?? 0))}</p>
         </div>
-
       </div>
 
-      <ScrollIndicator />
+      <div className="flex justify-end h-full">
+        <ScrollIndicator />
+      </div>
     </section>
   );
 }
 
 // Helpers de Data
 const monthNames: Record<string, string> = {
-  "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
-  "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",
-  "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro",
+  "01": "Janeiro",
+  "02": "Fevereiro",
+  "03": "Março",
+  "04": "Abril",
+  "05": "Maio",
+  "06": "Junho",
+  "07": "Julho",
+  "08": "Agosto",
+  "09": "Setembro",
+  "10": "Outubro",
+  "11": "Novembro",
+  "12": "Dezembro",
 };
 
 function convertMonthRef(monthRef: string): string {

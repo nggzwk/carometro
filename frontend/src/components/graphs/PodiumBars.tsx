@@ -134,11 +134,11 @@ function getBarColorByItemName(name: string): string {
   if (lower.includes("óleo") || lower.includes("oleo")) return "#ffe49f";
   if (lower.includes("trigo") || lower.includes("farinha")) return "#f2bd78";
   if (lower.includes("café") || lower.includes("cafe")) return "#ae9a8b";
-  if (lower.includes("açúcar") || lower.includes("acucar")) return "#d4b6dc";
-  if (lower.includes("leite")) return "#fff4cf";
+  if (lower.includes("açúcar") || lower.includes("acucar")) return "#baf1eb";
+  if (lower.includes("leite")) return "#ebdbdb";
   if (lower.includes("arroz")) return "#e5caa2";
-  if (lower.includes("feijão") || lower.includes("feijao")) return "#90b47c";
-  if (lower.includes("carne") || lower.includes("coxão")) return "#e6a3a3";
-  if (lower.includes("frango")) return "#ffe0a6";
+  if (lower.includes("feijão") || lower.includes("feijao")) return "#b6c89e";
+  if (lower.includes("carne") || lower.includes("coxão")) return "#e1aeae";
+  if (lower.includes("frango")) return "#ffdba6";
   return "#d1d5db";
 }

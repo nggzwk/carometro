@@ -76,7 +76,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         style={{ backgroundColor: statusBgColor }}
       >
         <span
-          className="font-subtitle text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] tracking-tighter leading-none"
+          className="font-subtitle text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] tracking-tighter leading-none "
           style={{ WebkitTextStroke: "1.5px white" }}
         >
           {formatPct(mom_pct, true)}

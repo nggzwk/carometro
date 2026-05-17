@@ -33,13 +33,6 @@ export default async function Home() {
       </header>
 
       <main className="px-6 pt-8 pb-12 sm:px-10 lg:px-16">
-        <div className="flex items-center gap-2 text-xl sm:text-2xl font-black uppercase tracking-normal mb-2 small-header">
-          <span className="text-black select-none" aria-hidden="true">
-            ›
-          </span>
-          <h2 className="small-header">Cesta Básica</h2>
-        </div>
-
         <section>
           <BasketSummary {...basketSummary} />
         </section>
