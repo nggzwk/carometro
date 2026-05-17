@@ -101,14 +101,15 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         style={{ backgroundColor: statusBgColor }}
       >
         <span
-          className="footer text-sm tracking-tighter leading-none self-end"
-          style={{ WebkitTextStroke: "0.8px black", color: "#fff8eb" }}
+          className="footer text-lg font-bold tracking-tight leading-none self-end"
+          style={{ WebkitTextStroke: "0.7px black", color: "#fff8eb" }}
         >
           {formatPct(mom_pct, true)}
         </span>
         <span
-          className="footer text-sm tracking-tight leading-none self-end"
-          style={{ WebkitTextStroke: "0.8px black", color: "#fff8eb" }}>
+          className="footer text-lg font-bold tracking-tight leading-none self-end"
+          style={{ WebkitTextStroke: "0.7px black", color: "#fff8eb" }}
+        >
           {formatBrl(deltaBrl)}
         </span>
       </div>

@@ -10,7 +10,7 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
   annualIpca,
 }) => {
   return (
-    <div className="w-full bg-brand border-t border-black px-4 py-3 flex items-center justify-center gap-6 md:gap-8 select-none">
+    <div className="w-full bg-brand px-4 py-3 flex items-center justify-center gap-6 md:gap-8 select-none">
       <span className="subtitle uppercase font-sans text-[15px] text-black tracking-tight leading-none whitespace-nowrap">
         <strong className="mr-1.5">MENSAL</strong>
         <span className="font-black">

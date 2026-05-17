@@ -86,7 +86,7 @@ function PodiumBarItem({
           hover: { opacity: 1, y: 0, scale: 1 }
         }}
         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-        className="subtitle absolute -top-8 bg-background text-black text-[10px] font-mono py-1 px-2 rounded-lg z-10 pointer-events-none whitespace-nowrap"
+        className="subtitle absolute -top-6 bg-[#e9e0d6]/90 text-[10px] py-1 px-2 rounded-lg z-10 pointer-events-none whitespace-nowrap items-center flex justify-center font-bold"
       >
         {shortName(nameValue)} {formatPct(pctValue)}
       </motion.div>
@@ -130,11 +130,11 @@ function PodiumBarItem({
 
 function getBarColorByItemName(name: string): string {
   const lower = name.toLowerCase();
-  if (lower.includes("ovo")) return "#fff090";
+  if (lower.includes("ovo")) return "#fff49f";
   if (lower.includes("óleo") || lower.includes("oleo")) return "#ffe49f";
   if (lower.includes("trigo") || lower.includes("farinha")) return "#f2bd78";
   if (lower.includes("café") || lower.includes("cafe")) return "#ae9a8b";
-  if (lower.includes("açúcar") || lower.includes("acucar")) return "#baf1eb";
+  if (lower.includes("açúcar") || lower.includes("acucar")) return "#b1f3ec";
   if (lower.includes("leite")) return "#ebdbdb";
   if (lower.includes("arroz")) return "#e5caa2";
   if (lower.includes("feijão") || lower.includes("feijao")) return "#b6c89e";

@@ -9,7 +9,7 @@ export default function ScrollIndicator({
 }: ScrollIndicatorProps) {
   return (
     <div className={`w-full flex flex-col items-center gap-1 mt-auto pt-6 ${className} align-center justify-center`}>
-      <span className="small-header text-[10px] uppercase tracking-[0.3em] text-black select-none">
+      <span className="subtitle text-[10px] uppercase tracking-[0.3em] text-black select-none">
         {text}
       </span>
       <svg

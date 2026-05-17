@@ -29,7 +29,7 @@ export default async function VillainsChart() {
   return (
     <section className="w-full min-h-screen flex flex-col items-center justify-between bg-color-background pt-10 pb-12 px-6 snap-start selection:bg-black selection:text-white relative z-10">
       <div className="w-full flex flex-col items-center justify-start flex-1">
-        <div className="w-auto min-w-[240px] border-1 border-black py-2.5 px-4 text-center mb-8 bg-color-background rounded-nonetext-">
+        <div className="w-auto min-w-[240px] border-1 border-black py-2.5 px-4 text-center mb-8 bg-color-background rounded-[10px]">
           <h2 className="font-sans text-3xl sm:text-3xl font-bold tracking-[0.2em] text-black uppercase whitespace-nowrap">
             Vilões do Mês
           </h2>

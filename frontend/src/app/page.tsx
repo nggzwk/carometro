@@ -7,7 +7,7 @@ export default async function Home() {
   const basketSummary = await getBasketSummaryProps();
 
   return (
-    <div className="min-h-screen bg-brand text-black">
+    <div className="min-h-screen bg-brand text-black overflow-x-hidden">
       <header>
         <UpdateBanner />
         <section

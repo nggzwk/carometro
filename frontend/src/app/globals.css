@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200&family=Londrina+Shadow&family=Londrina+Solid&family=Bowlby+One&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200&family=Londrina+Shadow&family=Londrina+Solid&family=Bowlby+One&family=Futura&display=swap");
 @import "tailwindcss";
 
 /* Design tokens */
@@ -10,7 +10,8 @@
   --font-header: "Londrina Shadow", cursive;
   --font-subheader: "Londrina Solid", sans-serif;
   --font-subtitle: "Inter", sans-serif;
-  --font-card-footer: "Bowlby One", sans-serif;
+  --font-card-summary: "Bowlby One", sans-serif;
+  --font-footer: "Futura", sans-serif;
 
   --color-inflation: #E63946; /* Red for inflation */
   --color-deflation: #2A9D8F; /* Green for deflation */
@@ -68,8 +69,12 @@ h6,
   font-family: var(--font-subheader);
 }
 
+.summary {
+  font-family: var(--font-card-summary);
+}
+
 .footer {
-  font-family: var(--font-card-footer);
+  font-family: var(--font-footer);
 }
 
 .bg-brand {
