@@ -1,5 +1,3 @@
-import React from "react";
-
 interface ScrollIndicatorProps {
   className?: string;
   text?: string;
@@ -10,7 +8,7 @@ export default function ScrollIndicator({
   text = "Deslize a tela" 
 }: ScrollIndicatorProps) {
   return (
-    <div className={`w-full flex flex-col items-center gap-1 mt-auto pt-6 ${className}`}>
+    <div className={`w-full flex flex-col items-center gap-1 mt-auto pt-6 ${className} align-center justify-center`}>
       <span className="small-header text-[10px] uppercase tracking-[0.3em] text-black select-none">
         {text}
       </span>

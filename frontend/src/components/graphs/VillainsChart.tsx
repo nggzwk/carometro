@@ -44,7 +44,7 @@ export default async function VillainsChart() {
             salário mínimo.
           </p>
           <p className="subtitle text-xl text-center">=</p>
-          <p className="text-center subtitle text-lg">R$ {Math.trunc(Number(latestMonth?.basket_value_brl ?? 0))}</p>
+          <p className="text-center subtitle text-lg">R${Math.trunc(Number(latestMonth?.basket_value_brl ?? 0))}</p>
         </div>
       </div>
 
