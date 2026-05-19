@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
 import type { BasketItemData } from "../../lib/basketTypes";
 import { getBasketItemIcon } from "../../lib/basketIcons";
 import { formatBrl, formatPct, shortName } from "../../lib/formatters";
@@ -27,8 +29,35 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
   const arrowColor = isInflation
     ? "text-[var(--color-inflation)]"
     : "text-[var(--color-deflation)]";
-  const arrowDirection = mom_pct === 0 ? "=" : (isInflation ? "▲" : "▼");
-  const arrowMotionClass = mom_pct === 0 ? "" : (isInflation ? "arrow-blink-inflation" : "arrow-bounce-down");
+  const arrowDirection = mom_pct === 0 ? "=" : isInflation ? "▲" : "▼";
+  const arrowMotionClass =
+    mom_pct === 0
+      ? ""
+      : isInflation
+        ? "arrow-blink-inflation"
+        : "arrow-bounce-down";
+
+  const arrowRef = useRef<HTMLSpanElement | null>(null);
+  const [arrowVisible, setArrowVisible] = useState(false);
+
+  useEffect(() => {
+    const el = arrowRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setArrowVisible(true);
+          } else {
+            setArrowVisible(false);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const deltaBrl = previous_price
     ? parseFloat(month_price) - parseFloat(previous_price)
@@ -43,7 +72,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
 
   return (
     <div
-      className={`flex flex-col bg-brand border-3 ${themeColor} rounded-[3px] overflow-hidden h-full min-h-[84px] lg:min-h-[116px]`}
+      className={`flex flex-col bg-brand border-2 ${themeColor} rounded-[10px] overflow-hidden h-full min-h-[84px] lg:min-h-[116px]`}
     >
       <div className="relative flex-1 flex items-center justify-between gap-2 px-2 pt-3 pb-0 lg:px-4 lg:pt-5 lg:pb-0">
         <div className="flex items-center gap-2 flex-1 justify-center">
@@ -52,7 +81,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
           </span>
 
           <h3
-            className="font-sans font-black text-3xl lg:text-[34px] tracking-wide text-black select-none leading-none text-center"
+            className="subheader font-black text-3xl lg:text-[34px] tracking-wide text-black select-none leading-none text-center"
             style={{ WebkitTextStroke: "1px black", color: "#fff8eb" }}
           >
             {displayName}
@@ -60,25 +89,26 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
         </div>
 
         <span
-          className={`flex-none text-lg font-bold ${arrowColor} ${arrowMotionClass} select-none`}
+          ref={arrowRef}
+          className={`flex-none text-lg font-bold ${arrowColor} ${arrowVisible ? arrowMotionClass : ""} select-none`}
         >
           {arrowDirection}
         </span>
       </div>
 
       <div
-        className="w-full text-white px-2 md:px-1.5 lg:px-2.5 py-1.5 flex justify-between items-center border-t border-white"
+        className="w-full text-white px-2 md:px-1.5 lg:px-2.5 py-1.5 flex justify-between items-end"
         style={{ backgroundColor: statusBgColor }}
       >
-        <span 
-          className="font-mono text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] font-bold tracking-tighter whitespace-nowrap leading-none"
-          style={{ WebkitTextStroke: "0.5px black" }}
+        <span
+          className="footer text-lg font-bold tracking-tight leading-none self-end"
+          style={{ WebkitTextStroke: "0.7px black", color: "#fff8eb" }}
         >
           {formatPct(mom_pct, true)}
         </span>
-        <span 
-          className="font-mono text-[16px] md:text-[13px] lg:text-[14px] xl:text-[17px] font-bold tracking-tighter whitespace-nowrap leading-none"
-          style={{ WebkitTextStroke: "0.5px black" }}
+        <span
+          className="footer text-lg font-bold tracking-tight leading-none self-end"
+          style={{ WebkitTextStroke: "0.7px black", color: "#fff8eb" }}
         >
           {formatBrl(deltaBrl)}
         </span>

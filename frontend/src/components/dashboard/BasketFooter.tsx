@@ -10,31 +10,19 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
   annualIpca,
 }) => {
   return (
-    <div className="w-full bg-brand border-t border-black px-4 py-3 flex items-center justify-center gap-6 md:gap-8 select-none">
-      <span className="subtitle uppercase font-sans text-[15px] text-black tracking-normal leading-none whitespace-nowrap">
+    <div className="w-full bg-brand px-4 py-3 flex items-center justify-center gap-6 md:gap-8 select-none">
+      <span className="subtitle uppercase text-[11px] tracking-widest leading-none whitespace-nowrap">
         <strong className="mr-1.5">MENSAL</strong>
         <span className="font-black">
           {monthlyIpca !== null ? `${monthlyIpca}%` : "0,0%"}
         </span>
       </span>
 
-      <div className="flex items-center gap-1.5 subtitle uppercase font-sans text-[14px] text-black tracking-normal leading-none whitespace-nowrap">
-        <span
-          className="text-black select-none leading-none"
-          aria-hidden="true"
-        >
-          ‹
-        </span>
-        <span className="leading-none font-black">IPCA</span>
-        <span
-          className="text-black select-none leading-none"
-          aria-hidden="true"
-        >
-          ›
-        </span>
+      <div className="flex items-center align-center subtitle uppercase text-sm leading-none whitespace-nowrap">
+        <span className="leading-none font-black">‹ IPCA ›</span>
       </div>
 
-      <span className="subtitle uppercase font-sans text-[15px] text-black tracking-normal leading-none whitespace-nowrap">
+      <span className="subtitle uppercase text-[11px] tracking-widest leading-none whitespace-nowrap">
         <span className="mr-1.5 font-black">
           {annualIpca !== null ? `${annualIpca}%` : "0,0%"}
         </span>

@@ -30,12 +30,12 @@ const UpdateBanner: React.FC = () => {
         <div className="banner-marquee" aria-label={bannerMessage}>
           <div className="banner-marquee-track">
             <div className="banner-marquee-group">
-              <span className="banner-marquee-text font-sans text-[#1A1A1A] text-base md:text-lg font-light lowercase whitespace-nowrap">
+              <span className="banner-marquee-text text-black text-base md:text-lg font-light lowercase whitespace-nowrap">
                 {bannerMessage}
               </span>
             </div>
             <div className="banner-marquee-group" aria-hidden="true">
-              <span className="banner-marquee-text font-sans text-[#1A1A1A] text-base md:text-lg font-light lowercase whitespace-nowrap">
+              <span className="banner-marquee-text text-black text-base md:text-lg font-light lowercase whitespace-nowrap">
                 {bannerMessage}
               </span>
             </div>
