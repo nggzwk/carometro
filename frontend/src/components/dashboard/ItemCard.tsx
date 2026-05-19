@@ -72,7 +72,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
 
   return (
     <div
-      className={`flex flex-col bg-brand border-3 ${themeColor} rounded-[3px] overflow-hidden h-full min-h-[84px] lg:min-h-[116px]`}
+      className={`flex flex-col bg-brand border-2 ${themeColor} rounded-[10px] overflow-hidden h-full min-h-[84px] lg:min-h-[116px]`}
     >
       <div className="relative flex-1 flex items-center justify-between gap-2 px-2 pt-3 pb-0 lg:px-4 lg:pt-5 lg:pb-0">
         <div className="flex items-center gap-2 flex-1 justify-center">
@@ -97,7 +97,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
       </div>
 
       <div
-        className="w-full text-white px-2 md:px-1.5 lg:px-2.5 py-1.5 flex justify-between items-end border-t border-white"
+        className="w-full text-white px-2 md:px-1.5 lg:px-2.5 py-1.5 flex justify-between items-end"
         style={{ backgroundColor: statusBgColor }}
       >
         <span

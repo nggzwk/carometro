@@ -6,7 +6,7 @@ import { ItemGrid } from "./ItemGrid";
 import { BasketFooter } from "./BasketFooter";
 import type { BasketSummaryProps } from "../../lib/basketTypes";
 import ScrollIndicator from "../shared/ScrollIndicator";
-import BasketHeader from "./BasketHeader"; // Já importado aqui!
+import BasketHeader from "./BasketHeader";
 
 const inViewMotionProps = {
   initial: { opacity: 0, y: 20, scale: 0.98 },
@@ -17,6 +17,9 @@ const inViewMotionProps = {
     ease: [0.16, 1, 0.3, 1] as const,
   },
 };
+
+const GLASS_MORPHISM_STYLES = "bg-brand backdrop-blur-2xl";
+const SHADOW_BOTTOM_RIGHT = "shadow-[8px_8px_24px_0_rgba(0,0,0,0.25)]";
 
 export const BasketSummary: React.FC<BasketSummaryProps> = ({
   items,
@@ -38,31 +41,28 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
         className="w-full flex flex-col items-center justify-start"
       >
         <motion.div {...inViewMotionProps} className="mt-8">
-          <div className="w-fit mx-auto border-1 border-black py-2.5 px-8 text-center bg-color-background rounded-[10px]">
+          <div className="w-auto min-w-[240px] border-1 border-black py-2.5 px-4 text-center bg-color-background rounded-[10px] mb-4">
             <h2 className="font-sans text-3xl sm:text-3xl font-bold tracking-[0.2em] text-black uppercase whitespace-nowrap">
               BASICÃO
             </h2>
           </div>
         </motion.div>
-
-        <motion.div {...inViewMotionProps} className="mt-4">
-          <BasketHeader
-            totalInflationPct={totalInflationPct}
-            totalValue={totalValue}
-            annualIpca={annualIpca}
-          />
-        </motion.div>
       </motion.div>
 
       <motion.div
         {...inViewMotionProps}
-        className="w-full overflow-hidden rounded-[16px] border-1 border-black p-1
-                   bg-white/40 backdrop-blur-xl 
-                   shadow-[0_8px_32px_0_rgba(0,0,0,0.08)]"
+        className={`w-full overflow-visible rounded-[16px] border-1 border-black p-1 ${GLASS_MORPHISM_STYLES} ${SHADOW_BOTTOM_RIGHT} mt-2`}
       >
+        <BasketHeader
+          totalInflationPct={totalInflationPct}
+          totalValue={totalValue}
+          annualIpca={annualIpca}
+          monthlyIpca={monthlyIpca}
+        />
+
         <ItemGrid items={items} />
-        <BasketFooter monthlyIpca={monthlyIpca} annualIpca={annualIpca} />
       </motion.div>
+      <BasketFooter monthlyIpca={monthlyIpca} annualIpca={annualIpca} />
 
       <motion.div
         ref={scrollIndicatorRef}
@@ -72,10 +72,9 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
             ? { opacity: 1, y: 0, scale: 1 }
             : { opacity: 0, y: 20, scale: 0.98 }
         }
-        className="w-full flex items-center justify-end pt-6"
-      >
-        <ScrollIndicator />
-      </motion.div>
+        className="w-full flex items-center justify-end pt-2"
+      ></motion.div>
+      <ScrollIndicator />
     </div>
   );
 };

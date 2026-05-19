@@ -4,11 +4,10 @@ interface ScrollIndicatorProps {
 }
 
 export default function ScrollIndicator({ 
-  className = "", 
-  text = "Deslize a tela" 
+  text = "Deslize" 
 }: ScrollIndicatorProps) {
   return (
-    <div className={`w-full flex flex-col items-center gap-1 mt-auto pt-6 ${className} align-center justify-center`}>
+    <div className={'w-full flex flex-col items-center gap-1 mt-auto pt-6 justify-center'}>
       <span className="subtitle text-[10px] uppercase tracking-[0.3em] text-black select-none">
         {text}
       </span>
