@@ -1,17 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200&family=Londrina+Shadow&family=Londrina+Solid&family=Bowlby+One&family=Futura&display=swap");
 @import "tailwindcss";
 
 /* Design tokens */
 :root {
-  --color-background: #fff8eb;
+  --color-background: #ffffff;
   --color-foreground: #171717;
   --color-gray: #e9e0d6;
 
-  --font-header: "Londrina Shadow", cursive;
-  --font-subheader: "Londrina Solid", sans-serif;
-  --font-subtitle: "Inter", sans-serif;
-  --font-card-summary: "Bowlby One", sans-serif;
-  --font-footer: "Futura", sans-serif;
+  /* Arquitetura Tipográfica Ultra-Slim & Chic */
+  --font-header: var(--font-plus-jakarta-sans);
+  --font-subheader: var(--font-plus-jakarta-sans);
+  --font-subtitle: var(--font-plus-jakarta-sans);
+  --font-card-summary: var(--font-jetbrains-mono);
+  --font-footer: var(--font-plus-jakarta-sans);
 
   --color-inflation: #E63946; /* Red for inflation */
   --color-deflation: #2A9D8F; /* Green for deflation */
@@ -20,13 +20,15 @@
 /* Global base */
 html {
   background: var(--color-background);
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-subtitle);
-  font-weight: 200;
+  font-weight: 300; /* Peso leve padrão para o corpo */
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Semantic typography */
@@ -35,7 +37,9 @@ h2,
 .heading {
   color: #000000;
   font-family: var(--font-header);
-  font-weight: 400;
+  font-weight: 200; /* Ultra Thin para um visual editorial sofisticado */
+  text-transform: uppercase;
+  letter-spacing: 0.25em; /* Espaçamento nobre entre as letras */
 }
 
 h3,
@@ -43,8 +47,9 @@ h4,
 .subheading {
   color: #ffffff;
   font-family: var(--font-subheader);
-  font-weight: 400;
-  -webkit-text-stroke: 1px #000000; /* Retained valid property */
+  font-weight: 400; /* Mais fina para suavizar o stroke */
+  -webkit-text-stroke: 1px #000000;
+  letter-spacing: 0.05em;
 }
 
 h5,
@@ -53,34 +58,33 @@ h6,
 .small-header {
   color: #000000;
   font-family: var(--font-subtitle);
-  font-weight: 200;
+  font-weight: 300;
+  letter-spacing: 0.15em;
 }
 
-/* Utility color tokens */
-.text-brand-green {
-  color: var(--color-green);
-}
-
-.text-brand-red {
-  color: var(--color-red);
-}
-
+/* Utility font configuration mappings */
 .font-subheader {
   font-family: var(--font-subheader);
+  font-weight: 400;
 }
 
 .summary {
   font-family: var(--font-card-summary);
+  font-weight: 400; /* Números finos e precisos */
+  letter-spacing: -0.02em;
 }
 
 .footer {
   font-family: var(--font-footer);
+  font-weight: 400;
+  letter-spacing: 0.05em;
 }
 
 .bg-brand {
   background: var(--color-background);
 }
 
+/* --- Marquee & Animations --- */
 .banner-marquee {
   width: 100%;
   overflow: hidden;
@@ -92,7 +96,7 @@ h6,
   width: max-content;
   align-items: center;
   will-change: transform;
-  animation: banner-marquee-move 32s linear infinite;
+  animation: banner-marquee-move 36s linear infinite; /* Levemente mais lento para ser mais sutil */
 }
 
 .banner-marquee-group {
@@ -106,70 +110,57 @@ h6,
 }
 
 .banner-marquee-text {
-  letter-spacing: 0.28em;
+  font-family: var(--font-subheader);
+  font-weight: 300;
+  letter-spacing: 0.3em;
 }
 
 @media (min-width: 1024px) {
   .banner-marquee-track {
-    animation-duration: 62s;
+    animation-duration: 66s;
   }
 
   .banner-marquee-text {
-    letter-spacing: 0.4em;
+    letter-spacing: 0.42em;
   }
 }
 
 @keyframes banner-marquee-move {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }
 
 @keyframes arrow-bounce-up {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); } /* Movimento mais discreto */
 }
 
 @keyframes arrow-bounce-down {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(4px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
 }
 
 .arrow-bounce-up {
-  animation: arrow-bounce-up 1.6s ease-in-out infinite;
+  animation: arrow-bounce-up 2s ease-in-out infinite;
 }
 
 .arrow-bounce-down {
-  animation: arrow-bounce-down 1.6s ease-in-out infinite;
+  animation: arrow-bounce-down 2s ease-in-out infinite;
 }
 
 @keyframes arrow-blink-inflation {
-  0%,
-  100% {
+  0%, 100% {
     color: #E63946;
     -webkit-text-stroke: 0px transparent;
     opacity: 1;
   }
   50% {
     color: transparent;
-    -webkit-text-stroke: 1px #E63946;
-    opacity: 1;
+    -webkit-text-stroke: 0.5px #E63946;
+    opacity: 0.8;
   }
 }
 
 .arrow-blink-inflation {
-  animation: arrow-blink-inflation 0.5s ease-in-out 4;
+  animation: arrow-blink-inflation 0.6s ease-in-out 3;
 }

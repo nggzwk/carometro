@@ -26,7 +26,7 @@ const UpdateBanner: React.FC = () => {
     <>
       <div className="h-10 md:h-12" aria-hidden="true" />
 
-      <div className="fixed top-0 left-0 w-full z-50 bg-[var(--color-gray)] py-2 md:py-3 overflow-hidden">
+      <div className="fixed top-0 left-0 w-full z-50 bg-[#f2f2f2af] py-2 md:py-3 overflow-hidden">
         <div className="banner-marquee" aria-label={bannerMessage}>
           <div className="banner-marquee-track">
             <div className="banner-marquee-group">

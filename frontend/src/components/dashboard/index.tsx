@@ -9,17 +9,14 @@ import ScrollIndicator from "../shared/ScrollIndicator";
 import BasketHeader from "./BasketHeader";
 
 const inViewMotionProps = {
-  initial: { opacity: 0, y: 20, scale: 0.98 },
+  initial: { opacity: 0, y: 24, scale: 0.98 },
   whileInView: { opacity: 1, y: 0, scale: 1 },
-  viewport: { once: false, amount: 0.35 },
+  viewport: { once: false, amount: 0.25 },
   transition: {
-    duration: 0.7,
+    duration: 0.75,
     ease: [0.16, 1, 0.3, 1] as const,
   },
 };
-
-const GLASS_MORPHISM_STYLES = "bg-brand backdrop-blur-2xl";
-const SHADOW_BOTTOM_RIGHT = "shadow-[8px_8px_24px_0_rgba(0,0,0,0.25)]";
 
 export const BasketSummary: React.FC<BasketSummaryProps> = ({
   items,
@@ -28,30 +25,41 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
   monthlyIpca,
   annualIpca,
 }) => {
-  const scrollIndicatorRef = useRef<HTMLDivElement | null>(null);
-  const scrollIndicatorInView = useInView(scrollIndicatorRef, {
-    amount: 0.35,
-    once: false,
-  });
-
   return (
     <div className="w-full text-center flex flex-col items-center">
-      <motion.div
-        {...inViewMotionProps}
-        className="w-full flex flex-col items-center justify-start"
-      >
-        <motion.div {...inViewMotionProps} className="mt-8">
-          <div className="w-auto min-w-[240px] border-1 border-black py-2.5 px-4 text-center bg-color-background rounded-[10px] mb-4">
-            <h2 className="font-sans text-3xl sm:text-3xl font-bold tracking-[0.2em] text-black uppercase whitespace-nowrap">
-              BASICÃO
-            </h2>
-          </div>
-        </motion.div>
+      <motion.div {...inViewMotionProps} className="mt-8 mb-4">
+        <div className="flex flex-col items-center gap-1">
+          <p
+            className="text-[10px] uppercase tracking-[0.22em] font-semibold"
+            style={{ color: "#A89B8C" }}
+          >
+            Itens monitorados
+          </p>
+          <h2
+            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            style={{
+              fontFamily: "var(--font-header)",
+              fontStyle: "italic",
+              color: "#1A120B",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Basicão
+          </h2>
+        </div>
       </motion.div>
 
+      {/* Card container — soft, not rigid */}
       <motion.div
         {...inViewMotionProps}
-        className={`w-full overflow-visible rounded-[16px] border-1 border-black p-1 ${GLASS_MORPHISM_STYLES} ${SHADOW_BOTTOM_RIGHT} mt-2`}
+        className="w-full overflow-visible rounded-3xl"
+        style={{
+          background: "#ffffffaf",
+          border: "1px solid rgba(200, 185, 170, 0.35)",
+          boxShadow:
+            "0 4px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)",
+          backdropFilter: "blur(12px)",
+        }}
       >
         <BasketHeader
           totalInflationPct={totalInflationPct}
@@ -62,18 +70,9 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
 
         <ItemGrid items={items} />
       </motion.div>
+
       <BasketFooter monthlyIpca={monthlyIpca} annualIpca={annualIpca} />
 
-      <motion.div
-        ref={scrollIndicatorRef}
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={
-          scrollIndicatorInView
-            ? { opacity: 1, y: 0, scale: 1 }
-            : { opacity: 0, y: 20, scale: 0.98 }
-        }
-        className="w-full flex items-center justify-end pt-2"
-      ></motion.div>
       <ScrollIndicator />
     </div>
   );

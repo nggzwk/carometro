@@ -10,63 +10,139 @@ export default async function VillainsChart() {
   if (displayItems.length === 0) {
     return (
       <div className="w-full min-h-screen flex flex-col items-center justify-center bg-color-background p-6 snap-start">
-        <div className="w-full max-w-md border-2 border-black py-3 px-6 text-center mb-10 bg-white rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-          <h2 className="font-sans text-2xl sm:text-3xl font-bold tracking-[0.18em] text-black uppercase">
-            Vilões do Mês
-          </h2>
-        </div>
-        <p className="font-sans text-sm text-black/70 uppercase tracking-[0.16em] text-center">
-          Nenhum vilão nesse mês.
-        </p>
+        <EmptyState />
       </div>
     );
   }
 
   const currentMonthName = latestMonth?.month_ref
-    ? convertMonthRef(latestMonth.month_ref).toUpperCase()
+    ? convertMonthRef(latestMonth.month_ref)
     : "";
 
+  const basketValue = Math.trunc(Number(latestMonth?.basket_value_brl ?? 0));
+  const wagePercent = Math.trunc(Number(latestMonth?.percentage_of_wage ?? 0));
+
   return (
-    <section className="w-full min-h-screen flex flex-col items-center justify-between bg-color-background pt-10 pb-12 px-6 snap-start selection:bg-black selection:text-white relative z-10">
-      <div className="w-full flex flex-col items-center justify-start flex-1">
-        <div className="w-auto min-w-[240px] border-1 border-black py-2.5 px-4 text-center mb-8 bg-color-background rounded-[10px]">
-          <h2 className="font-sans text-3xl sm:text-3xl font-bold tracking-[0.2em] text-black uppercase whitespace-nowrap">
-            Vilões do Mês
-          </h2>
+    <section className="w-full min-h-screen flex flex-col items-center justify-between bg-color-background pt-12 pb-12 px-6 snap-start selection:bg-black selection:text-white relative z-10">
+      <div className="w-full flex flex-col items-center justify-start flex-1 max-w-sm mx-auto">
+
+        {/* Title */}
+        <h2
+          className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-1"
+          style={{
+            fontFamily: "var(--font-subheader)",
+            color: "#1A120B",
+            letterSpacing: "-0.01em",
+            fontStyle: "italic",
+          }}
+        >
+          Vilões do Mês
+        </h2>
+
+        {/* Month pill */}
+        <div
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-10 mt-2 border border-#black shadow-sm"
+          style={{ backgroundColor: "#ffffff", color: "#000000" }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ backgroundColor: "#bf823c" }}
+          />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ fontFamily: "var(--font-card-summary)" }}>
+            {currentMonthName}
+          </span>
         </div>
 
+        {/* Podium */}
         <PodiumBars displayItems={displayItems} />
 
-        <div className="w-full max-w-sm text-center flex flex-col gap-1.5 subtitle text-sm sm:text-base font-normal uppercase tracking-[0.2em] text-black leading-relaxed">
-          <p>A cesta básica em {currentMonthName}</p>
-          <p>
-            custa {Math.trunc(Number(latestMonth?.percentage_of_wage ?? 0))}% do
-            salário mínimo.
-          </p>
-          <p className="text-xl">
-            R${Math.trunc(Number(latestMonth?.basket_value_brl ?? 0))}
-          </p>
+        {/* Stats row */}
+        <div
+          className="w-full rounded-2xl overflow-hidden mt-2"
+          style={{
+            border: "1px solid #E8DDD3",
+            backgroundColor: "#ffffffaf",
+            boxShadow: "0 2px 16px 0 rgba(0, 0, 0, 0.04)",
+          }}
+        >
+          <div className="flex divide-x divide-[#E8DDD3]">
+            {/* Basket value */}
+            <div className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
+              <span
+                className="text-[10px] uppercase tracking-[0.16em] font-medium"
+                style={{ color: "#A89B8C" }}
+              >
+                Cesta básica
+              </span>
+              <span
+                className="text-2xl font-bold mt-1"
+                style={{ fontFamily: "var(--font-subheader)", color: "#1A120B", letterSpacing: "-0.02em" }}
+              >
+                R${basketValue}
+              </span>
+              <span
+                className="text-[10px]"
+                style={{ color: "#A89B8C" }}
+              >
+                em {currentMonthName}
+              </span>
+            </div>
+
+            {/* Wage percentage */}
+            <div className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
+              <span
+                className="text-[10px] uppercase tracking-[0.16em] font-medium"
+                style={{ color: "#A89B8C" }}
+              >
+                Do salário mínimo
+              </span>
+              <span
+                className="text-2xl font-bold mt-1"
+                style={{ fontFamily: "var(--font-subheader)", color: "#E11D48", letterSpacing: "-0.02em" }}
+              >
+                {wagePercent}%
+              </span>
+              <span
+                className="text-[10px]"
+                style={{ color: "#A89B8C" }}
+              >
+                comprometido
+              </span>
+            </div>
+          </div>
         </div>
       </div>
+
       <ScrollIndicator />
     </section>
   );
 }
 
-// Helpers de Data
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <div
+        className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
+        style={{ backgroundColor: "#EDE0D4" }}
+      >
+        🛒
+      </div>
+      <p
+        className="text-sm uppercase tracking-[0.18em] font-medium"
+        style={{ color: "#A89B8C" }}
+      >
+        Nenhum vilão nesse mês.
+      </p>
+    </div>
+  );
+}
+
+// Helpers
 const monthNames: Record<string, string> = {
-  "01": "Janeiro",
-  "02": "Fevereiro",
-  "03": "Março",
-  "04": "Abril",
-  "05": "Maio",
-  "06": "Junho",
-  "07": "Julho",
-  "08": "Agosto",
-  "09": "Setembro",
-  "10": "Outubro",
-  "11": "Novembro",
-  "12": "Dezembro",
+  "01": "Janeiro",   "02": "Fevereiro", "03": "Março",
+  "04": "Abril",     "05": "Maio",      "06": "Junho",
+  "07": "Julho",     "08": "Agosto",    "09": "Setembro",
+  "10": "Outubro",   "11": "Novembro",  "12": "Dezembro",
 };
 
 function convertMonthRef(monthRef: string): string {

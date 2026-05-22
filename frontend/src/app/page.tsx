@@ -16,7 +16,7 @@ export default async function Home() {
         >
           <h1
             id="carometro-title"
-            className="heading max-w-3xl text-5xl leading-none sm:text-7xl"
+            className="heading max-w-3xl text-2xl leading-none sm:text-7xl"
           >
             CARÔMETRO
           </h1>
@@ -37,7 +37,9 @@ export default async function Home() {
           <BasketSummary {...basketSummary} />
         </section>
 
-        <VillainsChart />
+        <section>
+          <VillainsChart />
+        </section>
       </main>
     </div>
   );

@@ -10,24 +10,46 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
   annualIpca,
 }) => {
   return (
-    <div className="w-full bg-brand px-4 py-3 flex items-center justify-center gap-6 md:gap-8 select-none">
-      <span className="subtitle uppercase text-[11px] tracking-widest leading-none whitespace-nowrap">
-        <strong className="mr-1.5">MENSAL</strong>
-        <span className="font-black">
-          {monthlyIpca !== null ? `${monthlyIpca}%` : "0,0%"}
+    <div className="w-full px-4 py-3 flex items-center justify-center gap-4 select-none">
+      {/* Monthly */}
+      <div className="flex items-center gap-2">
+        <span
+          className="text-[10px] uppercase tracking-[0.18em] font-medium"
+          style={{ color: "#A89B8C", fontFamily: "var(--font-card-summary)" }}
+        >
+          Mensal
         </span>
-      </span>
-
-      <div className="flex items-center align-center subtitle uppercase text-sm leading-none whitespace-nowrap">
-        <span className="leading-none font-black">‹ IPCA ›</span>
+        <span
+          className="text-[13px] font-bold tabular-nums"
+          style={{ color: "#1A120B", fontFamily: "var(--font-card-summary)" }}
+        >
+          {monthlyIpca !== null ? `${monthlyIpca}%` : "—"}
+        </span>
       </div>
 
-      <span className="subtitle uppercase text-[11px] tracking-widest leading-none whitespace-nowrap">
-        <span className="mr-1.5 font-black">
-          {annualIpca !== null ? `${annualIpca}%` : "0,0%"}
+      {/* Divider */}
+      <div
+        className="text-[11px] font-light tracking-[0.3em] uppercase"
+        style={{ color: "#C4B8AC", fontFamily: "var(--font-card-summary)" }}
+      >
+        IPCA
+      </div>
+
+      {/* Annual */}
+      <div className="flex items-center gap-2">
+        <span
+          className="text-[13px] font-bold tabular-nums"
+          style={{ color: "#1A120B", fontFamily: "var(--font-card-summary)" }}
+        >
+          {annualIpca !== null ? `${annualIpca}%` : "—"}
         </span>
-        <strong>ACUMULADO</strong>
-      </span>
+        <span
+          className="text-[10px] uppercase tracking-[0.18em] font-medium"
+          style={{ color: "#A89B8C", fontFamily: "var(--font-card-summary)" }}
+        >
+          Acumulado
+        </span>
+      </div>
     </div>
   );
 };
