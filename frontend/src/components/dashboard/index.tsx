@@ -43,7 +43,6 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
             className="relative inline-flex items-start text-3xl sm:text-4xl font-bold tracking-tight mb-2"
             style={{
               fontFamily: "var(--font-header)",
-              fontStyle: "italic",
               color: "#1A120B",
               letterSpacing: "-0.01em",
             }}

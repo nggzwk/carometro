@@ -95,15 +95,14 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
       aria-pressed={nameRevealed}
     >
       <AnimatePresence initial={false}>
-        {!nameRevealed && (
-          <motion.div
-            key="default"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -3 }}
-            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 flex"
-          >
+        <motion.div
+          key="default"
+          initial={{ opacity: 0, y: 4 }}
+          animate={nameRevealed ? { opacity: 0, y: -3 } : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute inset-0 flex"
+          style={{ pointerEvents: nameRevealed ? "none" : "auto" }}
+        >
             <div
               className="flex items-center justify-center"
               style={{
@@ -176,69 +175,65 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
                 </span>
               </div>
             </div>
-          </motion.div>
-        )}
+        </motion.div>
       </AnimatePresence>
 
       <AnimatePresence initial={false}>
-        {nameRevealed && (
-          <motion.div
-            key="revealed"
-            initial={{ opacity: 0, scale: 0.88 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.88 }}
-            transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-1.5"
-            style={{ background: "var(--color-background)" }}
+        <motion.div
+          key="revealed"
+          initial={{ opacity: 0, scale: 0.88 }}
+          animate={nameRevealed ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.88 }}
+          transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
+          className="absolute inset-0 flex flex-col items-center justify-center gap-1.5"
+          style={{ background: "var(--color-background)", pointerEvents: nameRevealed ? "auto" : "none" }}
+        >
+          <motion.span
+            initial={{ scale: 1.4, opacity: 0, y: 4 }}
+            animate={{ scale: 1, opacity: 0.65, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{ fontSize: "0.95rem", lineHeight: 1 }}
           >
-            <motion.span
-              initial={{ scale: 1.4, opacity: 0, y: 4 }}
-              animate={{ scale: 1, opacity: 0.65, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              style={{ fontSize: "0.95rem", lineHeight: 1 }}
-            >
-              {icon}
-            </motion.span>
+            {icon}
+          </motion.span>
 
-            <motion.span
-              initial={{ y: 8, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{
-                delay: 0.22,
-                duration: 0.34,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="text-center leading-none uppercase tracking-wide"
-              style={{
-                fontFamily: "var(--font-header)",
-                fontSize: "clamp(1rem, 5vw, 1.4rem)",
-                color: "#1A120B",
-                fontWeight: 700,
-              }}
-            >
-              {displayName}
-            </motion.span>
+          <motion.span
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{
+              delay: 0.22,
+              duration: 0.34,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="text-center leading-none uppercase tracking-wide"
+            style={{
+              fontFamily: "var(--font-header)",
+              fontSize: "clamp(1rem, 5vw, 1.4rem)",
+              color: "#1A120B",
+              fontWeight: 700,
+            }}
+          >
+            {displayName}
+          </motion.span>
 
-            <motion.span
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.34,
-                duration: 0.34,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              style={{
-                fontFamily: "'DM Mono', monospace",
-                fontSize: "0.55rem",
-                letterSpacing: "0.10em",
-                color: "#938679",
-                textTransform: "uppercase",
-              }}
-            >
-              {subtitle}
-            </motion.span>
-          </motion.div>
-        )}
+          <motion.span
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.34,
+              duration: 0.34,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.55rem",
+              letterSpacing: "0.10em",
+              color: "#938679",
+              textTransform: "uppercase",
+            }}
+          >
+            {subtitle}
+          </motion.span>
+        </motion.div>
       </AnimatePresence>
 
       {/* Invisible height spacer */}

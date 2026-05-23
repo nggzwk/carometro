@@ -31,7 +31,6 @@ export default async function VillainsChart() {
             fontFamily: "var(--font-subheader)",
             color: "#1A120B",
             letterSpacing: "-0.01em",
-            fontStyle: "italic",
           }}
         >
           Vilões do Mês
