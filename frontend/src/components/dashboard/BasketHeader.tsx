@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { formatBrl, formatPct } from "../../lib/formatters";
 
 interface BasketHeaderProps {
@@ -21,50 +21,38 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
   const [isPinned, setIsPinned] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeoutRef = useRef<number | null>(null);
-  const showTotalValue = isPinned;
+
   const exceedsBenchmark =
     (annualIpca != null && pct > annualIpca) ||
     (monthlyIpca != null && pct > monthlyIpca);
-  const totalValueStroke = exceedsBenchmark ? "#E63946" : "#2A9D8F";
+
+  const accentColor = exceedsBenchmark ? "#E63946" : "#2A9D8F";
+
   const totalValueEmoji =
-    pct > 15
-      ? " ☠️"
-      : pct > 10
-        ? " 😭"
-        : pct > 5
-          ? " 😱"
-          : pct < 4
-            ? " 😐"
-            : " 💰";
-  const displayText = showTotalValue
-    ? `${formatBrl(totalValue)}${totalValueEmoji}`
+    pct > 15 ? "☠️" : pct > 10 ? "😭" : pct > 5 ? "😱" : pct < 4 ? "😐" : "💰";
+
+  const showTotalValue = isPinned;
+  const label = showTotalValue
+    ? `${formatBrl(totalValue)} ${totalValueEmoji}`
     : pct >= 0.1
-      ? `AUMENTOU ${formatPct(pct, true)}`
-      : `DIMINUIU ${formatPct(Math.abs(pct), true)}`;
+      ? `Aumentou ${formatPct(pct, true)}`
+      : `Diminuiu ${formatPct(Math.abs(pct), true)}`;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const isMobile = mediaQuery.matches;
-
-    if (!isMobile) return;
-
+    if (!mediaQuery.matches) return;
     const interval = setInterval(() => {
       setIsPinned((prev) => !prev);
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
   const handleTooltipStart = () => {
     setShowTooltip(true);
-
-    if (tooltipTimeoutRef.current != null) {
+    if (tooltipTimeoutRef.current != null)
       window.clearTimeout(tooltipTimeoutRef.current);
-    }
-
     tooltipTimeoutRef.current = window.setTimeout(() => {
       setShowTooltip(false);
-      tooltipTimeoutRef.current = null;
     }, 3000);
   };
 
@@ -73,45 +61,67 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
       window.clearTimeout(tooltipTimeoutRef.current);
       tooltipTimeoutRef.current = null;
     }
-
     setShowTooltip(false);
   };
 
   return (
-    <div className="w-fit mx-auto py-1.5 px-5 text-center bg-background-color select-none">
-      <div className="flex items-center gap-3 justify-center tracking-tightest">
+    <div className="w-full flex items-center justify-center py-3 px-4 select-none">
+      <motion.div
+        initial="rest"
+        animate={showTooltip ? "hover" : "rest"}
+        onHoverStart={handleTooltipStart}
+        onHoverEnd={handleTooltipEnd}
+        className="relative"
+      >
         <motion.div
-          initial="rest"
-          animate={showTooltip ? "hover" : "rest"}
-          onHoverStart={handleTooltipStart}
-          onHoverEnd={handleTooltipEnd}
-          className="relative"
+          variants={{
+            rest: { opacity: 0, y: 6, scale: 0.94 },
+            hover: { opacity: 1, y: 0, scale: 1 },
+          }}
+          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+          className="absolute -top-9 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
         >
-          <motion.div
-            variants={{
-              rest: { opacity: 0, y: 6, scale: 0.98 },
-              hover: { opacity: 1, y: 0, scale: 1 }
-            }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="subtitle absolute -top-8 left-1/2 -translate-x-1/2 bg-[#e9e0d6]/50 text-[10px] py-1 px-2 rounded-lg z-10 pointer-events-none whitespace-nowrap flex justify-center"
+          <div
+            className="text-[10px] font-semibold uppercase tracking-[0.16em] px-3 py-1.5 rounded-full whitespace-nowrap"
+            style={{ backgroundColor: "#1A120B", color: "#fff8eb" }}
           >
-            CLIQUE
-          </motion.div>
-          <motion.button
-            type="button"
-            onClick={() => setIsPinned((prev) => !prev)}
-            whileTap={{ scale: 0.98 }}
-            className="summary text-xl tracking-widest text-white whitespace-nowrap leading-none"
-            style={{
-              WebkitTextStroke: showTotalValue ? `1.2px ${totalValueStroke}` : "1px black",
-              color: "#ffffff",
-            }}
-            aria-pressed={isPinned}
-          >
-            {displayText}
-          </motion.button>
+            clique para ver valor
+          </div>
         </motion.div>
-      </div>
+
+        <motion.button
+          type="button"
+          onClick={() => setIsPinned((prev) => !prev)}
+          whileTap={{ scale: 0.97 }}
+          className="relative flex items-center gap-2 px-5 py-2 rounded-full cursor-pointer"
+          style={{
+            backgroundColor: `#ffffffaf`,
+            border: `1.5px solid ${accentColor}40`,
+          }}
+        >
+          <span
+            className="w-2 h-2 rounded-full flex-none"
+            style={{ backgroundColor: accentColor }}
+          />
+
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={label}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="text-sm font-semibold tracking-[0.06em] uppercase"
+              style={{
+                fontFamily: "var(--font-card-summary)",
+                color: accentColor,
+              }}
+            >
+              {label}
+            </motion.span>
+          </AnimatePresence>
+        </motion.button>
+      </motion.div>
     </div>
   );
 };
