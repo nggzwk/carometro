@@ -123,14 +123,13 @@ function PodiumBarItem({
         >
           {shortName(nameValue)} {formatPct(pctValue)}
         </div>
-        {/* Tooltip arrow */}
+
         <div
           className="w-2 h-2 rotate-45 mx-auto -mt-1"
           style={{ backgroundColor: accentColor }}
         />
       </motion.div>
 
-      {/* Rank badge */}
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
         animate={
@@ -145,7 +144,6 @@ function PodiumBarItem({
         className="text-base mb-1 select-none"
       ></motion.div>
 
-      {/* Percentage label on bar */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={isLineVisible ? { opacity: 1 } : { opacity: 0 }}
@@ -153,13 +151,12 @@ function PodiumBarItem({
           delay: isLineVisible ? BAR_GROW_DURATION + entryDelay + 0.05 : 0,
           duration: 0.4,
         }}
-        className="mb-2 text-xs font-bold tracking-wide"
+        className="mb-2 text-xs font-bold tracking-wide sm:hidden"
         style={{ color: accentColor, fontFamily: "var(--font-card-summary)" }}
       >
         {formatPct(pctValue)}
       </motion.div>
 
-      {/* Emoji icon */}
       <motion.span
         initial={{ scale: 0, opacity: 0 }}
         animate={
@@ -178,7 +175,6 @@ function PodiumBarItem({
           : getFallbackIcon(nameValue)}
       </motion.span>
 
-      {/* The bar itself */}
       <motion.div
         initial={{ scaleY: 0 }}
         animate={isLineVisible ? { scaleY: 1 } : { scaleY: 0 }}
@@ -200,7 +196,6 @@ function PodiumBarItem({
         }}
       ></motion.div>
 
-      {/* Bottom line */}
       <div
         ref={lineRef}
         style={{
@@ -210,7 +205,6 @@ function PodiumBarItem({
         }}
       />
 
-      {/* Item name label */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={isLineVisible ? { opacity: 1 } : { opacity: 0 }}

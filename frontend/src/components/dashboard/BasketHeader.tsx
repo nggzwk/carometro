@@ -49,7 +49,8 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
 
   const handleTooltipStart = () => {
     setShowTooltip(true);
-    if (tooltipTimeoutRef.current != null) window.clearTimeout(tooltipTimeoutRef.current);
+    if (tooltipTimeoutRef.current != null)
+      window.clearTimeout(tooltipTimeoutRef.current);
     tooltipTimeoutRef.current = window.setTimeout(() => {
       setShowTooltip(false);
     }, 3000);
@@ -72,10 +73,9 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
         onHoverEnd={handleTooltipEnd}
         className="relative"
       >
-        {/* Tooltip */}
         <motion.div
           variants={{
-            rest:  { opacity: 0, y: 6, scale: 0.94 },
+            rest: { opacity: 0, y: 6, scale: 0.94 },
             hover: { opacity: 1, y: 0, scale: 1 },
           }}
           transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
@@ -89,7 +89,6 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
           </div>
         </motion.div>
 
-        {/* Main label button */}
         <motion.button
           type="button"
           onClick={() => setIsPinned((prev) => !prev)}
@@ -100,7 +99,6 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
             border: `1.5px solid ${accentColor}40`,
           }}
         >
-          {/* Colored dot */}
           <span
             className="w-2 h-2 rounded-full flex-none"
             style={{ backgroundColor: accentColor }}

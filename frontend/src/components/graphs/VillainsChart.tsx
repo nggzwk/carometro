@@ -25,8 +25,6 @@ export default async function VillainsChart() {
   return (
     <section className="w-full min-h-screen flex flex-col items-center justify-between bg-color-background pt-12 pb-12 px-6 snap-start selection:bg-black selection:text-white relative z-10">
       <div className="w-full flex flex-col items-center justify-start flex-1 max-w-sm mx-auto">
-
-        {/* Title */}
         <h2
           className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-1"
           style={{
@@ -39,24 +37,24 @@ export default async function VillainsChart() {
           Vilões do Mês
         </h2>
 
-        {/* Month pill */}
         <div
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-10 mt-2 border border-#black shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mt-2 mb-11 border border-#black shadow-sm"
           style={{ backgroundColor: "#ffffff", color: "#000000" }}
         >
           <span
             className="w-1.5 h-1.5 rounded-full"
-            style={{ backgroundColor: "#bf823c" }}
+            style={{ backgroundColor: "#949494" }}
           />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ fontFamily: "var(--font-card-summary)" }}>
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{ fontFamily: "var(--font-card-summary)" }}
+          >
             {currentMonthName}
           </span>
         </div>
 
-        {/* Podium */}
         <PodiumBars displayItems={displayItems} />
 
-        {/* Stats row */}
         <div
           className="w-full rounded-2xl overflow-hidden mt-2"
           style={{
@@ -76,14 +74,15 @@ export default async function VillainsChart() {
               </span>
               <span
                 className="text-2xl font-bold mt-1"
-                style={{ fontFamily: "var(--font-subheader)", color: "#1A120B", letterSpacing: "-0.02em" }}
+                style={{
+                  fontFamily: "var(--font-subheader)",
+                  color: "#1A120B",
+                  letterSpacing: "-0.02em",
+                }}
               >
                 R${basketValue}
               </span>
-              <span
-                className="text-[10px]"
-                style={{ color: "#A89B8C" }}
-              >
+              <span className="text-[10px]" style={{ color: "#A89B8C" }}>
                 em {currentMonthName}
               </span>
             </div>
@@ -98,14 +97,15 @@ export default async function VillainsChart() {
               </span>
               <span
                 className="text-2xl font-bold mt-1"
-                style={{ fontFamily: "var(--font-subheader)", color: "#E11D48", letterSpacing: "-0.02em" }}
+                style={{
+                  fontFamily: "var(--font-subheader)",
+                  color: "#E11D48",
+                  letterSpacing: "-0.02em",
+                }}
               >
                 {wagePercent}%
               </span>
-              <span
-                className="text-[10px]"
-                style={{ color: "#A89B8C" }}
-              >
+              <span className="text-[10px]" style={{ color: "#A89B8C" }}>
                 comprometido
               </span>
             </div>
@@ -139,10 +139,18 @@ function EmptyState() {
 
 // Helpers
 const monthNames: Record<string, string> = {
-  "01": "Janeiro",   "02": "Fevereiro", "03": "Março",
-  "04": "Abril",     "05": "Maio",      "06": "Junho",
-  "07": "Julho",     "08": "Agosto",    "09": "Setembro",
-  "10": "Outubro",   "11": "Novembro",  "12": "Dezembro",
+  "01": "Janeiro",
+  "02": "Fevereiro",
+  "03": "Março",
+  "04": "Abril",
+  "05": "Maio",
+  "06": "Junho",
+  "07": "Julho",
+  "08": "Agosto",
+  "09": "Setembro",
+  "10": "Outubro",
+  "11": "Novembro",
+  "12": "Dezembro",
 };
 
 function convertMonthRef(monthRef: string): string {

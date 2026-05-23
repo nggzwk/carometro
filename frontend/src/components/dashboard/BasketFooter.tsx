@@ -11,7 +11,6 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
 }) => {
   return (
     <div className="w-full px-4 py-3 flex items-center justify-center gap-4 select-none">
-      {/* Monthly */}
       <div className="flex items-center gap-2">
         <span
           className="text-[10px] uppercase tracking-[0.18em] font-medium"
@@ -27,7 +26,6 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
         </span>
       </div>
 
-      {/* Divider */}
       <div
         className="text-[11px] font-light tracking-[0.3em] uppercase"
         style={{ color: "#C4B8AC", fontFamily: "var(--font-card-summary)" }}
@@ -35,7 +33,6 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
         IPCA
       </div>
 
-      {/* Annual */}
       <div className="flex items-center gap-2">
         <span
           className="text-[13px] font-bold tabular-nums"
