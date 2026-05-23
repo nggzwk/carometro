@@ -84,7 +84,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
       }
       className="relative rounded-2xl overflow-hidden h-full cursor-pointer select-none"
       style={{
-        border: `2px solid ${borderColor}`,
+        border: `3px solid ${borderColor}`,
         background: "var(--color-background)",
         boxShadow: isInflation
           ? "0 2px 16px rgba(230,57,70,0.10)"
@@ -107,7 +107,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
               className="flex items-center justify-center"
               style={{
                 width: "50%",
-                borderRight: `1px solid ${accentColor}20`,
+                borderRight: `2px solid ${accentColor}20`,
               }}
             >
               <motion.span
@@ -156,12 +156,11 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
 
               <div
                 style={{
-                  height: "1px",
+                  height: "2px",
                   background: `${accentColor}22`,
                 }}
               />
 
-              {/* Bottom: BRL delta */}
               <div className="flex items-end justify-end">
                 <span
                   className="tabular-nums font-medium leading-none"
@@ -225,9 +224,9 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
             }}
             style={{
               fontFamily: "'DM Mono', monospace",
-              fontSize: "0.55rem",
+              fontSize: "0.60rem",
               letterSpacing: "0.10em",
-              color: "#938679",
+              color: "#A89B8C",
               textTransform: "uppercase",
             }}
           >
