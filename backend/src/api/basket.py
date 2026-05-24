@@ -251,14 +251,6 @@ def _get_ipca_monthly_pct(db: Session, month_ref: str) -> float | None:
     return db.execute(query, {"month_ref": month_ref}).scalar()
 
 
-def _get_latest_month_ref(db: Session) -> str | None:
-    query = text("""
-        SELECT MAX(month_ref)
-        FROM inflacao_brasil.item_monthly_price
-    """)
-    return db.execute(query).scalar()
-
-
 def _load_basket_items(
     db: Session,
 ) -> list[tuple[int, int, int, str, str, float, int | None]]:

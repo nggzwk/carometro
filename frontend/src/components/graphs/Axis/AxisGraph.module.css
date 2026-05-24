@@ -1,0 +1,78 @@
+.chartNoSelect,
+.chartNoSelect * {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.chartNoSelect svg,
+.chartNoSelect svg * {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+.chartNoSelect text {
+  pointer-events: none !important;
+}
+
+.chartNoSelect,
+.chartNoSelect *,
+.chartNoSelect svg,
+.chartNoSelect svg *,
+.chartNoSelect svg g,
+.chartNoSelect svg g:focus,
+.chartNoSelect svg g:focus-visible,
+.chartNoSelect svg g:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.chartNoSelect .recharts-wrapper,
+.chartNoSelect .recharts-wrapper:focus,
+.chartNoSelect .recharts-surface,
+.chartNoSelect .recharts-surface:focus {
+  outline: none !important;
+}
+
+.title {
+  margin-bottom: 24px;
+}
+
+.metricsSubtitle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .metricsSubtitle {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: -12px;
+    margin-bottom: 12px;
+  }
+
+  .metricsSubtitleItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .metricsSubtitleSquare {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex: 0 0 10px;
+  }
+
+  .metricsSubtitleLabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8B7355;
+    letter-spacing: 0.3px;
+  }
+}

@@ -30,4 +30,10 @@ const ICONS_SUBTITLES: Record<number, string> = {
   20001: "BRANCOS",
   10011: "INTEIRO",
   10023: "COXÃO MOLE SEM OSSO",
-}
+};
+
+export const basketTypesIcons = {
+  basketIcon: "🛒",
+  vegetablesBasketIcon: "🧺",
+  cleaningBasketIcon: "🧼",
+};

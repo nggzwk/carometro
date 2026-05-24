@@ -9,6 +9,11 @@ export type BasketItemData = {
   mom_pct: number | null;
 };
 
+export type MonthlyPriceData = {
+  month_ref: string;
+  median_price: string;
+};
+
 export type BasketSummaryProps = {
   items: BasketItemData[];
   totalValue: number;

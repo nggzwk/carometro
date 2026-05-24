@@ -1,0 +1,74 @@
+.tooltip {
+  position: absolute;
+  background: rgba(255, 255, 255);
+  backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: 
+    0 8px 24px rgba(139, 115, 85, 0.12),
+    0 2px 8px rgba(139, 115, 85, 0.08);
+  pointer-events: auto;
+  z-index: 100;
+  border: 1px solid rgba(224, 170, 89, 0.2);
+  min-width: 122px;
+  animation: tooltipFadeIn 200ms ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin-bottom: 2px;
+  gap: 8px;
+}
+
+.metric:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.value {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.metricPhone {
+  justify-content: center;
+}
+
+.valuePhone {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+
+/* Arrow pointing up to the dot */
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  border-left: 1px solid rgba(224, 170, 89, 0.2);
+  border-top: 1px solid rgba(224, 170, 89, 0.2);
+  transform: translateX(-50%) rotate(45deg);
+  z-index: -1;
+}

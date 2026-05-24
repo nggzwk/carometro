@@ -53,7 +53,6 @@ function getBarTheme(name: string): [string, string] {
 }
 
 export default function PodiumBars({ displayItems }: { displayItems: any[] }) {
-  // Reorder: 2nd, 1st, 3rd for podium visual
   const podiumItems =
     displayItems.length === 3
       ? [displayItems[1], displayItems[0], displayItems[2]]
@@ -84,7 +83,7 @@ function PodiumBarItem({
 }) {
   const pctValue = item.mom_pct ?? 0;
   const nameValue = item.item_name ?? "";
-  const rankIndex = displayItems.indexOf(item); // 0 = highest inflation
+  const rankIndex = displayItems.indexOf(item);
 
   const heights = [
     MAX_BAR_HEIGHT,
@@ -94,12 +93,10 @@ function PodiumBarItem({
   const calculatedHeight = heights[rankIndex] ?? MAX_BAR_HEIGHT * 0.62;
 
   const [barColor, accentColor] = getBarTheme(nameValue);
-  const isPositive = pctValue >= 0;
 
   const lineRef = useRef<HTMLDivElement | null>(null);
   const isLineVisible = useInView(lineRef, { amount: 1, once: false });
 
-  // Staggered entry delay per bar
   const entryDelay = rankIndex === 0 ? 0.1 : rankIndex === 1 ? 0.0 : 0.2;
 
   return (
@@ -110,7 +107,6 @@ function PodiumBarItem({
       className="flex flex-col items-center relative group"
       style={{ width: 80 }}
     >
-      {/* Tooltip on hover */}
       <motion.div
         variants={{
           rest: { opacity: 0, y: 10, scale: 0.92 },

@@ -63,7 +63,6 @@ export default async function VillainsChart() {
           }}
         >
           <div className="flex divide-x divide-[#E8DDD3]">
-            {/* Basket value */}
             <div className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
               <span
                 className="text-[10px] uppercase tracking-[0.16em] font-medium"
@@ -86,7 +85,6 @@ export default async function VillainsChart() {
               </span>
             </div>
 
-            {/* Wage percentage */}
             <div className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
               <span
                 className="text-[10px] uppercase tracking-[0.16em] font-medium"
