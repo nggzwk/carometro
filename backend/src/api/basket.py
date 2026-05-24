@@ -956,10 +956,8 @@ def get_basket_annual_inflation(
     db: Session = Depends(get_db),
 ) -> list[BasketAnnualInflationResponse]:
     """
-    Fetch annual accumulated basket inflation starting from 2023.
-
-    Uses YEAR-OVER-YEAR comparison for standard years, but applies an
-    exception for 2023 (Jan 23 vs Dec 23) due to unreliable 2022 baseline data.
+    Fetch annual accumulated basket inflation calculated from December of the previous year
+    to December (or the latest available month for the current year).
     """
     query = text("""
         WITH years AS (
@@ -968,67 +966,47 @@ def get_basket_annual_inflation(
             UNION ALL SELECT 2025
             UNION ALL SELECT 2026
         ),
+        default_basket AS (
+            SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket'
+        ),
         year_end_values AS (
-            -- Get last available month for each year
+            -- Captura o último mês disponível de cada ano no banco
             SELECT
                 SUBSTRING(month_ref, 1, 4)::INTEGER AS year,
                 month_ref,
                 basket_value_brl,
                 row_number() OVER (PARTITION BY SUBSTRING(month_ref, 1, 4) ORDER BY month_ref DESC) AS rn
             FROM inflacao_brasil.basket_monthly_value bmv
-            WHERE bmv.basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
+            WHERE bmv.basket_id = (SELECT id FROM default_basket)
         ),
-        january_2023_baseline AS (
-            -- Explicit exception baseline for the start of 2023
-            SELECT month_ref, basket_value_brl
-            FROM inflacao_brasil.basket_monthly_value
-            WHERE month_ref = '2023-01'
-              AND basket_id = (SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket')
-            LIMIT 1
+        previous_december_values AS (
+            -- Busca especificamente o baseline de dezembro do ano anterior (YYYY-1-12)
+            SELECT
+                (SUBSTRING(month_ref, 1, 4)::INTEGER + 1) AS target_year,
+                month_ref,
+                basket_value_brl
+            FROM inflacao_brasil.basket_monthly_value bmv
+            WHERE bmv.month_ref LIKE '%-12'
+              AND bmv.basket_id = (SELECT id FROM default_basket)
         )
         SELECT
             y.year,
-            -- Current year end month and value
+            -- Mês final e seu respectivo valor
             cy.month_ref AS end_month_ref,
             cy.basket_value_brl AS end_month_value_brl,
             
-            -- EXCEPTION LOGIC: Use Jan-23 for 2023, otherwise use previous year's end
-            CASE 
-                WHEN y.year = 2023 THEN j23.month_ref
-                ELSE py.month_ref
-            END AS previous_year_end_month_ref,
-            CASE 
-                WHEN y.year = 2023 THEN j23.basket_value_brl
-                ELSE py.basket_value_brl
-            END AS previous_year_end_value_brl,
+            -- Mês inicial (Dezembro do ano anterior) e seu respectivo valor
+            pd.month_ref AS start_month_ref,
+            pd.basket_value_brl AS start_month_value_brl,
             
-            -- Calculate differences conditionally
-            CASE 
-                WHEN y.year = 2023 THEN cy.basket_value_brl - j23.basket_value_brl
-                ELSE cy.basket_value_brl - py.basket_value_brl
-            END AS annual_difference_brl,
+            -- Cálculo da diferença absoluta em BRL
+            (cy.basket_value_brl - pd.basket_value_brl) AS annual_difference_brl,
             
-            -- Calculate YoY/Intra-year inflation percentage conditionally
-            CASE
-                WHEN y.year = 2023 THEN
-                    ROUND(((cy.basket_value_brl - j23.basket_value_brl) / j23.basket_value_brl) * 100, 2)
-                ELSE
-                    ROUND(((cy.basket_value_brl - py.basket_value_brl) / py.basket_value_brl) * 100, 2)
-            END AS annual_inflation_pct,
-            
-            (
-                SELECT annual_inflation_pct
-                FROM inflacao_brasil.ipca_monthly ip
-                WHERE EXTRACT(YEAR FROM ip.effective_date) = y.year
-                ORDER BY ip.effective_date DESC
-                LIMIT 1
-            ) AS annual_ipca_pct
+            -- Cálculo da variação percentual da inflação da cesta
+            ROUND(((cy.basket_value_brl - pd.basket_value_brl) / pd.basket_value_brl) * 100, 2) AS annual_inflation_pct
         FROM years y
-        LEFT JOIN year_end_values cy ON cy.year = y.year AND cy.rn = 1
-        LEFT JOIN year_end_values py ON py.year = y.year - 1 AND py.rn = 1
-        LEFT JOIN january_2023_baseline j23 ON y.year = 2023
-        WHERE cy.basket_value_brl IS NOT NULL 
-          AND (y.year = 2023 OR py.basket_value_brl IS NOT NULL)
+        INNER JOIN year_end_values cy ON cy.year = y.year AND cy.rn = 1
+        INNER JOIN previous_december_values pd ON pd.target_year = y.year
         ORDER BY y.year
     """)
 

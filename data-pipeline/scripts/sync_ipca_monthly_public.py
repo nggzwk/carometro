@@ -13,7 +13,6 @@ import os
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
-from pathlib import Path
 from typing import Iterable
 from urllib.request import urlopen
 

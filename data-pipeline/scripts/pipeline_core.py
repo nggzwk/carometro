@@ -44,6 +44,10 @@ def _generate_monthly_dates(start: datetime, end: datetime, include_end_always: 
     return dates
 
 
+def _last_day_of_month(date: datetime) -> datetime:
+    return date.replace(day=1) + relativedelta(months=1, days=-1)
+
+
 def _download_with_fallback(
     base_url: str,
     output_dir: Path,
@@ -193,9 +197,9 @@ def _match_cotacoes_new_filename(filename: str) -> bool:
     return file_date >= datetime(2025, 1, 1)
 
 
-def _current_month_day_20() -> datetime:
+def _current_month_last_day() -> datetime:
     now = datetime.now()
-    return now.replace(day=20)
+    return _last_day_of_month(now)
 
 
 DATASETS: Dict[str, DatasetConfig] = {
@@ -209,7 +213,7 @@ DATASETS: Dict[str, DatasetConfig] = {
         download_start=datetime(2022, 7, 20),
         download_end_provider=lambda: datetime(2023, 6, 20),
         download_filename=_filename_old_portal,
-        fallback_days=11,
+        fallback_days=21,
         file_matcher=_match_legacy_old_filename,
         dedupe_cleaned_files=True,
     ),
@@ -223,7 +227,7 @@ DATASETS: Dict[str, DatasetConfig] = {
         download_start=datetime(2023, 7, 20),
         download_end_provider=lambda: datetime(2024, 12, 20),
         download_filename=_filename_cotacoes,
-        fallback_days=11,
+        fallback_days=21,
         include_end_always=True,
         file_matcher=_match_cotacoes_old_filename,
     ),
@@ -235,9 +239,9 @@ DATASETS: Dict[str, DatasetConfig] = {
         cleaner=clean_new_format_csv,
         download_base_url="https://mid-dadosabertos.curitiba.pr.gov.br/CliqueEconomia/",
         download_start=datetime(2025, 1, 20),
-        download_end_provider=_current_month_day_20,
+        download_end_provider=_current_month_last_day,
         download_filename=_filename_cotacoes,
-        fallback_days=11,
+        fallback_days=21,
         file_matcher=_match_cotacoes_new_filename,
     ),
 }
@@ -312,10 +316,11 @@ def download_dataset(dataset_key: str) -> bool:
 
     failed = 0
     for date in dates:
+        target_date = _last_day_of_month(date)
         if not _download_with_fallback(
             base_url=config.download_base_url,
             output_dir=output_dir,
-            date=date,
+            date=target_date,
             filename_formatter=config.download_filename,
             max_days_back=config.fallback_days,
         ):

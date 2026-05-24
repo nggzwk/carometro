@@ -74,16 +74,15 @@ def resolve_target_date(
     return latest
 
 
-def extract_date_from_filename(filename: str, target_day: int = 20) -> Optional[str]:
+def extract_date_from_filename(filename: str) -> Optional[str]:
     """
     Extract date from filename in format: YYYY-MM-DD_*.csv
-    Returns the specified day of the same month in DD/MM/YYYY format.
+    Returns that date in DD/MM/YYYY format.
     """
     try:
         date_part = filename.split('_')[0]
         file_date = datetime.strptime(date_part, "%Y-%m-%d")
-        target_date = file_date.replace(day=target_day)
-        return target_date.strftime("%d/%m/%Y")
+        return file_date.strftime("%d/%m/%Y")
     except Exception as exc:
         print(f"✗ Could not extract date from filename {filename}: {exc}")
         return None
