@@ -36,7 +36,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
     ? `${formatBrl(totalValue)} ${totalValueEmoji}`
     : pct >= 0.1
       ? `Aumentou ${formatPct(pct, true)}`
-      : `Diminuiu ${formatPct(Math.abs(pct), true)}`;
+      : `Diminuiu -${formatPct(Math.abs(pct), false)}`;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 768px)");

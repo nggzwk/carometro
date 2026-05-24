@@ -8,6 +8,13 @@ import { formatPct, shortName } from "../../lib/formatters";
 const MAX_BAR_HEIGHT = 260;
 const BAR_GROW_DURATION = 1.1;
 
+function getDisplayName(name: string): string {
+  const lower = (name || "").toLowerCase();
+  if (lower.includes("coxão") || lower.includes("coxao")) return "CARNE";
+  if (lower.includes("filé") || lower.includes("file")) return "FRANGO";
+  return shortName(name);
+}
+
 function getFallbackIcon(name: string): string {
   const lower = name.toLowerCase();
   if (lower.includes("ovo")) return "🍳";
@@ -121,7 +128,7 @@ function PodiumBarItem({
             letterSpacing: "0.04em",
           }}
         >
-          {shortName(nameValue)} {formatPct(pctValue)}
+          {getDisplayName(nameValue)} {formatPct(pctValue)}
         </div>
 
         <div
@@ -219,7 +226,7 @@ function PodiumBarItem({
           maxWidth: 72,
         }}
       >
-        {shortName(nameValue)}
+        {getDisplayName(nameValue)}
       </motion.p>
     </motion.div>
   );

@@ -81,7 +81,7 @@ export default async function VillainsChart() {
               >
                 R${basketValue}
               </span>
-              <span className="text-[10px]" style={{ color: "#A89B8C" }}>
+              <span className="text-[10px] uppercase" style={{ color: "#A89B8C" }}>
                 em {currentMonthName}
               </span>
             </div>
@@ -104,8 +104,8 @@ export default async function VillainsChart() {
               >
                 {wagePercent}%
               </span>
-              <span className="text-[10px]" style={{ color: "#A89B8C" }}>
-                comprometido
+              <span className="text-[10px] uppercase" style={{ color: "#A89B8C" }}>
+                por pessoa
               </span>
             </div>
           </div>

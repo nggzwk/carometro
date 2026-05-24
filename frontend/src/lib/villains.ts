@@ -90,7 +90,6 @@ export async function getLatestVillainsMonth(): Promise<MonthlyVillainsData | nu
       month_ref: latestMonth.month_ref,
       ipca_monthly_pct: latestMonth.ipca_monthly_pct,
       percentage_of_wage: matchingWage ? matchingWage.percentage_of_wage : null,
-      // MODIFICADO: Converte a string "268.63" em um float real para o TypeScript não reclamar no formatBrl
       basket_value_brl: matchingWage ? parseFloat(matchingWage.basket_value_brl) : null,
       villains: topVillains.map((villain) => ({
         produto_subcategoria:
