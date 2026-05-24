@@ -242,6 +242,7 @@ def categorize_file(
             mapping[produto] = (None, method, score)
 
     subcategory_mapping: dict[str, int | None] = {}
+    produto_overrides: dict[str, str] = {}
     for produto in unique_produtos:
         category_id = mapping.get(produto, (None, "", 0.0))[0]
         if category_id is None:
@@ -257,6 +258,8 @@ def categorize_file(
         matched_subcategory, _, _ = _best_rule_match(produto, index_for_category)
         if matched_subcategory is not None:
             subcategory_mapping[produto] = matched_subcategory.id
+            if matched_subcategory.id == 30001:
+                produto_overrides[produto] = "LEITE INTEGRAL"
         else:
             subcategory_mapping[produto] = fallback_subcategory
 
@@ -265,6 +268,10 @@ def categorize_file(
     df["produto_categoria"] = pd.to_numeric(df["produto_categoria"], errors="coerce").astype("Int64")
     df["produto_subcategoria"] = df[produto_column].map(lambda p: subcategory_mapping.get(str(p).strip()))
     df["produto_subcategoria"] = pd.to_numeric(df["produto_subcategoria"], errors="coerce").astype("Int64")
+    if produto_overrides:
+        df[produto_column] = df[produto_column].map(
+            lambda p: produto_overrides.get(str(p).strip(), str(p).strip())
+        )
 
     legacy_columns = [col for col in ["codigo_categoria", "id_produto"] if col in df.columns]
     if legacy_columns:

@@ -150,6 +150,11 @@ class ObservationParser:
                 qtd_embalagem = "12"
                 unidade_sigla = "UNIDADES"
 
+        if produto_subcategoria == 30001:
+            unidade_upper = unidade_sigla.upper()
+            if unidade_upper in ("LITRO", "LITROS"):
+                unidade_sigla = "L"
+
         return PriceObservation(
             reference_date=reference_date,
             month_ref=self._month_ref_resolver.resolve(reference_date, source_file),
@@ -190,6 +195,11 @@ def parse(self, raw: dict[str, str], source_file: str) -> PriceObservation | Non
         ):
             qtd_embalagem = "12"
             unidade_sigla = "UNIDADES"
+
+    if produto_subcategoria == 30001:
+        unidade_upper = unidade_sigla.upper()
+        if unidade_upper in ("LITRO", "LITROS"):
+            unidade_sigla = "L"
 
     return PriceObservation(
         reference_date=reference_date,

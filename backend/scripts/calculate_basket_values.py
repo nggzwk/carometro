@@ -24,6 +24,24 @@ def _parse_pack_size(qtd_embalagem: str) -> Decimal | None:
         return None
 
 
+def _normalize_pack_size(
+    qtd_embalagem: str,
+    unidade_sigla: str,
+    produto_subcategoria: int,
+) -> Decimal | None:
+    base_size = _parse_pack_size(qtd_embalagem)
+    if base_size is None:
+        return None
+
+    unit = (unidade_sigla or "").strip().upper()
+    if produto_subcategoria == 30001:
+        if unit in ("L", "LITRO"):
+            return base_size
+        return None
+
+    return base_size
+
+
 def get_basket_items(
     conn, basket_code: str = "default_basket"
 ) -> list[tuple[int, int, int, str, str, Decimal, int | None]] | None:
@@ -107,14 +125,20 @@ def _get_alternative_item_keys(
     excluded_item_ids: set[int],
 ) -> list[tuple[int, int, int, str, str]]:
     with conn.cursor() as cur:
+        allowed_units = [unidade_sigla]
+        if produto_subcategoria == 30001:
+            allowed_units = ["L", "LITRO"]
+
         excluded_ids = tuple(excluded_item_ids)
         if not excluded_ids:
             excluded_clause = ""
-            params: tuple[object, ...] = (produto_categoria, produto_subcategoria, unidade_sigla)
+            params: tuple[object, ...] = (produto_categoria, produto_subcategoria, *allowed_units)
         else:
             placeholders = ", ".join(["%s"] * len(excluded_ids))
             excluded_clause = f"AND id NOT IN ({placeholders})"
-            params = (produto_categoria, produto_subcategoria, unidade_sigla, *excluded_ids)
+            params = (produto_categoria, produto_subcategoria, *allowed_units, *excluded_ids)
+
+        unit_placeholders = ", ".join(["%s"] * len(allowed_units))
 
         cur.execute(
             f"""
@@ -122,7 +146,7 @@ def _get_alternative_item_keys(
             FROM inflacao_brasil.item_key
             WHERE produto_categoria = %s
                 AND produto_subcategoria = %s
-                AND unidade_sigla = %s
+                AND unidade_sigla IN ({unit_placeholders})
                 {excluded_clause}
             ORDER BY CAST(NULLIF(qtd_embalagem, '') AS NUMERIC) DESC, id
             """,
@@ -171,7 +195,7 @@ def get_normalized_monthly_price(
 
     seen_item_ids: set[int] = set()
     for candidate_item in candidate_items:
-        candidate_id, _, _, candidate_qtd_embalagem, _ = candidate_item
+        candidate_id, _, candidate_subcategoria, candidate_qtd_embalagem, candidate_unidade = candidate_item
         if candidate_id in seen_item_ids:
             continue
         seen_item_ids.add(candidate_id)
@@ -180,7 +204,11 @@ def get_normalized_monthly_price(
         if median_price is None:
             continue
 
-        pack_size = _parse_pack_size(candidate_qtd_embalagem)
+        pack_size = _normalize_pack_size(
+            candidate_qtd_embalagem,
+            candidate_unidade,
+            candidate_subcategoria,
+        )
         if pack_size is None or pack_size <= 0:
             continue
 
