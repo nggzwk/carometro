@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from pydantic import BaseModel, ConfigDict
 
@@ -86,3 +87,24 @@ class MonthlyVillains(BaseModel):
     month_ref: str
     ipca_monthly_pct: float | None
     villains: list[VillainItem]
+
+
+class GlobalBasketReferenceResponse(BaseModel):
+    """Response model for global basket references with converted values."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    country_region: str
+    responsible_authority: str
+    local_currency_code: str
+    raw_monthly_min_wage: Decimal
+    raw_basket_cost: Decimal
+    workweek_hours: int
+    last_updated_at: datetime | None
+    rate_to_usd: Decimal | None
+    rate_updated_at: datetime | None
+    monthly_min_wage_usd: Decimal | None
+    basket_cost_usd: Decimal | None
+    monthly_min_wage_brl: Decimal | None
+    basket_cost_brl: Decimal | None
