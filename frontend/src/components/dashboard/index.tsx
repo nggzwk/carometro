@@ -51,7 +51,7 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
               <span>Basicão</span>
               <button
                 type="button"
-                aria-label="Inflação da cesta básica mensal"
+                aria-label="Inflação da cesta básica mensal mês sobre mês"
                 className="group/icon relative ml-2 inline-flex items-center justify-center"
                 onClick={() => setShowIconTooltip((value) => !value)}
                 onBlur={() => setShowIconTooltip(false)}
@@ -64,6 +64,7 @@ export const BasketSummary: React.FC<BasketSummaryProps> = ({
                 >
                   <span className="block">inflação da cesta</span>
                   <span className="block">básica mensal</span>
+                  <span className="block">mês sobre mês</span>
                 </span>
               </button>
             </span>

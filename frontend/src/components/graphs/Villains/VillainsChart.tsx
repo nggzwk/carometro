@@ -1,5 +1,5 @@
-import { getLatestVillainsMonth } from "../../lib/villains";
-import ScrollIndicator from "../shared/ScrollIndicator";
+import { getLatestVillainsMonth } from "../../../lib/villains";
+import ScrollIndicator from "../../shared/ScrollIndicator";
 import PodiumBars from "./PodiumBars";
 
 export default async function VillainsChart() {
@@ -37,7 +37,7 @@ export default async function VillainsChart() {
         </h2>
 
         <div
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mt-2 mb-11 border border-#black shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mt-2 mb-14 border border-#black shadow-sm"
           style={{ backgroundColor: "#ffffff", color: "#000000" }}
         >
           <span

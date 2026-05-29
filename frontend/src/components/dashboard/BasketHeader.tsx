@@ -64,66 +64,75 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
     setShowTooltip(false);
   };
 
-  return (
-    <div className="w-full flex items-center justify-center py-3 px-4 select-none">
-      <motion.div
-        initial="rest"
-        animate={showTooltip ? "hover" : "rest"}
-        onHoverStart={handleTooltipStart}
-        onHoverEnd={handleTooltipEnd}
-        className="relative"
-      >
+  try {
+    return (
+      <div className="w-full flex items-center justify-center py-3 px-4 select-none">
         <motion.div
-          variants={{
-            rest: { opacity: 0, y: 6, scale: 0.94 },
-            hover: { opacity: 1, y: 0, scale: 1 },
-          }}
-          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-          className="absolute -top-9 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
+          initial="rest"
+          animate={showTooltip ? "hover" : "rest"}
+          onHoverStart={handleTooltipStart}
+          onHoverEnd={handleTooltipEnd}
+          className="relative"
         >
-          <div
-            className="text-[10px] font-semibold uppercase tracking-[0.16em] px-3 py-1.5 rounded-full whitespace-nowrap"
-            style={{ backgroundColor: "#1A120B", color: "#fff8eb" }}
+          <motion.div
+            variants={{
+              rest: { opacity: 0, y: 6, scale: 0.94 },
+              hover: { opacity: 1, y: 0, scale: 1 },
+            }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            className="absolute -top-9 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
           >
-            clique para ver valor
-          </div>
-        </motion.div>
-
-        <motion.button
-          type="button"
-          onClick={() => setIsPinned((prev) => !prev)}
-          whileTap={{ scale: 0.97 }}
-          className="relative flex items-center gap-2 px-5 py-2 rounded-full cursor-pointer"
-          style={{
-            backgroundColor: `#ffffffaf`,
-            border: `1.5px solid ${accentColor}40`,
-          }}
-        >
-          <span
-            className="w-2 h-2 rounded-full flex-none"
-            style={{ backgroundColor: accentColor }}
-          />
-
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={label}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="text-sm font-semibold tracking-[0.06em] uppercase"
-              style={{
-                fontFamily: "var(--font-card-summary)",
-                color: accentColor,
-              }}
+            <div
+              className="text-[10px] font-semibold uppercase tracking-[0.16em] px-3 py-1.5 rounded-full whitespace-nowrap"
+              style={{ backgroundColor: "#1A120B", color: "#fff8eb" }}
             >
-              {label}
-            </motion.span>
-          </AnimatePresence>
-        </motion.button>
-      </motion.div>
-    </div>
-  );
+              clique para ver valor
+            </div>
+          </motion.div>
+
+          <motion.button
+            type="button"
+            onClick={() => setIsPinned((prev) => !prev)}
+            whileTap={{ scale: 0.97 }}
+            className="relative flex items-center gap-2 px-5 py-2 rounded-full cursor-pointer"
+            style={{
+              backgroundColor: `#ffffffaf`,
+              border: `1.5px solid ${accentColor}40`,
+            }}
+          >
+            <span
+              className="w-2 h-2 rounded-full flex-none"
+              style={{ backgroundColor: accentColor }}
+            />
+
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={label}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="text-sm font-semibold tracking-[0.06em] uppercase"
+                style={{
+                  fontFamily: "var(--font-card-summary)",
+                  color: accentColor,
+                }}
+              >
+                {label}
+              </motion.span>
+            </AnimatePresence>
+          </motion.button>
+        </motion.div>
+      </div>
+    );
+  } catch (error) {
+    console.error("Failed to render BasketHeader:", error);
+    return (
+      <div className="w-full flex items-center justify-center py-3 px-4 select-none text-sm text-[#8B7355]">
+        Cabeçalho indisponível
+      </div>
+    );
+  }
 };
 
 export default BasketHeader;

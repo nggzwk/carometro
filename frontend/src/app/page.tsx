@@ -1,7 +1,7 @@
 import UpdateBanner from "../components/shared/UpdateBanner";
 import BasketSummary from "../components/dashboard/index";
 import { getBasketSummaryProps } from "../lib/basket";
-import VillainsChart from "../components/graphs/VillainsChart";
+import VillainsChart from "../components/graphs/Villains/VillainsChart";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
 
 export default async function Home() {

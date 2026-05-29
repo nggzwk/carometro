@@ -2,8 +2,8 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { getBasketItemIcon } from "../../lib/basketIcons";
-import { formatPct, shortName } from "../../lib/formatters";
+import { getBasketItemIcon } from "../../../lib/basketIcons";
+import { formatPct, shortName } from "../../../lib/formatters";
 
 const MAX_BAR_HEIGHT = 260;
 const BAR_GROW_DURATION = 1.1;

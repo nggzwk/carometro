@@ -119,7 +119,16 @@ export default function AxisGraph() {
 
   return (
     <div className={`${styles.container} relative`}>
-      <h1 className={styles.title}>Inflação Anual vs IPCA</h1>
+      <h1
+        className={`${styles.title} relative mb-4 flex w-full items-start justify-center text-3xl sm:text-4xl font-bold tracking-tight`}
+        style={{
+          fontFamily: "var(--font-header)",
+          color: "#1A120B",
+          letterSpacing: "-0.01em",
+        }}
+      >
+        <span className="relative inline-flex items-center">Inflação Anual vs IPCA</span>
+      </h1>
       <div className={styles.metricsSubtitle}>
         {metricsSubtitle.map((metric) => (
           <div key={metric.label} className={styles.metricsSubtitleItem}>
