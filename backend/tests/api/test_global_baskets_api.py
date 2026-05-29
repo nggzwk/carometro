@@ -78,7 +78,6 @@ def test_get_global_baskets_without_brl_rate_returns_null_brl(client, db_session
             "2024-01-10",
         )
     ]
-    # The endpoint fetches basket rows first, then exchange rates.
     db_session.execute.side_effect = [
         _result_with_rows(basket_rows),
         _result_with_rows(rates_rows),

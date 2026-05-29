@@ -948,21 +948,21 @@ def get_basket_annual_inflation(
     db: Session = Depends(get_db),
 ) -> list[BasketAnnualInflationResponse]:
     """
-    Fetch annual accumulated basket inflation calculated from December of the previous year
-    to December (or the latest available month for the current year).
+    Fetch annual basket inflation with two rules:
+    - Completed years (or years with December data): compare December vs previous December.
+    - Current year without December data: compare latest available month vs January (YTD).
     """
     query = text("""
-        WITH years AS (
-            SELECT 2023 AS year
-            UNION ALL SELECT 2024
-            UNION ALL SELECT 2025
-            UNION ALL SELECT 2026
-        ),
-        default_basket AS (
+        WITH default_basket AS (
             SELECT id FROM inflacao_brasil.basket WHERE code = 'default_basket'
         ),
+        years AS (
+            SELECT DISTINCT SUBSTRING(month_ref, 1, 4)::INTEGER AS year
+            FROM inflacao_brasil.basket_monthly_value bmv
+            WHERE bmv.basket_id = (SELECT id FROM default_basket)
+              AND SUBSTRING(month_ref, 1, 4)::INTEGER >= 2023
+        ),
         year_end_values AS (
-            -- Captura o último mês disponível de cada ano no banco
             SELECT
                 SUBSTRING(month_ref, 1, 4)::INTEGER AS year,
                 month_ref,
@@ -971,8 +971,17 @@ def get_basket_annual_inflation(
             FROM inflacao_brasil.basket_monthly_value bmv
             WHERE bmv.basket_id = (SELECT id FROM default_basket)
         ),
+        january_values AS (
+            SELECT
+                SUBSTRING(month_ref, 1, 4)::INTEGER AS year,
+                month_ref,
+                basket_value_brl,
+                row_number() OVER (PARTITION BY SUBSTRING(month_ref, 1, 4) ORDER BY month_ref ASC) AS rn
+            FROM inflacao_brasil.basket_monthly_value bmv
+            WHERE bmv.basket_id = (SELECT id FROM default_basket)
+              AND RIGHT(month_ref, 2) = '01'
+        ),
         previous_december_values AS (
-            -- Busca especificamente o baseline de dezembro do ano anterior (YYYY-1-12)
             SELECT
                 (SUBSTRING(month_ref, 1, 4)::INTEGER + 1) AS target_year,
                 month_ref,
@@ -983,22 +992,66 @@ def get_basket_annual_inflation(
         )
         SELECT
             y.year,
-            -- Mês final e seu respectivo valor
             cy.month_ref AS end_month_ref,
             cy.basket_value_brl AS end_month_value_brl,
-            
-            -- Mês inicial (Dezembro do ano anterior) e seu respectivo valor
-            pd.month_ref AS start_month_ref,
-            pd.basket_value_brl AS start_month_value_brl,
-            
-            -- Cálculo da diferença absoluta em BRL
-            (cy.basket_value_brl - pd.basket_value_brl) AS annual_difference_brl,
-            
-            -- Cálculo da variação percentual da inflação da cesta
-            ROUND(((cy.basket_value_brl - pd.basket_value_brl) / pd.basket_value_brl) * 100, 2) AS annual_inflation_pct
+
+            CASE
+                WHEN y.year = EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+                     AND RIGHT(cy.month_ref, 2) <> '12'
+                THEN jy.month_ref
+                ELSE pd.month_ref
+            END AS start_month_ref,
+
+            CASE
+                WHEN y.year = EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+                     AND RIGHT(cy.month_ref, 2) <> '12'
+                THEN jy.basket_value_brl
+                ELSE pd.basket_value_brl
+            END AS start_month_value_brl,
+
+            cy.basket_value_brl -
+            CASE
+                WHEN y.year = EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+                     AND RIGHT(cy.month_ref, 2) <> '12'
+                THEN jy.basket_value_brl
+                ELSE pd.basket_value_brl
+            END AS annual_difference_brl,
+
+            ROUND(
+                (
+                    (
+                        cy.basket_value_brl -
+                        CASE
+                            WHEN y.year = EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+                                 AND RIGHT(cy.month_ref, 2) <> '12'
+                            THEN jy.basket_value_brl
+                            ELSE pd.basket_value_brl
+                        END
+                    ) /
+                    NULLIF(
+                        CASE
+                            WHEN y.year = EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+                                 AND RIGHT(cy.month_ref, 2) <> '12'
+                            THEN jy.basket_value_brl
+                            ELSE pd.basket_value_brl
+                        END,
+                        0
+                    )
+                ) * 100,
+                2
+            ) AS annual_inflation_pct
         FROM years y
         INNER JOIN year_end_values cy ON cy.year = y.year AND cy.rn = 1
-        INNER JOIN previous_december_values pd ON pd.target_year = y.year
+        LEFT JOIN previous_december_values pd ON pd.target_year = y.year
+        LEFT JOIN january_values jy ON jy.year = y.year AND jy.rn = 1
+        WHERE (
+            CASE
+                WHEN y.year = EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+                     AND RIGHT(cy.month_ref, 2) <> '12'
+                THEN jy.basket_value_brl
+                ELSE pd.basket_value_brl
+            END
+        ) IS NOT NULL
         ORDER BY y.year
     """)
 

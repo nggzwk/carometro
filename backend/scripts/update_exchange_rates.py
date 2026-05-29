@@ -154,23 +154,12 @@ def _update_global_basket_usd_values(conn) -> None:
         )
 
 
-def main() -> int:
-    _load_env_file()
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        print("DATABASE_URL is not set", file=sys.stderr)
-        return 1
-
-    api_url = _build_api_url()
-    try:
-        base, rates = _fetch_rates(api_url)
-    except Exception as exc:
-        print(f"Failed to fetch rates: {exc}", file=sys.stderr)
-        return 1
+def refresh_exchange_rates(database_url: str, api_url: str | None = None) -> int:
+    resolved_api_url = api_url or _build_api_url()
+    base, rates = _fetch_rates(resolved_api_url)
 
     if not rates:
-        print("No rates returned from API", file=sys.stderr)
-        return 1
+        raise RuntimeError("No rates returned from API")
 
     updated = 0
     with psycopg.connect(database_url) as conn:
@@ -184,6 +173,22 @@ def main() -> int:
             updated += 1
         _update_global_basket_usd_values(conn)
         conn.commit()
+
+    return updated
+
+
+def main() -> int:
+    _load_env_file()
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        print("DATABASE_URL is not set", file=sys.stderr)
+        return 1
+
+    try:
+        updated = refresh_exchange_rates(database_url)
+    except Exception as exc:
+        print(f"Failed to refresh exchange rates: {exc}", file=sys.stderr)
+        return 1
 
     print(f"Updated {updated} currency rates")
     return 0
