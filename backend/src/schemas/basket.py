@@ -19,6 +19,30 @@ class BasketItemResponse(BaseModel):
     ipca_monthly_pct: float | None
 
 
+class DieeseBasketItemResponse(BaseModel):
+    """Response model for DIEESE basket item."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    produto_subcategoria: int
+    item_name: str
+    qtd_basket_dieese: str
+    month_ref: str
+    qtd_month_price: Decimal | None
+    qtd_previous_month_price: Decimal | None
+    mom_pct: float | None
+    ipca_monthly_pct: float | None
+
+
+class DieeseBasketItemsWithReferenceResponse(BaseModel):
+    """Response model for DIEESE basket list."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    basket_items_dieese: list[str]
+    items: list[DieeseBasketItemResponse]
+
+
 class BasketResponse(BaseModel):
     """Response model for basket data."""
     
