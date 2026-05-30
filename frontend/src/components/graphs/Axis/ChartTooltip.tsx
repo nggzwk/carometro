@@ -90,8 +90,8 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   };
 
   const offsetY = 50;
-  const phoneMarginFromIcon = 60;
-  const adjustedY = y + offsetY + (isPhone ? phoneMarginFromIcon : 0);
+  const phoneMarginFromIcon = 28;
+  const adjustedY = y + offsetY + (isPhone ? phoneMarginFromIcon : 60);
 
   return (
     <div
