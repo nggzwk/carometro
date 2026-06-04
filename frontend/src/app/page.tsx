@@ -3,14 +3,16 @@ import BasketSummary from "../components/dashboard/index";
 import { getBasketSummaryProps } from "../lib/basket";
 import VillainsChart from "../components/graphs/Villains/VillainsChart";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
+import Ranking from "../components/graphs/Ranking/Ranking";
 
 export default async function Home() {
   const basketSummary = await getBasketSummaryProps();
 
   return (
     <div className="min-h-screen bg-brand text-black overflow-x-hidden">
+      <UpdateBanner />
+
       <header>
-        <UpdateBanner />
         <section
           className="space-y-1 w-full flex flex-col items-center text-center mt-6 md:mt-8"
           aria-labelledby="carometro-title"
@@ -27,8 +29,10 @@ export default async function Home() {
             aria-hidden="true"
           />
 
-          <p className="small-header text-xs uppercase tracking-[0.20em]"
-            style={{ fontStyle: "italic" }}>
+          <p
+            className="small-header text-xs uppercase tracking-[0.20em]"
+            style={{ fontStyle: "italic" }}
+          >
             a inflação da cesta básica curitibana
           </p>
         </section>
@@ -41,6 +45,10 @@ export default async function Home() {
 
         <section>
           <VillainsChart />
+        </section>
+
+        <section>
+          <Ranking />
         </section>
 
         <section>

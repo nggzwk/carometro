@@ -7,6 +7,7 @@ interface ChartTooltipProps {
   inflation: number | null;
   ipca: number | null;
   wageIncrease: number | null;
+  above?: boolean;
   visible: boolean;
   onRequestClose: () => void;
 }
@@ -17,6 +18,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   inflation,
   ipca,
   wageIncrease,
+  above = false,
   visible,
   onRequestClose,
 }) => {
@@ -91,7 +93,9 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
 
   const offsetY = 50;
   const phoneMarginFromIcon = 28;
-  const adjustedY = y + offsetY + (isPhone ? phoneMarginFromIcon : 60);
+  const adjustedY = above
+    ? y - 60
+    : y + offsetY + (isPhone ? phoneMarginFromIcon : 60);
 
   return (
     <div
@@ -101,6 +105,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
         left: clampedX,
         top: adjustedY,
         transform: "translate(-50%, 0)",
+        ...(above && { "--arrow-top": "auto", "--arrow-bottom": "-6px", "--arrow-rotate": "225deg" } as React.CSSProperties),
       }}
     >
       <div className={`${styles.metric} ${isPhone ? styles.metricPhone : ""}`} style={{ color: "#e0aa59" }}>

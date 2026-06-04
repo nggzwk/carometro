@@ -5,7 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { getBasketItemIcon } from "../../../lib/basketIcons";
 import { formatPct, shortName } from "../../../lib/formatters";
 
-const MAX_BAR_HEIGHT = 260;
+const MAX_BAR_HEIGHT = 320;
 const BAR_GROW_DURATION = 1.1;
 
 function getDisplayName(name: string): string {
@@ -59,7 +59,7 @@ export default function PodiumBars({ displayItems }: { displayItems: any[] }) {
       : displayItems;
 
   return (
-    <div className="flex items-end justify-center w-full relative mb-10 gap-3 px-2">
+    <div className="flex items-end justify-center w-full relative mb-10 gap- px-2">
       {podiumItems.map((item, index) => (
         <PodiumBarItem
           key={`${item.item_name ?? "item"}-${index}`}
@@ -116,21 +116,22 @@ function PodiumBarItem({
         className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
       >
         <div
-          className="text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap"
+          className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap mt-2"
           style={{
             fontFamily: "var(--font-card-summary)",
-            backgroundColor: accentColor,
-            color: "#fff",
+            // backgroundColor: `${barColor}`,
+            color: accentColor,
+            // WebkitTextStroke: `${accentColor} 1px`,
             letterSpacing: "0.04em",
           }}
         >
-          {getDisplayName(nameValue)} {formatPct(pctValue)}
+          {formatPct(pctValue)}
         </div>
 
-        <div
+        {/* <div
           className="w-2 h-2 rotate-45 mx-auto -mt-1"
-          style={{ backgroundColor: accentColor }}
-        />
+          style={{ backgroundColor: barColor }}
+        /> */}
       </motion.div>
 
       <motion.div
@@ -154,7 +155,7 @@ function PodiumBarItem({
           delay: isLineVisible ? BAR_GROW_DURATION + entryDelay + 0.05 : 0,
           duration: 0.4,
         }}
-        className="mb-2 text-xs font-bold tracking-wide sm:hidden"
+        className="mb-2 text-xs font-semibold tracking-widest  sm:hidden"
         style={{ color: accentColor, fontFamily: "var(--font-card-summary)" }}
       >
         {formatPct(pctValue)}
@@ -171,7 +172,7 @@ function PodiumBarItem({
           type: "spring",
           stiffness: 200,
         }}
-        className="text-6xl select-none leading-none mb-2 drop-shadow-sm"
+        className="text-6xl select-none leading-none mb-0 drop-shadow-sm"
       >
         {item.produto_subcategoria
           ? getBasketItemIcon(item.produto_subcategoria)
@@ -188,12 +189,12 @@ function PodiumBarItem({
         }}
         style={{
           height: calculatedHeight,
-          width: "100%",
+          width: "85%",
           backgroundColor: barColor,
-          borderTop: `3px solid ${accentColor}`,
+          borderTop: `2px solid ${accentColor}`,
           transformOrigin: "bottom",
           borderRadius: "6px 6px 2px 2px",
-          boxShadow: `0 -2px 12px 0 ${accentColor}30, inset 0 1px 0 rgba(255,255,255,0.6)`,
+          boxShadow: `0 -2px 12px 0 ${accentColor}20, inset 0 1px 0 rgba(0, 0, 0, 0.6)`,
           position: "relative",
           overflow: "hidden",
         }}

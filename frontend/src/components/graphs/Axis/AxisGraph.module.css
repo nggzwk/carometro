@@ -52,35 +52,42 @@
   margin-bottom: 12px;
 }
 
+.metricsSubtitleItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metricsSubtitleSquare {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex: 0 0 12px;
+}
+
+.metricsSubtitleLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #A89B8C;
+  letter-spacing: 0.3px;
+}
+
 @media (max-width: 768px) {
   .metricsSubtitle {
-    display: flex;
-    flex-direction: row;
     flex-wrap: nowrap;
     gap: 8px 10px;
     margin-top: -12px;
-    margin-bottom: 12px;
     overflow-x: auto;
     white-space: nowrap;
-  }
-
-  .metricsSubtitleItem {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
   }
 
   .metricsSubtitleSquare {
     width: 10px;
     height: 10px;
-    border-radius: 2px;
     flex: 0 0 10px;
   }
 
   .metricsSubtitleLabel {
     font-size: 11px;
-    font-weight: 700;
-    color: #8B7355;
-    letter-spacing: 0.3px;
   }
 }

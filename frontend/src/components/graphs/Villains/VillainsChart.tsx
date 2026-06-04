@@ -25,8 +25,19 @@ export default async function VillainsChart() {
   return (
     <section className="w-full min-h-screen flex flex-col items-center justify-between bg-color-background pt-12 pb-12 px-6 snap-start selection:bg-black selection:text-white relative z-10">
       <div className="w-full flex flex-col items-center justify-start flex-1 max-w-sm mx-auto">
+        <div
+          className="inline-flex items-center gap-1.5 px-3 py-1 mt-2 mb-2"
+          style={{ backgroundColor: "#ffffff", color: "#A89B8C" }}
+        >
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{ fontFamily: "var(--font-card-summary)" }}
+          >
+            Mês de {currentMonthName}
+          </span>
+        </div>
         <h2
-          className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-1"
+          className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-10"
           style={{
             fontFamily: "var(--font-subheader)",
             color: "#1A120B",
@@ -35,22 +46,6 @@ export default async function VillainsChart() {
         >
           Vilões do Mês
         </h2>
-
-        <div
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mt-2 mb-14 border border-#black shadow-sm"
-          style={{ backgroundColor: "#ffffff", color: "#000000" }}
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full"
-            style={{ backgroundColor: "#949494" }}
-          />
-          <span
-            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
-            style={{ fontFamily: "var(--font-card-summary)" }}
-          >
-            {currentMonthName}
-          </span>
-        </div>
 
         <PodiumBars displayItems={displayItems} />
 
@@ -80,7 +75,10 @@ export default async function VillainsChart() {
               >
                 R${basketValue}
               </span>
-              <span className="text-[10px] uppercase" style={{ color: "#A89B8C" }}>
+              <span
+                className="text-[10px] uppercase"
+                style={{ color: "#A89B8C" }}
+              >
                 em {currentMonthName}
               </span>
             </div>
@@ -90,26 +88,28 @@ export default async function VillainsChart() {
                 className="text-[10px] uppercase tracking-[0.16em] font-medium"
                 style={{ color: "#A89B8C" }}
               >
-                Do salário mínimo
+                Salário mínimo
               </span>
               <span
                 className="text-2xl font-bold mt-1"
                 style={{
                   fontFamily: "var(--font-subheader)",
-                  color: "#E11D48",
+                  color: "#E63946",
                   letterSpacing: "-0.02em",
                 }}
               >
                 {wagePercent}%
               </span>
-              <span className="text-[10px] uppercase" style={{ color: "#A89B8C" }}>
+              <span
+                className="text-[10px] uppercase"
+                style={{ color: "#A89B8C" }}
+              >
                 por pessoa
               </span>
             </div>
           </div>
         </div>
       </div>
-
       <ScrollIndicator />
     </section>
   );

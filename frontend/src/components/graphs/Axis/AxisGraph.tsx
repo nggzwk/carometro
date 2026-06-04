@@ -127,7 +127,7 @@ export default function AxisGraph() {
           letterSpacing: "-0.01em",
         }}
       >
-        <span className="relative inline-flex items-center">Inflação Anual vs IPCA</span>
+        <span className="relative inline-flex items-center">Inflação</span>
       </h1>
       <div className={styles.metricsSubtitle}>
         {metricsSubtitle.map((metric) => (
@@ -188,12 +188,6 @@ export default function AxisGraph() {
               stroke="#8B7355"
               strokeDasharray="5 5"
               strokeWidth={1.5}
-              label={{
-                value: "0%",
-                position: "left",
-                fill: "#8B7355",
-                fontSize: 11,
-              }}
             />
 
             <Area
@@ -248,6 +242,7 @@ export default function AxisGraph() {
             inflation={tooltipData.inflation}
             ipca={tooltipData.ipca}
             wageIncrease={tooltipData.wageIncrease}
+            above={tooltipData.y > 160}
             visible={true}
             onRequestClose={handleDotLeave}
           />

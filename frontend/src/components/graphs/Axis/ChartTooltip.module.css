@@ -58,18 +58,19 @@
   letter-spacing: 0.2px;
 }
 
-/* Arrow pointing up to the dot */
+/* Arrow pointing to the dot */
 .tooltip::after {
   content: '';
   position: absolute;
-  top: -6px;
+  top: var(--arrow-top, -6px);
+  bottom: var(--arrow-bottom, auto);
   left: 50%;
   width: 12px;
   height: 12px;
   background: inherit;
   border-left: 1px solid rgba(224, 170, 89, 0.2);
   border-top: 1px solid rgba(224, 170, 89, 0.2);
-  transform: translateX(-50%) rotate(45deg);
+  transform: translateX(-50%) rotate(var(--arrow-rotate, 45deg));
   z-index: -1;
 }
 

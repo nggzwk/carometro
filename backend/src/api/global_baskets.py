@@ -25,6 +25,22 @@ from .basket import (
 
 router = APIRouter(prefix="/api/global-baskets", tags=["global-baskets"])
 
+DIEESE_ITEMS = [
+    ("Carne", 10023, None, 6.6, "kg"),
+    ("Leite", 30001, None, 7.5, "L"),
+    ("Feijao", 40012, 40011, 4.5, "KG"),
+    ("Arroz", 40003, None, 3.0, "kg"),
+    ("Farinha de trigo", 40017, None, 1.5, "kg"),
+    ("Batata", 50005, None, 6.0, "kg"),
+    ("Tomate", 50009, None, 9.0, "kg"),
+    ("Pão", 90027, None, 6.0, "kg"),
+    ("Café", 90001, None, 0.6, "kg"),
+    ("Banana", 50025, 50024, 6.75, "kg"),
+    ("Açucar", 80002, None, 3.0, "kg"),
+    ("Óleo de soja", 60001, None, 0.9, "L"),
+    ("Manteiga", 70012, None, 0.75, "kg"),
+]
+
 
 def _to_decimal(value: object) -> Decimal | None:
     if value is None:
@@ -129,6 +145,44 @@ def _find_latest_month_for_items(db: Session, *item_ids: int) -> str | None:
     return db.execute(q, params).scalar()
 
 
+def _get_latest_dieese_wage(db: Session) -> BasketValueResponse | None:
+    q = text("SELECT MAX(month_ref) FROM inflacao_brasil.item_monthly_price")
+    month_ref = db.execute(q).scalar()
+    if not month_ref:
+        return None
+
+    total = Decimal("0")
+    for _, primary_subcat, fallback_subcat, quantity, unit in DIEESE_ITEMS:
+        res = _compute_dieese_item(db, primary_subcat, fallback_subcat, quantity, unit, month_ref)
+        if res is None:
+            continue
+        try:
+            total += Decimal(str(res["qtd_month_price"]))
+        except Exception:
+            pass
+
+    wage_q = text(
+        "SELECT wage_amount FROM inflacao_brasil.minimum_wage_history "
+        "WHERE effective_from = (SELECT MAX(effective_from) FROM inflacao_brasil.minimum_wage_history WHERE effective_from <= (:m || '-01')::DATE)"
+    )
+    wage_row = db.execute(wage_q, {"m": month_ref}).fetchone()
+    minimum_wage = Decimal(str(wage_row[0])) if wage_row and wage_row[0] is not None else None
+
+    percentage_of_wage = None
+    if minimum_wage and minimum_wage != 0:
+        try:
+            percentage_of_wage = round(float((total / minimum_wage) * 100), 2)
+        except Exception:
+            percentage_of_wage = None
+
+    return BasketValueResponse(
+        month_ref=month_ref,
+        basket_value_brl=round(float(total), 2),
+        minimum_wage_brl=minimum_wage,
+        percentage_of_wage=percentage_of_wage,
+    )
+
+
 def _compute_dieese_item(db: Session, primary_subcat: int, fallback_subcat: int | None, quantity: float, dieese_unit: str, month_ref: str | None):
     primary_id = _get_default_basket_item_id(db, primary_subcat) or _find_item_id_for_subcat(db, primary_subcat)
     fallback_id = (
@@ -223,6 +277,8 @@ def get_global_baskets(db: Session = Depends(get_db)) -> list[GlobalBasketRefere
     rates = _load_exchange_rates(db)
     brl_rate = rates.get("BRL")
     brl_rate_to_usd = brl_rate[0] if brl_rate else None
+    dieese_wage = _get_latest_dieese_wage(db)
+    dieese_basket_brl = dieese_wage.basket_value_brl if dieese_wage else None
 
     response: list[GlobalBasketReferenceResponse] = []
     for (
@@ -272,6 +328,12 @@ def get_global_baskets(db: Session = Depends(get_db)) -> list[GlobalBasketRefere
             except Exception:
                 pass
 
+        if currency_code == "BRL" and dieese_basket_brl is not None:
+            raw_basket = dieese_basket_brl
+            basket_cost_brl = dieese_basket_brl
+            if brl_rate_to_usd is not None:
+                basket_cost_usd = dieese_basket_brl * brl_rate_to_usd
+
         response.append(
             GlobalBasketReferenceResponse(
                 id=item_id,
@@ -301,25 +363,9 @@ def get_dieese_basket(
 ) -> DieeseBasketItemsWithReferenceResponse:
     validate_month_ref(month_ref, db)
 
-    dieese_items = [
-        ("Carne", 10023, None, 6.6, "kg"),
-        ("Leite", 30001, None, 7.5, "L"),
-        ("Feijao", 40012, 40011, 4.5, "KG"),
-        ("Arroz", 40003, None, 3.0, "kg"),
-        ("Farinha de trigo", 40017, None, 1.5, "kg"),
-        ("Batata", 50005, None, 6.0, "kg"),
-        ("Tomate", 50009, None, 9.0, "kg"),
-        ("Pão", 90027, None, 6.0, "kg"),
-        ("Café", 90001, None, 0.6, "kg"),
-        ("Banana", 50025, 50024, 6.75, "kg"),
-        ("Açucar", 80002, None, 3.0, "kg"),
-        ("Óleo de soja", 60001, None, 0.9, "L"),
-        ("Manteiga", 70012, None, 0.75, "kg"),
-    ]
-
     rows: list[tuple[int, str, str, str, object, object, object]] = []
 
-    for display_name, primary_subcat, fallback_subcat, quantity, unit in dieese_items:
+    for display_name, primary_subcat, fallback_subcat, quantity, unit in DIEESE_ITEMS:
         result = _compute_dieese_item(db, primary_subcat, fallback_subcat, quantity, unit, month_ref)
         if result is None:
             continue
@@ -352,7 +398,7 @@ def get_dieese_basket(
         for row in rows
     ]
 
-    basket_items_list = [d[0] for d in dieese_items]
+    basket_items_list = [d[0] for d in DIEESE_ITEMS]
 
     return DieeseBasketItemsWithReferenceResponse(basket_items_dieese=basket_items_list, items=items_response)
 
@@ -364,22 +410,6 @@ def get_dieese_month_values(
 ) -> list[BasketValueResponse]:
     validate_month_ref(month_ref, db)
 
-    dieese_items = [
-        ("Carne", 10023, None, 6.6, "kg"),
-        ("Leite", 30001, None, 7.5, "L"),
-        ("Feijao", 40012, 40011, 4.5, "KG"),
-        ("Arroz", 40003, None, 3.0, "kg"),
-        ("Farinha de trigo", 40017, None, 1.5, "kg"),
-        ("Batata", 50005, None, 6.0, "kg"),
-        ("Tomate", 50009, None, 9.0, "kg"),
-        ("Pão", 90027, None, 6.0, "kg"),
-        ("Café", 90001, None, 0.6, "kg"),
-        ("Banana", 50025, 50024, 6.75, "kg"),
-        ("Açucar", 80002, None, 3.0, "kg"),
-        ("Óleo de soja", 60001, None, 0.9, "L"),
-        ("Manteiga", 70012, None, 0.75, "kg"),
-    ]
-
     if month_ref:
         months = [month_ref]
     else:
@@ -389,7 +419,7 @@ def get_dieese_month_values(
     out: list[BasketValueResponse] = []
     for m in months:
         total = Decimal("0")
-        for _, primary_subcat, fallback_subcat, quantity, unit in dieese_items:
+        for _, primary_subcat, fallback_subcat, quantity, unit in DIEESE_ITEMS:
             res = _compute_dieese_item(db, primary_subcat, fallback_subcat, quantity, unit, m)
             if res is None:
                 continue
