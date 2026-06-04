@@ -55,6 +55,20 @@ export default async function Home() {
           <AxisGraph />
         </section>
       </main>
+
+      <footer className="w-full py-6 text-center text-sm text-gray-600">
+        <p>
+          Desenvolvido por{" "}
+          <a
+            href="https://github.com/nggzwk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            nggzwk
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

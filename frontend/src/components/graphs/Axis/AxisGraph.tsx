@@ -27,6 +27,7 @@ type DataPoint = {
 type TooltipData = {
   x: number;
   y: number;
+  index: number;
   inflation: number | null;
   ipca: number | null;
   wageIncrease: number | null;
@@ -39,7 +40,6 @@ export default function AxisGraph() {
     { label: "SALÁRIO", color: "#2563eb" },
   ] as const;
 
-  const tooltipMarginFromIcon = 26;
   const [data, setData] = useState<DataPoint[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
@@ -78,6 +78,7 @@ export default function AxisGraph() {
     setTooltipData({
       x: cx,
       y: cy,
+      index,
       inflation: point.inflation,
       ipca: point.ipca,
       wageIncrease: point.wageIncrease,
@@ -118,7 +119,7 @@ export default function AxisGraph() {
   }
 
   return (
-    <div className={`${styles.container} relative`}>
+    <div className="relative w-full">
       <div className="flex flex-col items-center leading-none mb-4">
       <h1
         className={`${styles.title} relative flex w-full items-start justify-center text-3xl sm:text-4xl font-bold tracking-tight`}
@@ -159,13 +160,13 @@ export default function AxisGraph() {
         ))}
       </div>
       <div
-        className={`${styles.chartWrapper} ${styles.chartNoSelect}`}
+        className={`relative w-full ${styles.chartNoSelect}`}
         aria-label="Gráfico de inflação anual"
       >
         <ResponsiveContainer width="100%" height={320}>
           <LineChart
             data={data}
-            margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
+            margin={{ top: 20, right: 30, left: -10, bottom: 20 }}
           >
             <defs>
               <linearGradient
@@ -198,8 +199,8 @@ export default function AxisGraph() {
               stroke="#8B7355"
               tick={{ fill: "#8B7355", fontSize: 13 }}
               tickFormatter={(v) => `${v}%`}
-              width={60}
-              tickMargin={8}
+              width={40}
+              tickMargin={4}
               axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
 
@@ -257,11 +258,17 @@ export default function AxisGraph() {
         {tooltipData && (
           <ChartTooltip
             x={tooltipData.x}
-            y={tooltipData.y + tooltipMarginFromIcon}
+            y={tooltipData.y + 10}
             inflation={tooltipData.inflation}
             ipca={tooltipData.ipca}
             wageIncrease={tooltipData.wageIncrease}
-            above={tooltipData.y > 160}
+            side={
+              tooltipData.index === data.length - 1
+                ? "left"
+                : tooltipData.y > 250
+                ? "right"
+                : "below"
+            }
             visible={true}
             onRequestClose={handleDotLeave}
           />
