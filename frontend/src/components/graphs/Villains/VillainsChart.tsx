@@ -1,5 +1,4 @@
 import { getLatestVillainsMonth } from "../../../lib/villains";
-import ScrollIndicator from "../../shared/ScrollIndicator";
 import PodiumBars from "./PodiumBars";
 
 export default async function VillainsChart() {
@@ -63,7 +62,7 @@ export default async function VillainsChart() {
                 className="text-[10px] uppercase tracking-[0.16em] font-medium"
                 style={{ color: "#A89B8C" }}
               >
-                Cesta básica
+                Basicão custou
               </span>
               <span
                 className="text-2xl font-bold mt-1"
@@ -110,7 +109,6 @@ export default async function VillainsChart() {
           </div>
         </div>
       </div>
-      <ScrollIndicator />
     </section>
   );
 }

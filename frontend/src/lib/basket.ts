@@ -1,6 +1,6 @@
 import type { BasketSummaryProps } from "./basketTypes";
 
-type BasketItemsApiResponse = {
+export type BasketItemsApiResponse = {
   items: Array<{
     produto_categoria: number;
     produto_subcategoria: number;
@@ -23,6 +23,68 @@ type BasketInflationApiResponse = Array<{
 }>;
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
+
+export async function getAvailableMonths(year: number): Promise<string[]> {
+  const now = new Date();
+  const lastMonth = year < now.getFullYear() ? 12 : now.getMonth() + 1;
+
+  const results = await Promise.all(
+    Array.from({ length: lastMonth }, (_, i) => {
+      const month_ref = `${year}-${String(i + 1).padStart(2, "0")}`;
+      return fetch(`${API_BASE_URL}/api/basket/items/price?month_ref=${month_ref}`, { cache: "no-store" })
+        .then(async (res) => {
+          if (!res.ok) return null;
+          const { items } = (await res.json()) as BasketItemsApiResponse;
+          const ref = items[0]?.month_ref;
+          return ref?.startsWith(`${year}-`) ? ref.slice(0, 7) : null;
+        })
+        .catch(() => null);
+    })
+  );
+
+  return [...new Set(results.filter(Boolean) as string[])].sort();
+}
+
+
+export async function getBasketDataForMonth(
+  month_ref: string
+): Promise<BasketSummaryProps | null> {
+  try {
+    const [itemsRes, inflationRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/basket/items/price?month_ref=${month_ref}`, {
+        cache: "no-store",
+      }),
+      fetch(
+        `${API_BASE_URL}/api/basket/inflation/month?month_ref=${month_ref}`,
+        { cache: "no-store" }
+      ),
+    ]);
+
+    if (!itemsRes.ok) return null;
+
+    const itemsData = (await itemsRes.json()) as BasketItemsApiResponse;
+    const inflationData = inflationRes.ok
+      ? ((await inflationRes.json()) as BasketInflationApiResponse)
+      : [];
+
+    const latestInflation = inflationData[0];
+
+    return {
+      items: itemsData.items.map((item) => ({
+        ...item,
+        month_price: item.month_price === null ? "0" : String(item.month_price),
+        previous_price:
+          item.previous_price === null ? null : String(item.previous_price),
+      })),
+      totalValue: latestInflation?.basket_difference_brl ?? 0,
+      totalInflationPct: latestInflation?.inflation_pct ?? 0,
+      monthlyIpca: latestInflation?.ipca_monthly_pct ?? null,
+      annualIpca: latestInflation?.annual_ipca_pct ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
   try {

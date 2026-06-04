@@ -100,10 +100,6 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
               border: `1.5px solid ${accentColor}40`,
             }}
           >
-            <span
-              className="w-2 h-2 rounded-full flex-none"
-              style={{ backgroundColor: accentColor }}
-            />
 
             <AnimatePresence mode="wait">
               <motion.span
@@ -112,7 +108,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="text-sm font-semibold tracking-[0.06em] uppercase"
+                className="text-sm font-semibold tracking-widest uppercase"
                 style={{
                   fontFamily: "var(--font-card-summary)",
                   color: accentColor,

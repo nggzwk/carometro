@@ -119,16 +119,33 @@ export default function AxisGraph() {
 
   return (
     <div className={`${styles.container} relative`}>
+      <div className="flex flex-col items-center leading-none mb-4">
       <h1
-        className={`${styles.title} relative mb-4 flex w-full items-start justify-center text-3xl sm:text-4xl font-bold tracking-tight`}
+        className={`${styles.title} relative flex w-full items-start justify-center text-3xl sm:text-4xl font-bold tracking-tight`}
         style={{
           fontFamily: "var(--font-header)",
           color: "#1A120B",
           letterSpacing: "-0.01em",
         }}
       >
-        <span className="relative inline-flex items-center">Inflação</span>
+        <span className="relative inline-flex items-center">CARÔMETRO</span>
       </h1>
+      <h1
+        className={`relative flex w-full items-start justify-center sm:text-xl font-thin tracking-tight`}
+      >
+        <span className="relative inline-flex items-center">X</span>
+      </h1>
+      <h1
+        className={`${styles.title} relative flex w-full items-start justify-center text-3xl sm:text-4xl font-bold tracking-tight`}
+        style={{
+          fontFamily: "var(--font-header)",
+          color: "#1A120B",
+          letterSpacing: "-0.01em",
+        }}
+      >
+        <span className="relative inline-flex items-center">IPCA</span>
+      </h1>
+      </div>
       <div className={styles.metricsSubtitle}>
         {metricsSubtitle.map((metric) => (
           <div key={metric.label} className={styles.metricsSubtitleItem}>
@@ -141,7 +158,10 @@ export default function AxisGraph() {
           </div>
         ))}
       </div>
-      <div className={`${styles.chartWrapper} ${styles.chartNoSelect}`} aria-label="Gráfico de inflação anual">
+      <div
+        className={`${styles.chartWrapper} ${styles.chartNoSelect}`}
+        aria-label="Gráfico de inflação anual"
+      >
         <ResponsiveContainer width="100%" height={320}>
           <LineChart
             data={data}
@@ -231,7 +251,6 @@ export default function AxisGraph() {
               activeDot={false}
               isAnimationActive={false}
             />
-
           </LineChart>
         </ResponsiveContainer>
 

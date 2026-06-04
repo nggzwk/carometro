@@ -28,7 +28,7 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
         </div>
 
         <div
-          className="text-[11px] font-light tracking-[0.3em] uppercase"
+          className="text-[12px] font-semibold tracking-tighter uppercase"
           style={{ color: "#C4B8AC", fontFamily: "var(--font-card-summary)" }}
         >
           IPCA
