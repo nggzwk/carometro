@@ -1,19 +1,40 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ItemGrid } from "./ItemGrid";
 import { BasketFooter } from "./BasketFooter";
 import type { BasketSummaryProps } from "../../lib/basketTypes";
 import BasketHeader from "./BasketHeader";
-import BasketHistory from "./BasketHistory";
+import BasketHistoryPanel, { BasketHistoryButton } from "./BasketHistory";
 import BasketTitle from "./BasketTitle";
 import { useHistoricalBasket } from "../../hooks/useHistoricalBasket";
 import { inViewMotionProps } from "../../lib/motionPresets";
+import { getAvailableMonths } from "../../lib/basket";
+import ChangeMenu from "./ChangeMenu";
+
+const ACCENT = "#A89B8C";
 
 export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
   const { selectedMonth, activeData, isLoadingHistory, handleMonthSelect } =
     useHistoricalBasket(liveProps);
+
+  const [months, setMonths] = useState<string[]>([]);
+  const [isLoadingMonths, setIsLoadingMonths] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  const handleHistoryToggle = async () => {
+    if (isHistoryOpen) {
+      setIsHistoryOpen(false);
+      handleMonthSelect(null);
+      return;
+    }
+    setIsLoadingMonths(true);
+    const available = await getAvailableMonths(new Date().getFullYear());
+    setMonths(available);
+    setIsLoadingMonths(false);
+    setIsHistoryOpen(true);
+  };
 
   return (
     <div className="w-full text-center flex flex-col items-center">
@@ -31,6 +52,10 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
           backdropFilter: "blur(12px)",
         }}
       >
+        {/* Mobile-only: arrow button top-right of card */}
+        <div className="absolute top-2 right-2 z-20 sm:hidden">
+          <ChangeMenu variant="icon" onClick={() => {}} />
+        </div>
         <AnimatePresence>
           {isLoadingHistory && (
             <motion.div
@@ -76,13 +101,45 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         </AnimatePresence>
       </motion.div>
 
-      <BasketFooter
-        monthlyIpca={activeData.monthlyIpca}
-        annualIpca={activeData.annualIpca}
-      />
+      {/* Desktop footer row: HISTÓRICO | stats | MENU */}
+      <div className="w-full hidden sm:flex items-center px-1 py-1">
+        <div className="flex-1 flex justify-start">
+          <BasketHistoryButton
+            isOpen={isHistoryOpen}
+            isLoading={isLoadingMonths}
+            onToggle={handleHistoryToggle}
+          />
+        </div>
 
-      <BasketHistory
-        year={new Date().getFullYear()}
+        <BasketFooter
+          monthlyIpca={activeData.monthlyIpca}
+          annualIpca={activeData.annualIpca}
+        />
+
+        <div className="flex-1 hidden sm:flex justify-end">
+          <ChangeMenu onClick={() => {}} />
+        </div>
+      </div>
+
+      {/* Mobile footer: stats centered + HISTÓRICO centered below */}
+      <div className="w-full flex sm:hidden flex-col items-center px-1">
+        <BasketFooter
+          monthlyIpca={activeData.monthlyIpca}
+          annualIpca={activeData.annualIpca}
+        />
+        <div className="pb-2">
+          <BasketHistoryButton
+            isOpen={isHistoryOpen}
+            isLoading={isLoadingMonths}
+            onToggle={handleHistoryToggle}
+          />
+        </div>
+      </div>
+
+      {/* Expandable history panel */}
+      <BasketHistoryPanel
+        isOpen={isHistoryOpen}
+        months={months}
         currentMonthRef={liveProps.items[0]?.month_ref ?? null}
         selectedMonth={selectedMonth}
         onMonthSelect={handleMonthSelect}

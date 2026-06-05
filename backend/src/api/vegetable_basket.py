@@ -139,7 +139,7 @@ def get_vegetable_basket_items(
     month_ref: str | None = Query(
         None,
         max_length=7,
-        description="Month in YYYY-MM format. Omit for latest available month.",
+        description="Month in YYYY-MM format.",
     ),
     db: Session = Depends(get_db),
 ) -> BasketItemsWithReferenceResponse:
@@ -180,7 +180,7 @@ def get_vegetable_basket_items(
 def get_veggie_villains(
     year: int | None = Query(
         None,
-        description="Year (YYYY) to filter; omit for all months (latest first).",
+        description="Year (YYYY) to filter.",
         ge=2022,
         le=datetime.now().year,
     ),
