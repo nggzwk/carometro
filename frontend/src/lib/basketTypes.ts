@@ -7,6 +7,7 @@ export type BasketItemData = {
   month_price: string;
   previous_price: string | null;
   mom_pct: number | null;
+  ipca_monthly_pct: number | null;
 };
 
 export type MonthlyPriceData = {

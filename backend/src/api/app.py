@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import basket
 from . import global_baskets
+from . import vegetable_basket
 
 app = FastAPI(
     title="Inflação Brasil API",
@@ -21,4 +22,5 @@ app.add_middleware(
 
 # Include routers
 app.include_router(basket.router)
+app.include_router(vegetable_basket.router)
 app.include_router(global_baskets.router)

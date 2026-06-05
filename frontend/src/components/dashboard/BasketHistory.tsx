@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getAvailableMonths } from "../../lib/basket";
+import { getAvailableMonths as defaultGetAvailableMonths } from "../../lib/basket";
 
 interface BasketHistoryProps {
   year?: number;
   currentMonthRef?: string | null;
   selectedMonth: string | null;
   onMonthSelect: (month_ref: string | null) => void;
+  getAvailableMonths?: (year: number) => Promise<string[]>;
 }
 
 const ACCENT = "#A89B8C";
@@ -26,6 +27,7 @@ export default function BasketHistory({
   currentMonthRef,
   selectedMonth,
   onMonthSelect,
+  getAvailableMonths = defaultGetAvailableMonths,
 }: BasketHistoryProps) {
   const [months, setMonths] = useState<string[]>([]);
   const [isLoadingMonths, setIsLoadingMonths] = useState(false);
