@@ -7,6 +7,7 @@ export type GlobalBasketRow = {
 	raw_monthly_min_wage: number | string;
 	raw_basket_cost: number | string;
 	workweek_hours: number;
+	last_updated_at: string | null;
 	rate_to_usd: number | string | null;
 	rate_updated_at: string | null;
 	monthly_min_wage_usd: number | string | null;

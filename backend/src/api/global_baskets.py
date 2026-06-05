@@ -145,6 +145,15 @@ def _find_latest_month_for_items(db: Session, *item_ids: int) -> str | None:
     return db.execute(q, params).scalar()
 
 
+def _get_latest_usa_basket_usd(db: Session) -> Decimal | None:
+    q = text("""
+        SELECT basket_usd FROM inflacao_brasil.usa_basket_cpi_monthly
+        ORDER BY month_ref DESC LIMIT 1
+    """)
+    row = db.execute(q).fetchone()
+    return _to_decimal(row[0]) if row else None
+
+
 def _get_latest_dieese_wage(db: Session) -> BasketValueResponse | None:
     q = text("SELECT MAX(month_ref) FROM inflacao_brasil.item_monthly_price")
     month_ref = db.execute(q).scalar()
@@ -279,6 +288,7 @@ def get_global_baskets(db: Session = Depends(get_db)) -> list[GlobalBasketRefere
     brl_rate_to_usd = brl_rate[0] if brl_rate else None
     dieese_wage = _get_latest_dieese_wage(db)
     dieese_basket_brl = dieese_wage.basket_value_brl if dieese_wage else None
+    usa_basket_usd = _get_latest_usa_basket_usd(db)
 
     response: list[GlobalBasketReferenceResponse] = []
     for (
@@ -327,6 +337,13 @@ def get_global_baskets(db: Session = Depends(get_db)) -> list[GlobalBasketRefere
                 basket_cost_brl = Decimal(format(basket_cost_brl, "f"))
             except Exception:
                 pass
+
+        if currency_code == "USD" and usa_basket_usd is not None:
+            raw_basket = usa_basket_usd
+            basket_cost_usd = usa_basket_usd
+            basket_cost_brl = (
+                usa_basket_usd / brl_rate_to_usd if brl_rate_to_usd else None
+            )
 
         if currency_code == "BRL" and dieese_basket_brl is not None:
             raw_basket = dieese_basket_brl

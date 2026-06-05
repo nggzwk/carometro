@@ -12,6 +12,7 @@ import {
 
 type RankingGridProps = {
   rows: GlobalBasketRankingRow[];
+  lastUpdatedAt?: string | null;
 };
 
 function getCountryFlag(countryName: string): string {
@@ -100,7 +101,7 @@ const inViewMotionProps = {
   },
 };
 
-export default function RankingGrid({ rows }: RankingGridProps) {
+export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   return (
@@ -356,7 +357,9 @@ export default function RankingGrid({ rows }: RankingGridProps) {
 
                         <div className="hidden min-w-0 flex-col justify-center md:flex">
                           <span className="truncate text-lg font-medium text-[#1A120B] uppercase tracking-wide">
-                            <span className="mr-1 text-xl">{getCountryFlag(row.country_region)}</span>
+                            <span className="mr-1 text-xl">
+                              {getCountryFlag(row.country_region)}
+                            </span>
                             {translateCountry(row.country_region)}
                           </span>
                         </div>
@@ -411,6 +414,19 @@ export default function RankingGrid({ rows }: RankingGridProps) {
                 })}
               </div>
             </div>
+          )}
+
+          {lastUpdatedAt && (
+            <span className="mt-4 block text-[10px] uppercase tracking-[0.18em] font-medium text-[#A89B8C]"
+              style={{ fontFamily: "var(--font-card-summary)" }}
+            >
+              Cotação atualizada em{" "}
+              {new Date(lastUpdatedAt).toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           )}
         </div>
       </motion.div>

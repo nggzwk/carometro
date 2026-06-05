@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Scheduled exchange-rate refresh worker.
+"""Scheduled weekly worker for exchange rates, USA CPI, and Argentina SMVM.
 
-Run this from cron once a week, preferably after the quotation window closes,
-so the API never fetches rates during HTTP requests. Example:
-
-        0 19 * * 1 /Users/naranascimento/Projects/inflacao-brasil/.venv/bin/python \
-            /Users/naranascimento/Projects/inflacao-brasil/backend/scripts/refresh_exchange_rates_worker.py
+Cron example (every Monday at 19:00):
+    0 19 * * 1 /path/to/.venv/bin/python \
+        /path/to/backend/scripts/refresh_exchange_rates_worker.py
 """
 
 from __future__ import annotations
@@ -13,7 +11,7 @@ from __future__ import annotations
 import logging
 import os
 
-from backend.scripts.update_exchange_rates import _load_env_file, refresh_exchange_rates
+from backend.scripts.update_exchange_rates import _load_env_file, refresh_all
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,12 +26,12 @@ def main() -> int:
         return 1
 
     try:
-        updated = refresh_exchange_rates(database_url)
+        refresh_all(database_url)
     except Exception:
-        LOGGER.exception("ALERT: failed to refresh exchange rates")
+        LOGGER.exception("ALERT: weekly refresh failed")
         return 1
 
-    LOGGER.info("Exchange rate refresh completed; updated %s currency rates", updated)
+    LOGGER.info("Weekly refresh completed")
     return 0
 
 
