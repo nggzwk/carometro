@@ -117,6 +117,63 @@ def _load_subcategory_indexes(
     return indexes, fallback_by_category
 
 
+_QTY_UNIT_RE = re.compile(
+    r"^[\s\-]*(?P<qty>\d+(?:[.,]\d+)?)?\s*(?P<unit>[A-Za-z][A-Za-z/]*)\.?\s*$"
+)
+
+
+def _parse_qty_unit(text: str) -> tuple[str, str] | None:
+    """
+    Parse a quantity+unit string (e.g. '1 PC/UN', '- 1L', 'UN.') into
+    (qtd_embalagem, unidade_sigla). Returns None when the text doesn't look
+    like a unit (brands are longer than 5 chars and are rejected).
+
+    This recovers rows where the source embedded the unit in the produto name
+    after a hyphen (e.g. 'ALFACE CRESPA -1 PC/UN'), which split_produto_marca
+    misclassifies as the marca, leaving qtd_embalagem/unidade_sigla empty.
+    """
+    match = _QTY_UNIT_RE.match(text or "")
+    if match is None:
+        return None
+    unit = match.group("unit")
+    if len(unit) > 5:
+        return None
+    qty = (match.group("qty") or "1").replace(",", ".")
+    return qty, unit.upper()
+
+
+def _backfill_units_from_marca(
+    df: pd.DataFrame,
+    marca_column: str = "marca",
+    qtd_column: str = "qtd_embalagem",
+    unidade_column: str = "unidade_sigla",
+) -> pd.DataFrame:
+    """
+    When qtd_embalagem/unidade_sigla are empty but marca holds a quantity+unit
+    (because the unit was embedded in the produto name), move it into the unit
+    columns and clear marca. Without this the DB refresh drops these rows.
+    """
+    if marca_column not in df.columns:
+        return df
+    if qtd_column not in df.columns or unidade_column not in df.columns:
+        return df
+
+    for idx in df.index:
+        qtd = str(df.at[idx, qtd_column] or "").strip()
+        unidade = str(df.at[idx, unidade_column] or "").strip()
+        if qtd and unidade:
+            continue
+
+        parsed = _parse_qty_unit(str(df.at[idx, marca_column] or "").strip())
+        if parsed is None:
+            continue
+
+        df.at[idx, qtd_column], df.at[idx, unidade_column] = parsed
+        df.at[idx, marca_column] = ""
+
+    return df
+
+
 def _best_rule_match(produto: str, item_index: dict[str, tuple[Category, str]]) -> tuple[Category | None, str, float]:
     normalized = _normalize(produto)
     if not normalized:
@@ -220,6 +277,8 @@ def categorize_file(
         marca_column="marca",
         use_old_format_rules=use_old_format_rules,
     )
+
+    df = _backfill_units_from_marca(df)
 
     df[produto_column] = df[produto_column].map(_clean_produto_units)
 

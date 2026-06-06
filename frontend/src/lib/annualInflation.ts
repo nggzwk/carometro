@@ -85,7 +85,7 @@ export async function getAnnualMinimumWageIncrease(): Promise<
 export async function getAnnualInflation(): Promise<AnnualRow[] | null> {
   try {
     const [inflationRes, wageIncreaseByYear] = await Promise.all([
-      fetch(`${API_BASE_URL}/api/basket/inflation/annual`, {
+      fetch(`${API_BASE_URL}/api/global-baskets/dieese/inflation/annual`, {
         cache: "no-store",
       }),
       getAnnualMinimumWageIncrease(),
@@ -97,14 +97,14 @@ export async function getAnnualInflation(): Promise<AnnualRow[] | null> {
 
     return data.map((r) => ({
       ...r,
-      year: Number((r as any).year),
-      start_month_value_brl: r.start_month_value_brl === null ? null : Number(r.start_month_value_brl),
-      end_month_value_brl: r.end_month_value_brl === null ? null : Number(r.end_month_value_brl),
-      annual_difference_brl: r.annual_difference_brl === null ? null : Number(r.annual_difference_brl),
-      annual_inflation_pct: r.annual_inflation_pct === null ? null : Number(r.annual_inflation_pct),
-      annual_ipca_pct: r.annual_ipca_pct === null ? null : Number(r.annual_ipca_pct),
+      year: Number(r.year),
+      start_month_value_brl: toNumber(r.start_month_value_brl),
+      end_month_value_brl: toNumber(r.end_month_value_brl),
+      annual_difference_brl: toNumber(r.annual_difference_brl),
+      annual_inflation_pct: toNumber(r.annual_inflation_pct),
+      annual_ipca_pct: toNumber(r.annual_ipca_pct),
       annual_minimum_wage_increase_pct:
-        wageIncreaseByYear?.[Number((r as any).year)] ?? null,
+        wageIncreaseByYear?.[Number(r.year)] ?? null,
     }));
   } catch {
     return null;

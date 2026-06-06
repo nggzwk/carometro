@@ -19,6 +19,7 @@ import styles from "./AxisGraph.module.css";
 
 type DataPoint = {
   year: string;
+  value: number | null;
   inflation: number | null;
   ipca: number | null;
   wageIncrease: number | null;
@@ -35,7 +36,7 @@ type TooltipData = {
 
 export default function AxisGraph() {
   const metricsSubtitle = [
-    { label: "INFLAÇÃO", color: "#e0aa59" },
+    { label: "DIEESE", color: "#e0aa59" },
     { label: "IPCA", color: "#b300ff" },
     { label: "SALÁRIO", color: "#2563eb" },
   ] as const;
@@ -49,19 +50,43 @@ export default function AxisGraph() {
     (async () => {
       const rows = await getAnnualInflation();
       if (!rows || !mounted) return;
-      const series = rows.map((r) => ({
-        year: String(r.year),
-        inflation:
-          r.annual_inflation_pct === null
+      const basePrice = Number(rows[0]?.start_month_value_brl ?? 0);
+
+      let cumulativeIpca = 0;
+      let cumulativeWage = 0;
+
+      const series = rows.map((r, i) => {
+        const annualIpca = r.annual_ipca_pct === null ? null : Number(r.annual_ipca_pct);
+        const annualWage =
+          r.annual_minimum_wage_increase_pct == null
             ? null
-            : Number(r.annual_inflation_pct),
-        ipca: r.annual_ipca_pct === null ? null : Number(r.annual_ipca_pct),
-        wageIncrease:
-          (r as any).annual_minimum_wage_increase_pct === null ||
-          (r as any).annual_minimum_wage_increase_pct === undefined
+            : Number(r.annual_minimum_wage_increase_pct);
+
+        if (annualIpca !== null)
+          cumulativeIpca =
+            i === 0
+              ? annualIpca
+              : (1 + cumulativeIpca / 100) * (1 + annualIpca / 100) * 100 - 100;
+        if (annualWage !== null)
+          cumulativeWage =
+            i === 0
+              ? annualWage
+              : (1 + cumulativeWage / 100) * (1 + annualWage / 100) * 100 - 100;
+
+        const endPrice = r.end_month_value_brl === null ? null : Number(r.end_month_value_brl);
+        const basketGrowth =
+          endPrice === null || basePrice === 0
             ? null
-            : Number((r as any).annual_minimum_wage_increase_pct),
-      }));
+            : ((endPrice - basePrice) / basePrice) * 100;
+
+        return {
+          year: String(r.year),
+          value: basketGrowth !== null ? Number(basketGrowth.toFixed(2)) : null,
+          inflation: r.annual_inflation_pct === null ? null : Number(r.annual_inflation_pct),
+          ipca: annualIpca !== null ? Number(cumulativeIpca.toFixed(2)) : null,
+          wageIncrease: annualWage !== null ? Number(cumulativeWage.toFixed(2)) : null,
+        };
+      });
       setData(series);
     })();
     return () => {
@@ -129,22 +154,7 @@ export default function AxisGraph() {
           letterSpacing: "-0.01em",
         }}
       >
-        <span className="relative inline-flex items-center">CARÔMETRO</span>
-      </h1>
-      <h1
-        className={`relative flex w-full items-start justify-center sm:text-xl font-thin tracking-tight`}
-      >
-        <span className="relative inline-flex items-center">X</span>
-      </h1>
-      <h1
-        className={`${styles.title} relative flex w-full items-start justify-center text-3xl sm:text-4xl font-bold tracking-tight`}
-        style={{
-          fontFamily: "var(--font-header)",
-          color: "#1A120B",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        <span className="relative inline-flex items-center">IPCA</span>
+        <span className="relative inline-flex items-center">COMPARATIVO</span>
       </h1>
       </div>
       <div className={styles.metricsSubtitle}>
@@ -166,7 +176,7 @@ export default function AxisGraph() {
         <ResponsiveContainer width="100%" height={320}>
           <LineChart
             data={data}
-            margin={{ top: 20, right: 30, left: -10, bottom: 20 }}
+            margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
           >
             <defs>
               <linearGradient
@@ -195,33 +205,33 @@ export default function AxisGraph() {
               axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
 
+            {/* Single axis: cumulative % growth from 2023 for all three series */}
             <YAxis
+              yAxisId="pct"
               stroke="#8B7355"
               tick={{ fill: "#8B7355", fontSize: 13 }}
               tickFormatter={(v) => `${v}%`}
-              width={40}
+              width={45}
               tickMargin={4}
+              domain={[0, "dataMax + 3"]}
               axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
 
-            <ReferenceLine
-              y={0}
-              stroke="#8B7355"
-              strokeDasharray="5 5"
-              strokeWidth={1.5}
-            />
+            <YAxis yAxisId="price" hide domain={[0, "dataMax + 3"]} />
 
-            <Area
+<Area
+              yAxisId="price"
               type="monotone"
-              dataKey="inflation"
+              dataKey="value"
               stroke="none"
               fill="url(#inflationGradient)"
               isAnimationActive={false}
             />
 
             <Line
+              yAxisId="price"
               type="monotone"
-              dataKey="inflation"
+              dataKey="value"
               stroke="#e0aa59"
               strokeWidth={3}
               dot={renderDot}
@@ -230,6 +240,7 @@ export default function AxisGraph() {
             />
 
             <Line
+              yAxisId="pct"
               type="monotone"
               dataKey="ipca"
               stroke="#b300ff"
@@ -242,6 +253,7 @@ export default function AxisGraph() {
             />
 
             <Line
+              yAxisId="pct"
               type="monotone"
               dataKey="wageIncrease"
               stroke="#2563eb"

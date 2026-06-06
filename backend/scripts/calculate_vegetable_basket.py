@@ -89,6 +89,19 @@ def _minimum_wage(conn, month_ref: str) -> Decimal | None:
         row = cur.fetchone()
     return Decimal(str(row[0])) if row and row[0] else None
 
+VEGGIE_MULTIPLIERS: dict[int, Decimal] = {
+    50008: Decimal("1.15"),  # Tomate comum
+    50025: Decimal("1.2"),   # Banana prata
+    50005: Decimal("1.12"),  # Batata inglesa
+    50002: Decimal("0.51"),  # Cebola
+    50079: Decimal("1.0"),   # Alface (priced per PC/UN, not kg -> qty 1)
+    50007: Decimal("0.32"),  # Cenoura
+    50021: Decimal("2.4"),   # Laranja pera
+    50017: Decimal("0.34"),  # Abobora
+    50029: Decimal("0.45"),  # Maca
+    50004: Decimal("0.28"),  # Batata doce
+}
+
 
 def _basket_value(conn, items: list[tuple[int, int | None, str]], month_ref: str) -> Decimal | None:
     total = Decimal("0")
@@ -97,7 +110,8 @@ def _basket_value(conn, items: list[tuple[int, int | None, str]], month_ref: str
         price = _unit_price(conn, primary_subcat, fallback_subcat, unit, month_ref)
         if price is None:
             continue
-        total += price  # qty = 1
+        multiplier = VEGGIE_MULTIPLIERS.get(primary_subcat, Decimal("1.0"))
+        total += price * multiplier
         priced += 1
     return total if priced > 0 else None
 

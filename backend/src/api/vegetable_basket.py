@@ -32,7 +32,7 @@ VEGGIE_ITEM_NAMES: dict[int, str] = {
     50025: "Banana Prata",
     50005: "Batata Inglesa",
     50002: "Cebola",
-    50079: "Alface Americana",
+    50079: "Alface Crespa",
     50007: "Cenoura",
     50021: "Laranja Pera",
     50017: "Abobora",
