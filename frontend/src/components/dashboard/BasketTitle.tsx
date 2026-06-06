@@ -42,22 +42,22 @@ export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: Bas
   return (
     <div className="flex flex-col items-center gap-1">
       <p
-        className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-1"
+        className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-1 text-center"
         style={{ color: "#A89B8C" }}
       >
         Itens monitorados
       </p>
 
-      <h2
-        className="relative inline-flex items-start text-3xl sm:text-4xl font-bold tracking-tight mb-4"
-        style={{
-          fontFamily: "var(--font-header)",
-          color: "#1A120B",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        <span className="relative inline-flex items-center">
-          <span>Basicão</span>
+      <div className="flex items-center justify-center mb-4">
+        <h2
+          className="relative text-3xl sm:text-4xl font-bold tracking-tight"
+          style={{
+            fontFamily: "var(--font-header)",
+            color: "#1A120B",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Basicão
 
           {!dismissed && (
             <motion.button
@@ -65,7 +65,7 @@ export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: Bas
               type="button"
               aria-label="Inflação da cesta básica mensal mês sobre mês"
               onClick={handleClick}
-              className="absolute -right-6 top-1/2 -translate-y-1/2 inline-flex items-center justify-center cursor-pointer"
+              className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 inline-flex items-center justify-center cursor-pointer"
               animate={{
                 filter: showTooltip
                   ? "drop-shadow(0 0 6px rgba(168,155,140,0.9))"
@@ -97,8 +97,8 @@ export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: Bas
               </span>
             </motion.button>
           )}
-        </span>
-      </h2>
+        </h2>
+      </div>
 
       <p
         className="text-[11px] uppercase tracking-[0.18em] font-semibold mt-1"

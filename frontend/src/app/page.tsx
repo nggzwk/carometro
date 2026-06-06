@@ -1,16 +1,19 @@
 import UpdateBanner from "../components/shared/UpdateBanner";
-import BasketSummary from "../components/dashboard/index";
+import DashboardWrapper from "../components/DashboardWrapper";
 import { getBasketSummaryProps } from "../lib/basket";
 import { getVeggieBasketSummaryProps } from "../lib/veggieBasket";
-import VillainsChart from "../components/graphs/Villains/VillainsChart";
+import { getLatestVillainsMonth, getLatestFeiraoVillains } from "../lib/villains";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
 
 export default async function Home() {
-  const [basketSummary, feiraoSummary] = await Promise.all([
-    getBasketSummaryProps(),
-    getVeggieBasketSummaryProps(),
-  ]);
+  const [basketSummary, feiraoSummary, feiraoVillains, basicaoVillains] =
+    await Promise.all([
+      getBasketSummaryProps(),
+      getVeggieBasketSummaryProps(),
+      getLatestFeiraoVillains(),
+      getLatestVillainsMonth(),
+    ]);
 
   return (
     <div className="min-h-screen bg-brand text-black overflow-x-hidden">
@@ -43,13 +46,12 @@ export default async function Home() {
       </header>
 
       <main className="px-6 pt-8 pb-12 sm:px-10 lg:px-16">
-        <section>
-          <BasketSummary {...basketSummary} feiraoProps={feiraoSummary} />
-        </section>
-
-        <section>
-          <VillainsChart />
-        </section>
+        <DashboardWrapper
+          basketSummary={basketSummary}
+          feiraoSummary={feiraoSummary}
+          basicaoVillains={basicaoVillains}
+          feiraoVillains={feiraoVillains}
+        />
 
         <section>
           <Ranking />

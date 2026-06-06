@@ -1,3 +1,5 @@
+import type { VeggieBasketApiResponse } from "./veggieBasket";
+
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
 
 export type VillainItemData = {
@@ -59,6 +61,52 @@ const NORMALIZED_ITEM_NAME_TO_SUBCATEGORY = Object.fromEntries(
   ]),
 );
 
+export async function getLatestFeiraoVillains(): Promise<MonthlyVillainsData | null> {
+  try {
+    const [veggieRes, wageRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/vegetable-basket/items/price`, { cache: "no-store" }),
+      fetch(`${API_BASE_URL}/api/basket/wage`, { cache: "no-store" }),
+    ]);
+
+    if (!veggieRes.ok) return null;
+
+    const veggiePayload = (await veggieRes.json()) as VeggieBasketApiResponse;
+    const wagePayload = wageRes.ok ? ((await wageRes.json()) as WageApiResponse) : [];
+
+    const items = veggiePayload.items;
+    if (!items.length) return null;
+
+    const month_ref = items[0].month_ref;
+
+    const topVillains = [...items]
+      .filter((item) => (item.mom_pct ?? 0) > 0)
+      .sort((a, b) => (b.mom_pct ?? -Infinity) - (a.mom_pct ?? -Infinity))
+      .slice(0, 3);
+
+    const totalValue = items.reduce(
+      (sum, item) => sum + parseFloat(String(item.month_price ?? "0")),
+      0,
+    );
+
+    const matchingWage = wagePayload.find((w) => w.month_ref === month_ref);
+    const minimumWage = matchingWage ? parseFloat(matchingWage.minimum_wage_brl) : null;
+
+    return {
+      month_ref,
+      ipca_monthly_pct: items[0].ipca_monthly_pct,
+      percentage_of_wage: minimumWage ? (totalValue / minimumWage) * 100 : null,
+      basket_value_brl: totalValue,
+      villains: topVillains.map((item) => ({
+        produto_subcategoria: item.produto_subcategoria,
+        item_name: item.item_name,
+        mom_pct: item.mom_pct,
+      })),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function getLatestVillainsMonth(): Promise<MonthlyVillainsData | null> {
   try {
     const [villainsRes, wageRes] = await Promise.all([
@@ -83,6 +131,7 @@ export async function getLatestVillainsMonth(): Promise<MonthlyVillainsData | nu
     );
 
     const topVillains = [...latestMonth.villains]
+      .filter((v) => (v.inflation ?? 0) > 0)
       .sort((a, b) => (b.inflation ?? -Infinity) - (a.inflation ?? -Infinity))
       .slice(0, 3);
 

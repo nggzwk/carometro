@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { getBasketItemIcon } from "../../../lib/basketIcons";
+import { getVeggieItemIcon } from "../../../lib/veggieBasket";
 import { formatPct, shortName } from "../../../lib/formatters";
 
 const MAX_BAR_HEIGHT = 320;
@@ -33,22 +34,36 @@ function getFallbackIcon(name: string): string {
 // Returns [barColor, accentColor] per item
 function getBarTheme(name: string): [string, string] {
   const lower = name.toLowerCase();
-  if (lower.includes("ovo")) return ["#FEF3C7", "#F59E0B"];
+  // Basicão
+  if (lower.includes("ovo")) return ["#fff5beb6", "#F59E0B"];
   if (lower.includes("óleo") || lower.includes("oleo"))
-    return ["#FEF9C3", "#CA8A04"];
+    return ["#8db6cf4d", "#5e8097"];
   if (lower.includes("trigo") || lower.includes("farinha"))
-    return ["#FEF3C7", "#D97706"];
+    return ["#ffbb0051", "#D97706"];
   if (lower.includes("café") || lower.includes("cafe"))
-    return ["#EDE0D4", "#78350F"];
+    return ["#8d340045", "#78350F"];
   if (lower.includes("açúcar") || lower.includes("acucar"))
-    return ["#ECFDF5", "#059669"];
-  if (lower.includes("leite")) return ["#F5F3FF", "#7C3AED"];
-  if (lower.includes("arroz")) return ["#FFF7ED", "#EA580C"];
+    return ["#fb11ff15", "#fb11ff"];
+  if (lower.includes("leite")) return ["#85664019", "#866c4d"];
+  if (lower.includes("arroz")) return ["#c6c18131", "#8f8b61"];
   if (lower.includes("feijão") || lower.includes("feijao"))
-    return ["#F0FDF4", "#16A34A"];
+    return ["#9c3d1b41", "#683b2a"];
   if (lower.includes("carne") || lower.includes("coxão"))
-    return ["#FFF1F2", "#E11D48"];
-  if (lower.includes("frango")) return ["#FFFBEB", "#D97706"];
+    return ["#e11d471b", "#E11D48"];
+  if (lower.includes("frango")) return ["#ffa42440", "#D97706"];
+
+  // Feirão
+  if (lower.includes("tomate")) return ["#ffe9e9", "#dc2f26"];
+  if (lower.includes("banana")) return ["#fffac6a4", "#cea100"];
+  if (lower.includes("cebola")) return ["#ffae004a", "#CA8A04"];
+  if (lower.includes("alface")) return ["#F0FDF4", "#16A34A"];
+  if (lower.includes("cenoura")) return ["#ff4d004e", "#EA580C"];
+  if (lower.includes("laranja")) return ["#ff8b0e68", "#ff8000"];
+  if (lower.includes("maçã") || lower.includes("maca"))
+    return ["#ff8cbc64", "#b4004b"];
+  if (lower.includes("abóbora") || lower.includes("abobora"))
+    return ["#9b24004d", "#743826"];
+  if (lower.includes("batata")) return ["#FEF3C7", "#D97706"];
   return ["#F9FAFB", "#6B7280"];
 }
 
@@ -56,7 +71,9 @@ export default function PodiumBars({ displayItems }: { displayItems: any[] }) {
   const podiumItems =
     displayItems.length === 3
       ? [displayItems[1], displayItems[0], displayItems[2]]
-      : displayItems;
+      : displayItems.length === 2
+        ? [displayItems[1], displayItems[0]]
+        : displayItems;
 
   return (
     <div className="flex items-end justify-center w-full relative mb-10 gap- px-2">
@@ -119,19 +136,12 @@ function PodiumBarItem({
           className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap mt-2"
           style={{
             fontFamily: "var(--font-card-summary)",
-            // backgroundColor: `${barColor}`,
             color: accentColor,
-            // WebkitTextStroke: `${accentColor} 1px`,
             letterSpacing: "0.04em",
           }}
         >
           {formatPct(pctValue)}
         </div>
-
-        {/* <div
-          className="w-2 h-2 rotate-45 mx-auto -mt-1"
-          style={{ backgroundColor: barColor }}
-        /> */}
       </motion.div>
 
       <motion.div
@@ -167,16 +177,18 @@ function PodiumBarItem({
           isLineVisible ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }
         }
         transition={{
-          delay: isLineVisible ? BAR_GROW_DURATION + entryDelay : 0,
+          delay: isLineVisible ? BAR_GROW_DURATION + entryDelay - 0.08 : 0,
           duration: 0.35,
           type: "spring",
           stiffness: 200,
         }}
         className="text-6xl select-none leading-none mb-0 drop-shadow-sm"
       >
-        {item.produto_subcategoria
-          ? getBasketItemIcon(item.produto_subcategoria)
-          : getFallbackIcon(nameValue)}
+        {item.produto_subcategoria >= 50000 && item.produto_subcategoria < 51000
+          ? getVeggieItemIcon(item.produto_subcategoria)
+          : item.produto_subcategoria
+            ? getBasketItemIcon(item.produto_subcategoria)
+            : getFallbackIcon(nameValue)}
       </motion.span>
 
       <motion.div
@@ -194,7 +206,7 @@ function PodiumBarItem({
           borderTop: `2px solid ${accentColor}`,
           transformOrigin: "bottom",
           borderRadius: "6px 6px 2px 2px",
-          boxShadow: `0 -2px 12px 0 ${accentColor}20, inset 0 1px 0 rgba(0, 0, 0, 0.6)`,
+          boxShadow: `0 -2px 12px 0 ${accentColor}20`,
           position: "relative",
           overflow: "hidden",
         }}

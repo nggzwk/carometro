@@ -41,22 +41,22 @@ export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: Veg
   return (
     <div className="flex flex-col items-center gap-1">
       <p
-        className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-1"
+        className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-1 text-center"
         style={{ color: "#A89B8C" }}
       >
         Itens monitorados
       </p>
 
-      <h2
-        className="relative inline-flex items-start text-3xl sm:text-4xl font-bold tracking-tight mb-4"
-        style={{
-          fontFamily: "var(--font-header)",
-          color: "#1A120B",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        <span className="relative inline-flex items-center">
-          <span>Feirão</span>
+      <div className="flex items-center justify-center mb-4">
+        <h2
+          className="relative text-3xl sm:text-4xl font-bold tracking-tight"
+          style={{
+            fontFamily: "var(--font-header)",
+            color: "#1A120B",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Feirão
 
           {!dismissed && (
             <motion.button
@@ -64,7 +64,7 @@ export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: Veg
               type="button"
               aria-label="Inflação da cesta de hortifruti mês sobre mês"
               onClick={handleClick}
-              className="absolute -right-6 top-1/2 -translate-y-1/2 inline-flex items-center justify-center cursor-pointer"
+              className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 inline-flex items-center justify-center cursor-pointer"
               animate={{
                 filter: showTooltip
                   ? "drop-shadow(0 0 6px rgba(168,155,140,0.9))"
@@ -82,7 +82,6 @@ export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: Veg
             >
               <BsFillQuestionDiamondFill className="text-[15px] flex-shrink-0" style={{ color: "#A89B8C" }} />
 
-              {/* Tooltip */}
               <span
                 className="pointer-events-none absolute left-full top-1/2 z-20 ml-2 inline-flex w-32 -translate-y-1/2 flex-col items-start rounded-2xl border border-[#D8CFC4] bg-white px-3 py-2 text-left text-[8px] font-medium uppercase not-italic leading-tight tracking-[0.08em] text-[#5C5146] shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200"
                 style={{
@@ -97,8 +96,8 @@ export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: Veg
               </span>
             </motion.button>
           )}
-        </span>
-      </h2>
+        </h2>
+      </div>
 
       <p
         className="text-[11px] uppercase tracking-[0.18em] font-semibold mt-1"

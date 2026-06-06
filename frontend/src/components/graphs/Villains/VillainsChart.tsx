@@ -1,9 +1,13 @@
-import { getLatestVillainsMonth } from "../../../lib/villains";
+import type { MonthlyVillainsData } from "../../../lib/villains";
 import PodiumBars from "./PodiumBars";
 
-export default async function VillainsChart() {
-  const latestMonth = await getLatestVillainsMonth();
-  const items = latestMonth?.villains ?? [];
+type Props = {
+  data: MonthlyVillainsData | null;
+  source: "feirao" | "basicao";
+};
+
+export default function VillainsChart({ data, source }: Props) {
+  const items = data?.villains ?? [];
   const displayItems = items.slice(0, 3);
 
   if (displayItems.length === 0) {
@@ -14,12 +18,10 @@ export default async function VillainsChart() {
     );
   }
 
-  const currentMonthName = latestMonth?.month_ref
-    ? convertMonthRef(latestMonth.month_ref)
-    : "";
-
-  const basketValue = Math.trunc(Number(latestMonth?.basket_value_brl ?? 0));
-  const wagePercent = Math.trunc(Number(latestMonth?.percentage_of_wage ?? 0));
+  const currentMonthName = data?.month_ref ? convertMonthRef(data.month_ref) : "";
+  const basketValue = Math.trunc(Number(data?.basket_value_brl ?? 0));
+  const wagePercent = Math.trunc(Number(data?.percentage_of_wage ?? 0));
+  const basketLabel = source === "feirao" ? "Feirão" : "Basicão";
 
   return (
     <section className="w-full min-h-screen flex flex-col items-center justify-between bg-color-background pt-12 pb-12 px-6 snap-start selection:bg-black selection:text-white relative z-10">
@@ -62,7 +64,7 @@ export default async function VillainsChart() {
                 className="text-[10px] uppercase tracking-[0.16em] font-medium"
                 style={{ color: "#A89B8C" }}
               >
-                Basicão custou
+                {basketLabel} custou
               </span>
               <span
                 className="text-2xl font-bold mt-1"

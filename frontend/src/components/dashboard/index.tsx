@@ -20,9 +20,10 @@ type View = "basicao" | "feirao";
 
 interface DashboardProps extends BasketSummaryProps {
   feiraoProps: BasketSummaryProps;
+  onViewChange?: (view: View) => void;
 }
 
-export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...liveProps }) => {
+export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewChange, ...liveProps }) => {
   const basicao = useHistoricalBasket(liveProps);
   const feirao = useHistoricalFeirao(feiraoProps);
 
@@ -42,7 +43,9 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
       handleMonthSelect(null);
       setMonths([]);
     }
-    setView((v) => (v === "basicao" ? "feirao" : "basicao"));
+    const next = view === "basicao" ? "feirao" : "basicao";
+    setView(next);
+    onViewChange?.(next);
   };
 
   const handleHistoryToggle = async () => {
