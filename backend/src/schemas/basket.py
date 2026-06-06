@@ -43,6 +43,21 @@ class DieeseBasketItemsWithReferenceResponse(BaseModel):
     items: list[DieeseBasketItemResponse]
 
 
+class DieeseAnnualInflationResponse(BaseModel):
+    """Response model for DIEESE annual inflation data."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    year: int
+    start_month_ref: str
+    start_month_value_brl: float
+    end_month_ref: str
+    end_month_value_brl: float
+    annual_difference_brl: float
+    annual_inflation_pct: float
+    annual_ipca_pct: float | None
+
+
 class BasketResponse(BaseModel):
     """Response model for basket data."""
     

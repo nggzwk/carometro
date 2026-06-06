@@ -10,6 +10,7 @@ from ..schemas.basket import GlobalBasketReferenceResponse
 from ..schemas.basket import (
     DieeseBasketItemsWithReferenceResponse,
     DieeseBasketItemResponse,
+    DieeseAnnualInflationResponse,
     BasketValueResponse,
 )
 
@@ -18,6 +19,7 @@ from .basket import (
     validate_month_ref,
     _previous_month_ref,
     _get_ipca_monthly_pct,
+    _get_annual_ipca_pct,
     _get_item_key_row,
     _item_name_from_subcategory,
     _load_basket_items,
@@ -469,3 +471,103 @@ def get_dieese_month_values(
         )
 
     return out
+
+
+def _compute_dieese_monthly_totals(db: Session) -> dict[str, Decimal]:
+    """Return {month_ref: total_basket_value_brl} for every available month."""
+    q = text(
+        "SELECT DISTINCT month_ref FROM inflacao_brasil.item_monthly_price ORDER BY month_ref"
+    )
+    months = [r[0] for r in db.execute(q).fetchall()]
+
+    totals: dict[str, Decimal] = {}
+    for m in months:
+        total = Decimal("0")
+        any_item = False
+        for _, primary_subcat, fallback_subcat, quantity, unit in DIEESE_ITEMS:
+            res = _compute_dieese_item(db, primary_subcat, fallback_subcat, quantity, unit, m)
+            if res is None:
+                continue
+            try:
+                total += Decimal(str(res["qtd_month_price"]))
+                any_item = True
+            except Exception:
+                pass
+        if any_item:
+            totals[m] = total
+
+    return totals
+
+
+@router.get("/dieese/inflation/annual", response_model=list[DieeseAnnualInflationResponse])
+def get_dieese_annual_inflation(
+    db: Session = Depends(get_db),
+) -> list[DieeseAnnualInflationResponse]:
+    """
+    Annual DIEESE basket inflation.
+    - Completed years (or years with December data): December vs previous December.
+    - Current year without December: latest available month vs January (YTD).
+    """
+    from datetime import date as date_type
+
+    monthly_totals = _compute_dieese_monthly_totals(db)
+    if not monthly_totals:
+        return []
+
+    # Group by year
+    by_year: dict[int, dict[str, Decimal]] = {}
+    for month_ref, value in monthly_totals.items():
+        year = int(month_ref[:4])
+        by_year.setdefault(year, {})[month_ref] = value
+
+    current_year = date_type.today().year
+    results: list[DieeseAnnualInflationResponse] = []
+
+    for year in sorted(by_year.keys()):
+        months_in_year = by_year[year]
+        sorted_months = sorted(months_in_year.keys())
+
+        end_month_ref = sorted_months[-1]
+        end_value = months_in_year[end_month_ref]
+
+        has_december = any(m.endswith("-12") for m in sorted_months)
+        is_current_year_ytd = (year == current_year and not has_december)
+
+        if is_current_year_ytd:
+            # YTD: compare latest month vs January of the same year
+            jan_ref = f"{year}-01"
+            start_value = months_in_year.get(jan_ref)
+            start_month_ref = jan_ref
+        else:
+            # Full year: compare December vs previous December
+            dec_ref = f"{year}-12"
+            end_month_ref = dec_ref
+            end_value = months_in_year.get(dec_ref)
+            if end_value is None:
+                continue
+
+            prev_dec_ref = f"{year - 1}-12"
+            prev_year_months = by_year.get(year - 1, {})
+            start_value = prev_year_months.get(prev_dec_ref)
+            start_month_ref = prev_dec_ref
+
+        if start_value is None or start_value == 0:
+            continue
+
+        diff = end_value - start_value
+        inflation_pct = round(float((diff / start_value) * 100), 2)
+
+        results.append(
+            DieeseAnnualInflationResponse(
+                year=year,
+                start_month_ref=start_month_ref,
+                start_month_value_brl=round(float(start_value), 2),
+                end_month_ref=end_month_ref,
+                end_month_value_brl=round(float(end_value), 2),
+                annual_difference_brl=round(float(diff), 2),
+                annual_inflation_pct=inflation_pct,
+                annual_ipca_pct=_get_annual_ipca_pct(db, end_month_ref),
+            )
+        )
+
+    return results

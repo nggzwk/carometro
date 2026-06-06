@@ -220,7 +220,7 @@ def get_normalized_monthly_price(
 BASKET_MULTIPLIERS = {
     40003: Decimal("2.81"),  # Arroz
     30001: Decimal("6.19"),  # Leite
-    20001: Decimal("30.0"),  # Ovos (30 unidades individuais)
+    20001: Decimal("43.0"),  # Ovos
     10023: Decimal("2.81"),  # Carne
     10011: Decimal("3.57"),  # Frango
     40012: Decimal("1.23"),  # Feijão
