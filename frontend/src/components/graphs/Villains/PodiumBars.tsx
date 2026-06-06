@@ -126,18 +126,23 @@ function PodiumBarItem({
     >
       <motion.div
         variants={{
-          rest: { opacity: 0, y: 10, scale: 0.92 },
+          rest: { opacity: 0, y: 6, scale: 0.95 },
           hover: { opacity: 1, y: 0, scale: 1 },
         }}
-        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-        className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+        transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+        className="absolute -top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden sm:block"
       >
         <div
-          className="text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap mt-2"
+          className="whitespace-nowrap px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase"
           style={{
             fontFamily: "var(--font-card-summary)",
             color: accentColor,
-            letterSpacing: "0.04em",
+            backgroundColor: "rgba(255,255,255,0.45)",
+            border: `1px solid rgba(255,255,255,0.75)`,
+            borderRadius: "6px",
+            boxShadow: `0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)`,
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
           }}
         >
           {formatPct(pctValue)}
@@ -165,8 +170,17 @@ function PodiumBarItem({
           delay: isLineVisible ? BAR_GROW_DURATION + entryDelay + 0.05 : 0,
           duration: 0.4,
         }}
-        className="mb-2 text-xs font-semibold tracking-widest  sm:hidden"
-        style={{ color: accentColor, fontFamily: "var(--font-card-summary)" }}
+        className="mb-2 text-[10px] font-semibold tracking-[0.08em] uppercase px-2.5 py-1 sm:hidden"
+        style={{
+          fontFamily: "var(--font-card-summary)",
+          color: accentColor,
+          backgroundColor: "rgba(255,255,255,0.45)",
+          border: `1px solid rgba(255,255,255,0.75)`,
+          borderRadius: "6px",
+          boxShadow: `0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)`,
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+        }}
       >
         {formatPct(pctValue)}
       </motion.div>
