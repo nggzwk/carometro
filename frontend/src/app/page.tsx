@@ -1,7 +1,7 @@
 import UpdateBanner from "../components/shared/UpdateBanner";
 import BasketSummary from "../components/dashboard/index";
 import { getBasketSummaryProps } from "../lib/basket";
-import { getVeggieBasketSummaryProps } from "../lib/vegetableBasket";
+import { getVeggieBasketSummaryProps } from "../lib/veggieBasket";
 import VillainsChart from "../components/graphs/Villains/VillainsChart";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";

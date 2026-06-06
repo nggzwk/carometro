@@ -237,7 +237,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Invisible height spacer */}
       <div className="invisible flex pointer-events-none" aria-hidden="true">
         <div
           style={{ width: "50%" }}

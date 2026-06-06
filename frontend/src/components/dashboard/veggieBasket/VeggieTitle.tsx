@@ -1,28 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { BsFillQuestionDiamondFill } from "react-icons/bs";
 
-const SESSION_KEY = "feirao-qmark-dismissed";
-
-interface VegetableTitleProps {
+interface VeggieTitleProps {
   selectedMonth: string | null;
+  dismissed: boolean;
+  onDismiss: () => void;
 }
 
-export default function VegetableTitle({ selectedMonth }: VegetableTitleProps) {
-  const [dismissed, setDismissed] = useState(() =>
-    typeof window !== "undefined"
-      ? sessionStorage.getItem(SESSION_KEY) === "1"
-      : false
-  );
+export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: VeggieTitleProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   const dismiss = () => {
     setShowTooltip(false);
-    setDismissed(true);
-    sessionStorage.setItem(SESSION_KEY, "1");
+    onDismiss();
   };
 
   const handleClick = () => {
@@ -33,7 +27,6 @@ export default function VegetableTitle({ selectedMonth }: VegetableTitleProps) {
     }
   };
 
-  // Click outside → dismiss
   useEffect(() => {
     if (!showTooltip) return;
     const handler = (e: MouseEvent) => {

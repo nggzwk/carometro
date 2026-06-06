@@ -39,7 +39,6 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
       ? `Aumentou ${formatPct(pct, true)}`
       : `Diminuiu -${formatPct(Math.abs(pct), false)}`;
 
-  // Mobile: cycle every 5s regardless of interaction
   useEffect(() => {
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     if (!isMobile) return;
@@ -49,7 +48,6 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Desktop: cycle every 10s only if user has never clicked
   useEffect(() => {
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     if (isMobile) return;

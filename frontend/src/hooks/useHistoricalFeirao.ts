@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { BasketSummaryProps } from "../lib/basketTypes";
-import { getVeggieBasketDataForMonth } from "../lib/vegetableBasket";
+import { getVeggieBasketDataForMonth } from "../lib/veggieBasket";
 
 export function useHistoricalFeirao(liveProps: BasketSummaryProps) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);

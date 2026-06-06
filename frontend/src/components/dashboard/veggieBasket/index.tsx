@@ -8,12 +8,12 @@ import { BasketHeader } from "../BasketHeader";
 import BasketHistoryPanel, { BasketHistoryButton } from "../BasketHistory";
 import type { BasketSummaryProps } from "../../../lib/basketTypes";
 import { inViewMotionProps } from "../../../lib/motionPresets";
-import { getVeggieBasketDataForMonth, getVeggieAvailableMonths } from "../../../lib/vegetableBasket";
+import { getVeggieBasketDataForMonth, getVeggieAvailableMonths } from "../../../lib/veggieBasket";
 import ChangeMenu from "../ChangeMenu";
-import VegetableTitle from "./VegetableTitle";
+import VeggieTitle from "./VeggieTitle";
 
 
-function useHistoricalFeirao(liveProps: BasketSummaryProps) {
+function useHistoricalVeggieBasket(liveProps: BasketSummaryProps) {
   const [selectedMonth, setSelectedMonth] = React.useState<string | null>(null);
   const [historicalData, setHistoricalData] = React.useState<BasketSummaryProps | null>(null);
   const [isLoadingHistory, setIsLoadingHistory] = React.useState(false);
@@ -38,9 +38,9 @@ function useHistoricalFeirao(liveProps: BasketSummaryProps) {
   };
 }
 
-export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
+export const VeggieSummary: React.FC<BasketSummaryProps> = (liveProps) => {
   const { selectedMonth, activeData, isLoadingHistory, handleMonthSelect } =
-    useHistoricalFeirao(liveProps);
+    useHistoricalVeggieBasket(liveProps);
 
   const [months, setMonths] = useState<string[]>([]);
   const [isLoadingMonths, setIsLoadingMonths] = useState(false);
@@ -62,7 +62,7 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
   return (
     <div className="w-full text-center flex flex-col items-center">
       <motion.div {...inViewMotionProps} className="mt-8 mb-1">
-        <VegetableTitle selectedMonth={selectedMonth} />
+        <VeggieTitle selectedMonth={selectedMonth} dismissed={false} onDismiss={() => {}} />
       </motion.div>
 
       <motion.div
@@ -75,7 +75,6 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
           backdropFilter: "blur(12px)",
         }}
       >
-        {/* Mobile-only: arrow button top-right of card */}
         <div className="absolute top-2 right-2 z-20 sm:hidden">
           <ChangeMenu variant="icon" onClick={() => {}} />
         </div>
@@ -124,7 +123,6 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         </AnimatePresence>
       </motion.div>
 
-      {/* Desktop footer row: HISTÓRICO | stats | MENU */}
       <div className="w-full hidden sm:flex items-center px-1 py-1">
         <div className="flex-1 flex justify-start">
           <BasketHistoryButton
@@ -144,7 +142,6 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         </div>
       </div>
 
-      {/* Mobile footer: stats centered + HISTÓRICO centered below */}
       <div className="w-full flex sm:hidden flex-col items-center px-1">
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
@@ -159,7 +156,6 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         </div>
       </div>
 
-      {/* Expandable history panel */}
       <BasketHistoryPanel
         isOpen={isHistoryOpen}
         months={months}
@@ -172,4 +168,4 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
   );
 };
 
-export default FeiraoSummary;
+export default VeggieSummary;

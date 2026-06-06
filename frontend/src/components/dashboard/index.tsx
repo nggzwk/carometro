@@ -8,13 +8,13 @@ import type { BasketSummaryProps } from "../../lib/basketTypes";
 import BasketHeader from "./BasketHeader";
 import BasketHistoryPanel, { BasketHistoryButton } from "./BasketHistory";
 import BasketTitle from "./BasketTitle";
-import FeiraoTitle from "./feirao/VegetableTitle";
 import { useHistoricalBasket } from "../../hooks/useHistoricalBasket";
 import { useHistoricalFeirao } from "../../hooks/useHistoricalFeirao";
 import { inViewMotionProps } from "../../lib/motionPresets";
 import { getAvailableMonths } from "../../lib/basket";
-import { getVeggieAvailableMonths } from "../../lib/vegetableBasket";
+import { getVeggieAvailableMonths } from "../../lib/veggieBasket";
 import ChangeMenu from "./ChangeMenu";
+import VeggieTitle from "./veggieBasket/VeggieTitle";
 
 type View = "basicao" | "feirao";
 
@@ -30,12 +30,13 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
   const [months, setMonths] = useState<string[]>([]);
   const [isLoadingMonths, setIsLoadingMonths] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [basicaoDismissed, setBasicaoDismissed] = useState(false);
+  const [feiraoDismissed, setFeiraoDismissed] = useState(false);
 
   const active = view === "basicao" ? basicao : feirao;
   const { selectedMonth, activeData, isLoadingHistory, handleMonthSelect } = active;
 
   const handleMenuClick = () => {
-    // Close history first
     if (isHistoryOpen) {
       setIsHistoryOpen(false);
       handleMonthSelect(null);
@@ -66,7 +67,6 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
 
   return (
     <div className="w-full text-center flex flex-col items-center">
-      {/* Title — animates when view switches */}
       <motion.div {...inViewMotionProps} className="mt-8 mb-1">
         <AnimatePresence mode="wait">
           {view === "basicao" ? (
@@ -77,7 +77,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.25 }}
             >
-              <BasketTitle selectedMonth={selectedMonth} />
+              <BasketTitle selectedMonth={selectedMonth} dismissed={basicaoDismissed} onDismiss={() => setBasicaoDismissed(true)} />
             </motion.div>
           ) : (
             <motion.div
@@ -87,13 +87,12 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.25 }}
             >
-              <FeiraoTitle selectedMonth={selectedMonth} />
+              <VeggieTitle selectedMonth={selectedMonth} dismissed={feiraoDismissed} onDismiss={() => setFeiraoDismissed(true)} />
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
 
-      {/* Card */}
       <motion.div
         {...inViewMotionProps}
         className="w-full overflow-visible rounded-3xl relative"
@@ -104,7 +103,6 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
           backdropFilter: "blur(12px)",
         }}
       >
-        {/* Mobile-only: arrow button top-right of card */}
         <div className="absolute top-2 right-2 z-20 sm:hidden">
           <ChangeMenu variant="icon" onClick={handleMenuClick} />
         </div>
@@ -151,7 +149,6 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
         </AnimatePresence>
       </motion.div>
 
-      {/* Desktop footer row: HISTÓRICO | stats | MENU */}
       <div className="w-full hidden sm:flex items-center px-1 py-1">
         <div className="flex-1 flex justify-start">
           <BasketHistoryButton
@@ -171,7 +168,6 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
         </div>
       </div>
 
-      {/* Mobile footer: stats centered + HISTÓRICO centered below */}
       <div className="w-full flex sm:hidden flex-col items-center px-1">
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
@@ -186,7 +182,6 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...livePr
         </div>
       </div>
 
-      {/* Expandable history panel */}
       <BasketHistoryPanel
         isOpen={isHistoryOpen}
         months={months}
