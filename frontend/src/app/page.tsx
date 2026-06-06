@@ -1,12 +1,16 @@
 import UpdateBanner from "../components/shared/UpdateBanner";
 import BasketSummary from "../components/dashboard/index";
 import { getBasketSummaryProps } from "../lib/basket";
+import { getVeggieBasketSummaryProps } from "../lib/vegetableBasket";
 import VillainsChart from "../components/graphs/Villains/VillainsChart";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
 
 export default async function Home() {
-  const basketSummary = await getBasketSummaryProps();
+  const [basketSummary, feiraoSummary] = await Promise.all([
+    getBasketSummaryProps(),
+    getVeggieBasketSummaryProps(),
+  ]);
 
   return (
     <div className="min-h-screen bg-brand text-black overflow-x-hidden">
@@ -40,7 +44,7 @@ export default async function Home() {
 
       <main className="px-6 pt-8 pb-12 sm:px-10 lg:px-16">
         <section>
-          <BasketSummary {...basketSummary} />
+          <BasketSummary {...basketSummary} feiraoProps={feiraoSummary} />
         </section>
 
         <section>

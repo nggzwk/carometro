@@ -38,6 +38,7 @@ downloaded_files*/
 *.temp
 .pytest_cache/
 .coverage
+*.tsbuildinfo
 
 .env
 node_modules

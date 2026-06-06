@@ -20,46 +20,43 @@ interface BasketHistoryButtonProps {
 
 export function BasketHistoryButton({ isOpen, isLoading, onToggle }: BasketHistoryButtonProps) {
   return (
-    <div
-      className="flex flex-col rounded-xl overflow-hidden"
-      style={{
-        border: `1px solid ${ACCENT}30`,
-        backgroundColor: "#ffffffaf",
-        backdropFilter: "blur(10px)",
-        boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
-      }}
+    <motion.button
+      type="button"
+      onClick={onToggle}
+      whileTap={{ scale: 0.97 }}
+      className="flex items-center gap-2 cursor-pointer select-none pb-px"
+      style={{ borderBottom: `1px solid ${ACCENT}55` }}
     >
-      <motion.button
-        type="button"
-        onClick={onToggle}
-        whileTap={{ scale: 0.97 }}
-        className="flex items-center justify-center gap-2 px-4 py-1 cursor-pointer select-none w-full"
+      <span
+        className="uppercase whitespace-nowrap"
+        style={{
+          fontFamily: "var(--font-card-summary)",
+          color: ACCENT,
+          fontSize: "0.7rem",
+          letterSpacing: "0.14em",
+          fontWeight: 500,
+        }}
       >
-        <span
-          className="text-xs font-semibold tracking-[0.08em] uppercase whitespace-nowrap"
-          style={{ fontFamily: "var(--font-card-summary)", color: ACCENT }}
+        {isLoading ? "Carregando..." : "Histórico"}
+      </span>
+      {isLoading ? (
+        <motion.span
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-2 h-2 rounded-full border-[1.5px] flex-none"
+          style={{ borderColor: ACCENT, borderTopColor: "transparent" }}
+        />
+      ) : (
+        <motion.span
+          className="flex-none"
+          style={{ color: "#1A120B", fontSize: 8 }}
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 22 }}
         >
-          {isLoading ? "Carregando..." : "Histórico"}
-        </span>
-        {isLoading ? (
-          <motion.span
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-2.5 h-2.5 rounded-full border-[1.5px] flex-none"
-            style={{ borderColor: ACCENT, borderTopColor: "transparent" }}
-          />
-        ) : (
-          <motion.span
-            className="text-[10px] flex-none"
-            style={{ color: "#1A120B" }}
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          >
-            ▶
-          </motion.span>
-        )}
-      </motion.button>
-    </div>
+          ▶
+        </motion.span>
+      )}
+    </motion.button>
   );
 }
 
@@ -69,6 +66,7 @@ interface BasketHistoryPanelProps {
   currentMonthRef?: string | null;
   selectedMonth: string | null;
   onMonthSelect: (month_ref: string | null) => void;
+  onClose: () => void;
 }
 
 export default function BasketHistoryPanel({
@@ -77,12 +75,14 @@ export default function BasketHistoryPanel({
   currentMonthRef,
   selectedMonth,
   onMonthSelect,
+  onClose,
 }: BasketHistoryPanelProps) {
   const filteredMonths = months.filter((m) => m !== currentMonthRef);
 
   const handlePillClick = (month_ref: string) => {
     if (selectedMonth === month_ref) {
       onMonthSelect(null);
+      onClose();
     } else {
       onMonthSelect(month_ref);
     }

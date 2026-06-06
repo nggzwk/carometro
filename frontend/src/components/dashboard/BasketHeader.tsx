@@ -19,6 +19,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
 }) => {
   const pct = totalInflationPct ?? 0;
   const [isPinned, setIsPinned] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeoutRef = useRef<number | null>(null);
 
@@ -29,7 +30,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
   const accentColor = exceedsBenchmark ? "#E63946" : "#2A9D8F";
 
   const totalValueEmoji =
-    pct > 15 ? "☠️" : pct > 10 ? "😭" : pct > 5 ? "😱" : pct < 4 ? "😐" : "💰";
+    pct < 0 ? "🙂" : pct > 15 ? "☠️" : pct > 10 ? "😭" : pct > 5 ? "😱" : pct < 4 ? "😐" : "💰";
 
   const showTotalValue = isPinned;
   const label = showTotalValue
@@ -38,14 +39,26 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
       ? `Aumentou ${formatPct(pct, true)}`
       : `Diminuiu -${formatPct(Math.abs(pct), false)}`;
 
+  // Mobile: cycle every 5s regardless of interaction
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    if (!mediaQuery.matches) return;
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (!isMobile) return;
     const interval = setInterval(() => {
       setIsPinned((prev) => !prev);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Desktop: cycle every 10s only if user has never clicked
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (isMobile) return;
+    if (hasInteracted) return;
+    const interval = setInterval(() => {
+      setIsPinned((prev) => !prev);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [hasInteracted]);
 
   const handleTooltipStart = () => {
     setShowTooltip(true);
@@ -83,8 +96,15 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
             className="absolute -top-9 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
           >
             <div
-              className="text-[10px] font-semibold uppercase tracking-[0.16em] px-3 py-1.5 rounded-full whitespace-nowrap"
-              style={{ backgroundColor: "#1A120B", color: "#fff8eb" }}
+              className="text-[10px] font-medium uppercase tracking-[0.16em] rounded-xl px-3 py-1.5 whitespace-nowrap"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.45)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(168,155,140,0.25)",
+                boxShadow: "0 2px 12px rgba(168,155,140,0.12)",
+                color: "#6B5C4E",
+              }}
             >
               clique para ver valor
             </div>
@@ -92,15 +112,23 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
 
           <motion.button
             type="button"
-            onClick={() => setIsPinned((prev) => !prev)}
-            whileTap={{ scale: 0.97 }}
-            className="relative flex items-center gap-2 px-5 py-2 rounded-full cursor-pointer"
-            style={{
-              backgroundColor: `#ffffffaf`,
-              border: `1.5px solid ${accentColor}40`,
+            onClick={() => {
+              setHasInteracted(true);
+              setIsPinned((prev) => !prev);
             }}
+            whileTap={{ scale: 0.97 }}
+            className="relative flex items-center gap-3 cursor-pointer py-2 px-1"
           >
-
+            <span
+              style={{
+                display: "block",
+                width: 18,
+                height: 1,
+                backgroundColor: accentColor,
+                opacity: 0.35,
+                flexShrink: 0,
+              }}
+            />
             <AnimatePresence mode="wait">
               <motion.span
                 key={label}
@@ -108,15 +136,28 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="text-sm font-semibold tracking-widest uppercase"
+                className="uppercase whitespace-nowrap"
                 style={{
                   fontFamily: "var(--font-card-summary)",
                   color: accentColor,
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  letterSpacing: "0.18em",
                 }}
               >
                 {label}
               </motion.span>
             </AnimatePresence>
+            <span
+              style={{
+                display: "block",
+                width: 18,
+                height: 1,
+                backgroundColor: accentColor,
+                opacity: 0.35,
+                flexShrink: 0,
+              }}
+            />
           </motion.button>
         </motion.div>
       </div>

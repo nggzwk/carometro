@@ -4,13 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { BsFillQuestionDiamondFill } from "react-icons/bs";
 
-const SESSION_KEY = "basicao-qmark-dismissed";
+const SESSION_KEY = "feirao-qmark-dismissed";
 
-interface BasketTitleProps {
+interface VegetableTitleProps {
   selectedMonth: string | null;
 }
 
-export default function BasketTitle({ selectedMonth }: BasketTitleProps) {
+export default function VegetableTitle({ selectedMonth }: VegetableTitleProps) {
   const [dismissed, setDismissed] = useState(() =>
     typeof window !== "undefined"
       ? sessionStorage.getItem(SESSION_KEY) === "1"
@@ -63,13 +63,13 @@ export default function BasketTitle({ selectedMonth }: BasketTitleProps) {
         }}
       >
         <span className="relative inline-flex items-center">
-          <span>Basicão</span>
+          <span>Feirão</span>
 
           {!dismissed && (
             <motion.button
               ref={btnRef}
               type="button"
-              aria-label="Inflação da cesta básica mensal mês sobre mês"
+              aria-label="Inflação da cesta de hortifruti mês sobre mês"
               onClick={handleClick}
               className="absolute -right-6 top-1/2 -translate-y-1/2 inline-flex items-center justify-center cursor-pointer"
               animate={{
@@ -100,8 +100,7 @@ export default function BasketTitle({ selectedMonth }: BasketTitleProps) {
                 }}
               >
                 <span className="block">inflação da cesta</span>
-                <span className="block">básica mensal</span>
-                <span className="block">mês sobre mês</span>
+                <span className="block">de hortifruti MoM</span>
               </span>
             </motion.button>
           )}
@@ -117,13 +116,15 @@ export default function BasketTitle({ selectedMonth }: BasketTitleProps) {
           minHeight: "1.4em",
         }}
       >
-        {selectedMonth ? (() => {
-          const [y, m] = selectedMonth.split("-").map(Number);
-          return new Date(y, m - 1, 1).toLocaleString("pt-BR", {
-            month: "long",
-            year: "numeric",
-          });
-        })() : " "}
+        {selectedMonth
+          ? (() => {
+              const [y, m] = selectedMonth.split("-").map(Number);
+              return new Date(y, m - 1, 1).toLocaleString("pt-BR", {
+                month: "long",
+                year: "numeric",
+              });
+            })()
+          : " "}
       </p>
     </div>
   );

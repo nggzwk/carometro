@@ -2,17 +2,16 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ItemGrid } from "../dashboard/ItemGrid";
-import { BasketFooter } from "../dashboard/BasketFooter";
-import { BasketHeader } from "../dashboard/BasketHeader";
-import BasketHistoryPanel, { BasketHistoryButton } from "../dashboard/BasketHistory";
-import type { BasketSummaryProps } from "../../lib/basketTypes";
-import { inViewMotionProps } from "../../lib/motionPresets";
-import { getVeggieBasketDataForMonth, getVeggieAvailableMonths } from "../../lib/vegetableBasket";
-import ChangeMenu from "../dashboard/ChangeMenu";
-import FeiraoTitle from "./FeiraoTitle";
+import { ItemGrid } from "../ItemGrid";
+import { BasketFooter } from "../BasketFooter";
+import { BasketHeader } from "../BasketHeader";
+import BasketHistoryPanel, { BasketHistoryButton } from "../BasketHistory";
+import type { BasketSummaryProps } from "../../../lib/basketTypes";
+import { inViewMotionProps } from "../../../lib/motionPresets";
+import { getVeggieBasketDataForMonth, getVeggieAvailableMonths } from "../../../lib/vegetableBasket";
+import ChangeMenu from "../ChangeMenu";
+import VegetableTitle from "./VegetableTitle";
 
-const ACCENT = "#A89B8C";
 
 function useHistoricalFeirao(liveProps: BasketSummaryProps) {
   const [selectedMonth, setSelectedMonth] = React.useState<string | null>(null);
@@ -63,7 +62,7 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
   return (
     <div className="w-full text-center flex flex-col items-center">
       <motion.div {...inViewMotionProps} className="mt-8 mb-1">
-        <FeiraoTitle selectedMonth={selectedMonth} />
+        <VegetableTitle selectedMonth={selectedMonth} />
       </motion.div>
 
       <motion.div
@@ -167,6 +166,7 @@ export const FeiraoSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         currentMonthRef={liveProps.items[0]?.month_ref ?? null}
         selectedMonth={selectedMonth}
         onMonthSelect={handleMonthSelect}
+        onClose={() => setIsHistoryOpen(false)}
       />
     </div>
   );

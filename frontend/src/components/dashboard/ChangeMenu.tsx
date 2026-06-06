@@ -7,30 +7,35 @@ const ACCENT = "#A89B8C";
 interface ChangeMenuProps {
   onClick: () => void;
   variant?: "default" | "icon";
+  label?: string;
 }
 
-export default function ChangeMenu({ onClick, variant = "default" }: ChangeMenuProps) {
+export default function ChangeMenu({ onClick, variant = "default", label = "Menu" }: ChangeMenuProps) {
   if (variant === "icon") {
     return (
       <motion.button
         type="button"
         onClick={onClick}
-        whileTap={{ scale: 0.92 }}
+        whileTap={{ scale: 0.90 }}
         animate={{
           boxShadow: [
-            "0 0 0px 0px rgba(168,155,140,0.0), 0 1px 6px rgba(0,0,0,0.02)",
-            "0 0 8px 3px rgba(168,155,140,0.35), 0 1px 6px rgba(0,0,0,0.02)",
-            "0 0 0px 0px rgba(168,155,140,0.0), 0 1px 6px rgba(0,0,0,0.03)",
+            "0 0 0px 0px rgba(168,155,140,0.0)",
+            "0 0 7px 2px rgba(168,155,140,0.30)",
+            "0 0 0px 0px rgba(168,155,140,0.0)",
           ],
         }}
-        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-        className="flex items-center justify-center w-8 h-8 rounded-xl cursor-pointer select-none"
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="flex items-center justify-center cursor-pointer select-none"
         style={{
-          border: `1px solid ${ACCENT}30`,
-          backgroundColor: "#ffffffaf",
+          width: 28,
+          height: 28,
+          borderRadius: "50%",
+          border: "1px solid rgba(0,0,0,0.10)",
+          backgroundColor: "rgba(255,255,255,0.72)",
           backdropFilter: "blur(10px)",
           color: "#1A120B",
-          fontSize: 11,
+          fontSize: 9,
+          letterSpacing: "0.02em",
         }}
       >
         ▶
@@ -39,31 +44,26 @@ export default function ChangeMenu({ onClick, variant = "default" }: ChangeMenuP
   }
 
   return (
-    <div
-      className="flex flex-col rounded-xl overflow-hidden"
-      style={{
-        border: `1px solid ${ACCENT}30`,
-        backgroundColor: "#ffffffaf",
-        backdropFilter: "blur(10px)",
-        boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
-      }}
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileTap={{ scale: 0.97 }}
+      className="flex items-center gap-2 cursor-pointer select-none pb-px"
+      style={{ borderBottom: `1px solid ${ACCENT}55` }}
     >
-      <motion.button
-        type="button"
-        onClick={onClick}
-        whileTap={{ scale: 0.97 }}
-        className="flex items-center justify-center gap-2 px-4 py-1 cursor-pointer select-none w-full"
+      <span
+        className="uppercase whitespace-nowrap"
+        style={{
+          fontFamily: "var(--font-card-summary)",
+          color: ACCENT,
+          fontSize: "0.7rem",
+          letterSpacing: "0.14em",
+          fontWeight: 500,
+        }}
       >
-        <span
-          className="text-xs font-semibold tracking-[0.08em] uppercase whitespace-nowrap"
-          style={{ fontFamily: "var(--font-card-summary)", color: ACCENT }}
-        >
-          Menu
-        </span>
-        <span className="text-[10px] flex-none" style={{ color: "#1A120B" }}>
-          ▶
-        </span>
-      </motion.button>
-    </div>
+        {label}
+      </span>
+      <span style={{ color: "#1A120B", fontSize: 8 }}>▶</span>
+    </motion.button>
   );
 }

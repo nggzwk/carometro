@@ -61,6 +61,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
     const name = (item_name || "").toLowerCase();
     if (name.includes("coxão")) return "CARNE";
     if (name.includes("filé")) return "FRANGO";
+    if (name.includes("abobora") || name.includes("abóbora")) return "Abóbora";
+    if (name.includes("maca") || name.includes("maçã")) return "Maçã";
     return shortName(item_name);
   })();
 
@@ -84,7 +86,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
       }
       className="relative rounded-2xl overflow-hidden h-full cursor-pointer select-none"
       style={{
-        border: `3px solid ${borderColor}`,
+        border: `1px solid ${borderColor}`,
         background: "var(--color-background)",
         boxShadow: isInflation
           ? "0 2px 16px rgba(230,57,70,0.10)"

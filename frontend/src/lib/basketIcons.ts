@@ -16,6 +16,7 @@ const BASKET_ICONS: Record<number, string> = {
   50005: "🥔", // Batata Inglesa
   50002: "🧅", // Cebola
   50079: "🥬", // Alface Americana
+  50080: "🥬", // Alface (fallback — Crespa/Lisa treated as Americana)
   50007: "🥕", // Cenoura
   50021: "🍊", // Laranja Pera
   50017: "🎃", // Abobora
@@ -44,13 +45,14 @@ const ICONS_SUBTITLES: Record<number, string> = {
   10011: "INTEIRO",
   10023: "COXAO MOLE SEM OSSO",
   // Feirao
-  50008: "COMUM",
+  50008: "LONGA VIDA",
   50025: "PRATA",
   50005: "INGLESA",
   50002: "BRANCA",
   50079: "AMERICANA",
+  50080: "AMERICANA",
   50007: "COMUM",
-  50021: "PERA",
+  50021: "PÊRA",
   50017: "CABOTIÁ",
   50029: "GALA",
   50004: "DOCE",

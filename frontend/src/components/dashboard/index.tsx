@@ -8,20 +8,41 @@ import type { BasketSummaryProps } from "../../lib/basketTypes";
 import BasketHeader from "./BasketHeader";
 import BasketHistoryPanel, { BasketHistoryButton } from "./BasketHistory";
 import BasketTitle from "./BasketTitle";
+import FeiraoTitle from "./feirao/VegetableTitle";
 import { useHistoricalBasket } from "../../hooks/useHistoricalBasket";
+import { useHistoricalFeirao } from "../../hooks/useHistoricalFeirao";
 import { inViewMotionProps } from "../../lib/motionPresets";
 import { getAvailableMonths } from "../../lib/basket";
+import { getVeggieAvailableMonths } from "../../lib/vegetableBasket";
 import ChangeMenu from "./ChangeMenu";
 
-const ACCENT = "#A89B8C";
+type View = "basicao" | "feirao";
 
-export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
-  const { selectedMonth, activeData, isLoadingHistory, handleMonthSelect } =
-    useHistoricalBasket(liveProps);
+interface DashboardProps extends BasketSummaryProps {
+  feiraoProps: BasketSummaryProps;
+}
 
+export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, ...liveProps }) => {
+  const basicao = useHistoricalBasket(liveProps);
+  const feirao = useHistoricalFeirao(feiraoProps);
+
+  const [view, setView] = useState<View>("basicao");
   const [months, setMonths] = useState<string[]>([]);
   const [isLoadingMonths, setIsLoadingMonths] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  const active = view === "basicao" ? basicao : feirao;
+  const { selectedMonth, activeData, isLoadingHistory, handleMonthSelect } = active;
+
+  const handleMenuClick = () => {
+    // Close history first
+    if (isHistoryOpen) {
+      setIsHistoryOpen(false);
+      handleMonthSelect(null);
+      setMonths([]);
+    }
+    setView((v) => (v === "basicao" ? "feirao" : "basicao"));
+  };
 
   const handleHistoryToggle = async () => {
     if (isHistoryOpen) {
@@ -30,18 +51,49 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
       return;
     }
     setIsLoadingMonths(true);
-    const available = await getAvailableMonths(new Date().getFullYear());
+    const fn = view === "basicao" ? getAvailableMonths : getVeggieAvailableMonths;
+    const available = await fn(new Date().getFullYear());
     setMonths(available);
     setIsLoadingMonths(false);
     setIsHistoryOpen(true);
   };
 
+  const menuLabel = view === "basicao" ? "Feirão" : "Basicão";
+  const currentMonthRef =
+    view === "basicao"
+      ? liveProps.items[0]?.month_ref ?? null
+      : feiraoProps.items[0]?.month_ref ?? null;
+
   return (
     <div className="w-full text-center flex flex-col items-center">
+      {/* Title — animates when view switches */}
       <motion.div {...inViewMotionProps} className="mt-8 mb-1">
-        <BasketTitle selectedMonth={selectedMonth} />
+        <AnimatePresence mode="wait">
+          {view === "basicao" ? (
+            <motion.div
+              key="basicao-title"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25 }}
+            >
+              <BasketTitle selectedMonth={selectedMonth} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="feirao-title"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25 }}
+            >
+              <FeiraoTitle selectedMonth={selectedMonth} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
+      {/* Card */}
       <motion.div
         {...inViewMotionProps}
         className="w-full overflow-visible rounded-3xl relative"
@@ -54,8 +106,9 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
       >
         {/* Mobile-only: arrow button top-right of card */}
         <div className="absolute top-2 right-2 z-20 sm:hidden">
-          <ChangeMenu variant="icon" onClick={() => {}} />
+          <ChangeMenu variant="icon" onClick={handleMenuClick} />
         </div>
+
         <AnimatePresence>
           {isLoadingHistory && (
             <motion.div
@@ -72,10 +125,7 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 className="w-6 h-6 rounded-full border-2"
-                style={{
-                  borderColor: "#e0aa59",
-                  borderTopColor: "transparent",
-                }}
+                style={{ borderColor: "#e0aa59", borderTopColor: "transparent" }}
               />
             </motion.div>
           )}
@@ -84,13 +134,13 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         <BasketHeader
           totalInflationPct={activeData.totalInflationPct}
           totalValue={activeData.totalValue}
-          annualIpca={activeData.annualIpca}
+          annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
           monthlyIpca={activeData.monthlyIpca}
         />
 
         <AnimatePresence mode="wait">
           <motion.div
-            key={selectedMonth ?? "live"}
+            key={`${view}-${selectedMonth ?? "live"}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -113,11 +163,11 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
 
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
-          annualIpca={activeData.annualIpca}
+          annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
         />
 
-        <div className="flex-1 hidden sm:flex justify-end">
-          <ChangeMenu onClick={() => {}} />
+        <div className="flex-1 flex justify-end">
+          <ChangeMenu label={menuLabel} onClick={handleMenuClick} />
         </div>
       </div>
 
@@ -125,7 +175,7 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
       <div className="w-full flex sm:hidden flex-col items-center px-1">
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
-          annualIpca={activeData.annualIpca}
+          annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
         />
         <div className="pb-2">
           <BasketHistoryButton
@@ -140,9 +190,10 @@ export const BasketSummary: React.FC<BasketSummaryProps> = (liveProps) => {
       <BasketHistoryPanel
         isOpen={isHistoryOpen}
         months={months}
-        currentMonthRef={liveProps.items[0]?.month_ref ?? null}
+        currentMonthRef={currentMonthRef}
         selectedMonth={selectedMonth}
         onMonthSelect={handleMonthSelect}
+        onClose={() => setIsHistoryOpen(false)}
       />
     </div>
   );
