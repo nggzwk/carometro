@@ -67,9 +67,10 @@
 
 .metricsSubtitleLabel {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   color: #A89B8C;
   letter-spacing: 0.3px;
+  font-family: var(--font-card-summary);
 }
 
 @media (max-width: 768px) {

@@ -48,15 +48,23 @@ export default function ChangeMenu({ onClick, variant = "default", label = "Menu
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.97 }}
-      className="flex items-center gap-2 cursor-pointer select-none pb-px"
-      style={{ borderBottom: `1px solid ${ACCENT}55` }}
+      animate={{
+        boxShadow: [
+          "0 0 0px 0px rgba(168,155,140,0.0)",
+          "0 0 8px 2px rgba(168,155,140,0.40)",
+          "0 0 0px 0px rgba(168,155,140,0.0)",
+        ],
+      }}
+      transition={{ duration: 3, repeat: 9, ease: "easeInOut" }}
+      className="flex items-center gap-2 cursor-pointer select-none"
+      style={{ borderBottom: `1px solid ${ACCENT}55`, padding: "4px 8px 4px 6px" }}
     >
       <span
         className="uppercase whitespace-nowrap"
         style={{
           fontFamily: "var(--font-card-summary)",
           color: ACCENT,
-          fontSize: "0.7rem",
+          fontSize: "0.82rem",
           letterSpacing: "0.14em",
           fontWeight: 500,
         }}

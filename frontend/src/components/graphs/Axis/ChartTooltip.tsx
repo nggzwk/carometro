@@ -7,6 +7,7 @@ interface ChartTooltipProps {
   inflation: number | null;
   ipca: number | null;
   wageIncrease: number | null;
+  basePrice: number;
   visible: boolean;
   side?: "below" | "right" | "left";
   onRequestClose: () => void;
@@ -18,12 +19,18 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   inflation,
   ipca,
   wageIncrease,
+  basePrice,
   visible,
   side = "below",
   onRequestClose,
 }) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [clampedX, setClampedX] = useState<number>(x);
+  const [expandedMetric, setExpandedMetric] = useState<"inflation" | "ipca" | "wageIncrease" | null>(null);
+
+  useEffect(() => {
+    setExpandedMetric(null);
+  }, [x, y]);
 
   useEffect(() => {
     if (!visible) return;
@@ -78,9 +85,14 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
     return `0.00%`;
   };
 
+  const formatBRL = (value: number | null) => {
+    if (value === null || basePrice === 0) return null;
+    const brl = basePrice * (1 + value / 100);
+    return brl.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  };
+
   const DOT_RADIUS = 20;
   const GAP = 6;
-  const TOOLTIP_HEIGHT = 80;
 
   const positionStyle =
     side === "right"
@@ -89,23 +101,39 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
       ? { left: x - DOT_RADIUS - GAP, top: y, transform: "translate(-100%, -50%)" }
       : { left: clampedX, top: y + DOT_RADIUS + GAP, transform: "translate(-50%, 0)" };
 
+  const metrics: { key: "inflation" | "ipca" | "wageIncrease"; color: string; value: number | null }[] = [
+    { key: "inflation", color: "#e0aa59", value: inflation },
+    { key: "wageIncrease", color: "#2563eb", value: wageIncrease },
+    { key: "ipca", color: "#b300ff", value: ipca },
+  ];
+
   return (
     <div
       ref={tooltipRef}
-      className={`${styles.tooltip} ${side === "right" ? styles.tooltipRight : side === "left" ? styles.tooltipLeft : ""}`}
+      className={`${styles.tooltipAnchor} ${side === "right" ? styles.tooltipRight : side === "left" ? styles.tooltipLeft : ""}`}
       style={positionStyle}
     >
-      <div className={styles.metric} style={{ color: "#e0aa59" }}>
-        <span className={styles.label}>INFLAÇÃO</span>
-        <span className={styles.value}>{formatValue(inflation)}</span>
-      </div>
-      <div className={styles.metric} style={{ color: "#b300ff" }}>
-        <span className={styles.label}>IPCA</span>
-        <span className={styles.value}>{formatValue(ipca)}</span>
-      </div>
-      <div className={styles.metric} style={{ color: "#2563eb" }}>
-        <span className={styles.label}>SALÁRIO</span>
-        <span className={styles.value}>{formatValue(wageIncrease)}</span>
+      <div className={styles.tooltip}>
+        {metrics.map(({ key, color, value }) => {
+          const brl = key !== "ipca" ? formatBRL(value) : null;
+          const isExpanded = expandedMetric === key;
+          return (
+            <div
+              key={key}
+              className={`${styles.metric} ${brl ? styles.metricClickable : ""}`}
+              style={{ color }}
+              onClick={brl ? () => setExpandedMetric(isExpanded ? null : key) : undefined}
+            >
+              <span className={styles.square} style={{ backgroundColor: color }} />
+              <div className={styles.metricValues}>
+                <span className={styles.value}>{formatValue(value)}</span>
+                {isExpanded && brl && (
+                  <span className={styles.brlValue}>{brl}</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

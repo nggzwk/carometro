@@ -42,8 +42,10 @@ export default function AxisGraph() {
   ] as const;
 
   const [data, setData] = useState<DataPoint[]>([]);
+  const [basePrice, setBasePrice] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -51,16 +53,21 @@ export default function AxisGraph() {
       const rows = await getAnnualInflation();
       if (!rows || !mounted) return;
       const basePrice = Number(rows[0]?.start_month_value_brl ?? 0);
+      setBasePrice(basePrice);
 
       let cumulativeIpca = 0;
       let cumulativeWage = 0;
+      let cumulativeDieese = 0;
 
       const series = rows.map((r, i) => {
-        const annualIpca = r.annual_ipca_pct === null ? null : Number(r.annual_ipca_pct);
+        const annualIpca =
+          r.annual_ipca_pct === null ? null : Number(r.annual_ipca_pct);
         const annualWage =
           r.annual_minimum_wage_increase_pct == null
             ? null
             : Number(r.annual_minimum_wage_increase_pct);
+        const annualDieese =
+          r.annual_inflation_pct === null ? null : Number(r.annual_inflation_pct);
 
         if (annualIpca !== null)
           cumulativeIpca =
@@ -72,8 +79,14 @@ export default function AxisGraph() {
             i === 0
               ? annualWage
               : (1 + cumulativeWage / 100) * (1 + annualWage / 100) * 100 - 100;
+        if (annualDieese !== null)
+          cumulativeDieese =
+            i === 0
+              ? annualDieese
+              : (1 + cumulativeDieese / 100) * (1 + annualDieese / 100) * 100 - 100;
 
-        const endPrice = r.end_month_value_brl === null ? null : Number(r.end_month_value_brl);
+        const endPrice =
+          r.end_month_value_brl === null ? null : Number(r.end_month_value_brl);
         const basketGrowth =
           endPrice === null || basePrice === 0
             ? null
@@ -82,9 +95,11 @@ export default function AxisGraph() {
         return {
           year: String(r.year),
           value: basketGrowth !== null ? Number(basketGrowth.toFixed(2)) : null,
-          inflation: r.annual_inflation_pct === null ? null : Number(r.annual_inflation_pct),
+          inflation:
+            annualDieese !== null ? Number(cumulativeDieese.toFixed(2)) : null,
           ipca: annualIpca !== null ? Number(cumulativeIpca.toFixed(2)) : null,
-          wageIncrease: annualWage !== null ? Number(cumulativeWage.toFixed(2)) : null,
+          wageIncrease:
+            annualWage !== null ? Number(cumulativeWage.toFixed(2)) : null,
         };
       });
       setData(series);
@@ -96,6 +111,7 @@ export default function AxisGraph() {
 
   const handleDotInteraction = (index: number, cx: number, cy: number) => {
     setHoveredIndex(index);
+    setPinnedIndex(index);
 
     const point = data[index];
     if (!point) return;
@@ -111,6 +127,24 @@ export default function AxisGraph() {
   };
 
   const handleDotLeave = () => {
+    if (pinnedIndex !== null) return;
+    setHoveredIndex(null);
+    setTooltipData(null);
+  };
+
+  const handleDotClick = (index: number, cx: number, cy: number) => {
+    if (pinnedIndex === index) {
+      setPinnedIndex(null);
+      setHoveredIndex(null);
+      setTooltipData(null);
+    } else {
+      setPinnedIndex(index);
+      handleDotInteraction(index, cx, cy);
+    }
+  };
+
+  const handleRequestClose = () => {
+    setPinnedIndex(null);
     setHoveredIndex(null);
     setTooltipData(null);
   };
@@ -129,7 +163,8 @@ export default function AxisGraph() {
         isHovered={hoveredIndex === index}
         onMouseEnter={() => handleDotInteraction(index, cx, cy)}
         onMouseLeave={handleDotLeave}
-        onClick={() => handleDotInteraction(index, cx, cy)}
+        onClick={() => handleDotClick(index, cx, cy)}
+        onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
       />
     );
   };
@@ -146,34 +181,12 @@ export default function AxisGraph() {
   return (
     <div className="relative w-full">
       <div className="flex flex-col items-center leading-none mb-4">
-      <h1
-        className={`${styles.title} relative flex w-full items-start justify-center text-3xl sm:text-4xl font-bold tracking-tight`}
-        style={{
-          fontFamily: "var(--font-header)",
-          color: "#1A120B",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        <span className="relative inline-flex items-center">COMPARATIVO</span>
-      </h1>
-      </div>
-      <div className={styles.metricsSubtitle}>
-        {metricsSubtitle.map((metric) => (
-          <div key={metric.label} className={styles.metricsSubtitleItem}>
-            <span
-              className={styles.metricsSubtitleSquare}
-              style={{ backgroundColor: metric.color }}
-              aria-hidden="true"
-            />
-            <span className={styles.metricsSubtitleLabel}>{metric.label}</span>
-          </div>
-        ))}
       </div>
       <div
         className={`relative w-full ${styles.chartNoSelect}`}
         aria-label="Gráfico de inflação anual"
       >
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="100%" height={420}>
           <LineChart
             data={data}
             margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
@@ -200,7 +213,7 @@ export default function AxisGraph() {
             <XAxis
               dataKey="year"
               stroke="#8B7355"
-              tick={{ fill: "#8B7355", fontSize: 13 }}
+              tick={{ fill: "#8B7355", fontSize: 13, fontFamily: "var(--font-card-summary)" }}
               tickMargin={10}
               axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
@@ -209,29 +222,27 @@ export default function AxisGraph() {
             <YAxis
               yAxisId="pct"
               stroke="#8B7355"
-              tick={{ fill: "#8B7355", fontSize: 13 }}
+              tick={{ fill: "#8B7355", fontSize: 13, fontFamily: "var(--font-card-summary)" }}
               tickFormatter={(v) => `${v}%`}
-              width={45}
+              width={62}
               tickMargin={4}
-              domain={[0, "dataMax + 3"]}
+              domain={[0, "dataMax"]}
               axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
 
-            <YAxis yAxisId="price" hide domain={[0, "dataMax + 3"]} />
-
-<Area
-              yAxisId="price"
+            <Area
+              yAxisId="pct"
               type="monotone"
-              dataKey="value"
+              dataKey="inflation"
               stroke="none"
               fill="url(#inflationGradient)"
               isAnimationActive={false}
             />
 
             <Line
-              yAxisId="price"
+              yAxisId="pct"
               type="monotone"
-              dataKey="value"
+              dataKey="inflation"
               stroke="#e0aa59"
               strokeWidth={3}
               dot={renderDot}
@@ -274,17 +285,30 @@ export default function AxisGraph() {
             inflation={tooltipData.inflation}
             ipca={tooltipData.ipca}
             wageIncrease={tooltipData.wageIncrease}
+            basePrice={basePrice}
             side={
               tooltipData.index === data.length - 1
                 ? "left"
                 : tooltipData.y > 250
-                ? "right"
-                : "below"
+                  ? "right"
+                  : "below"
             }
             visible={true}
-            onRequestClose={handleDotLeave}
+            onRequestClose={handleRequestClose}
           />
         )}
+      </div>
+      <div className={`${styles.metricsSubtitle} flex justify-center gap-6 mt-4 flex-wrap`}>
+        {metricsSubtitle.map((metric) => (
+          <div key={metric.label} className={styles.metricsSubtitleItem}>
+            <span
+              className={`${styles.metricsSubtitleSquare}`}
+              style={{ backgroundColor: metric.color }}
+              aria-hidden="true"
+            />
+            <span className={styles.metricsSubtitleLabel}>{metric.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

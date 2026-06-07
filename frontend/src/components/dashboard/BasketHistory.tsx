@@ -32,7 +32,7 @@ export function BasketHistoryButton({ isOpen, isLoading, onToggle }: BasketHisto
         style={{
           fontFamily: "var(--font-card-summary)",
           color: ACCENT,
-          fontSize: "0.7rem",
+          fontSize: "0.82rem",
           letterSpacing: "0.14em",
           fontWeight: 500,
         }}

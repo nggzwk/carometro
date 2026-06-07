@@ -27,7 +27,6 @@ export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: Bas
     }
   };
 
-  // Click outside → dismiss
   useEffect(() => {
     if (!showTooltip) return;
     const handler = (e: MouseEvent) => {
@@ -81,10 +80,10 @@ export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: Bas
                   : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
               }
             >
-              <BsFillQuestionDiamondFill className="text-[15px] flex-shrink-0" style={{ color: "#A89B8C" }} />
+              <BsFillQuestionDiamondFill className="text-[19px] flex-shrink-0" style={{ color: "#A89B8C" }} />
 
               <span
-                className="pointer-events-none absolute left-full top-1/2 z-20 ml-2 inline-flex w-32 -translate-y-1/2 flex-col items-start rounded-2xl border border-[#D8CFC4] bg-white px-3 py-2 text-left text-[8px] font-medium uppercase not-italic leading-tight tracking-[0.08em] text-[#5C5146] shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200"
+                className="pointer-events-none absolute left-full top-1/2 z-20 ml-2 inline-flex w-40 -translate-y-1/2 flex-col items-start rounded-2xl border border-[#D8CFC4] bg-white px-4 py-2.5 text-left text-[10px] font-medium uppercase not-italic leading-tight tracking-[0.08em] text-[#5C5146] shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200"
                 style={{
                   opacity: showTooltip ? 1 : 0,
                   transform: showTooltip
