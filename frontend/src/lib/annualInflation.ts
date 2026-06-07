@@ -82,6 +82,25 @@ export async function getAnnualMinimumWageIncrease(): Promise<
   }
 }
 
+export async function getBaseMinimumWage(): Promise<number | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/basket/wage`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+
+    const wageRows = (await res.json()) as WageRow[];
+    if (!wageRows.length) return null;
+
+    const sorted = [...wageRows].sort((a, b) =>
+      String(a.month_ref).localeCompare(String(b.month_ref))
+    );
+    return toNumber(sorted[0].minimum_wage_brl);
+  } catch {
+    return null;
+  }
+}
+
 export async function getAnnualInflation(): Promise<AnnualRow[] | null> {
   try {
     const [inflationRes, wageIncreaseByYear] = await Promise.all([

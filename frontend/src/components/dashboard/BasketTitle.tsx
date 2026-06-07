@@ -6,11 +6,14 @@ import { BsFillQuestionDiamondFill } from "react-icons/bs";
 
 interface BasketTitleProps {
   selectedMonth: string | null;
+  currentMonthRef?: string | null;
+  isHistoryOpen?: boolean;
   dismissed: boolean;
   onDismiss: () => void;
 }
 
-export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: BasketTitleProps) {
+export default function BasketTitle({ selectedMonth, currentMonthRef, isHistoryOpen, dismissed, onDismiss }: BasketTitleProps) {
+  const displayMonth = selectedMonth ?? (isHistoryOpen ? currentMonthRef : null);
   const [showTooltip, setShowTooltip] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -92,7 +95,7 @@ export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: Bas
                 }}
               >
                 <span className="block">inflação da cesta</span>
-                <span className="block">básica mensal MoM</span>
+                <span className="block">básica mensal</span>
               </span>
             </motion.button>
           )}
@@ -104,12 +107,12 @@ export default function BasketTitle({ selectedMonth, dismissed, onDismiss }: Bas
         style={{
           color: "#A89B8C",
           fontFamily: "var(--font-card-summary)",
-          visibility: selectedMonth ? "visible" : "hidden",
+          visibility: displayMonth ? "visible" : "hidden",
           minHeight: "1.4em",
         }}
       >
-        {selectedMonth ? (() => {
-          const [y, m] = selectedMonth.split("-").map(Number);
+        {displayMonth ? (() => {
+          const [y, m] = displayMonth.split("-").map(Number);
           return new Date(y, m - 1, 1).toLocaleString("pt-BR", {
             month: "long",
             year: "numeric",

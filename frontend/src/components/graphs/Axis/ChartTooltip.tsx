@@ -8,6 +8,7 @@ interface ChartTooltipProps {
   ipca: number | null;
   wageIncrease: number | null;
   basePrice: number;
+  baseSalary?: number;
   visible: boolean;
   side?: "below" | "right" | "left";
   onRequestClose: () => void;
@@ -20,6 +21,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   ipca,
   wageIncrease,
   basePrice,
+  baseSalary = 0,
   visible,
   side = "below",
   onRequestClose,
@@ -85,9 +87,9 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
     return `0.00%`;
   };
 
-  const formatBRL = (value: number | null) => {
-    if (value === null || basePrice === 0) return null;
-    const brl = basePrice * (1 + value / 100);
+  const formatBRL = (value: number | null, base: number) => {
+    if (value === null || base === 0) return null;
+    const brl = base * (1 + value / 100);
     return brl.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
 
@@ -115,7 +117,11 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
     >
       <div className={styles.tooltip}>
         {metrics.map(({ key, color, value }) => {
-          const brl = key !== "ipca" ? formatBRL(value) : null;
+          const brl = key === "inflation"
+            ? formatBRL(value, basePrice)
+            : key === "wageIncrease"
+            ? formatBRL(value, baseSalary)
+            : null;
           const isExpanded = expandedMetric === key;
           return (
             <div

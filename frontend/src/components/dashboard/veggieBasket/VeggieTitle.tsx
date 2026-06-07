@@ -6,11 +6,14 @@ import { BsFillQuestionDiamondFill } from "react-icons/bs";
 
 interface VeggieTitleProps {
   selectedMonth: string | null;
+  currentMonthRef?: string | null;
+  isHistoryOpen?: boolean;
   dismissed: boolean;
   onDismiss: () => void;
 }
 
-export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: VeggieTitleProps) {
+export default function VeggieTitle({ selectedMonth, currentMonthRef, isHistoryOpen, dismissed, onDismiss }: VeggieTitleProps) {
+  const displayMonth = selectedMonth ?? (isHistoryOpen ? currentMonthRef : null);
   const [showTooltip, setShowTooltip] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -92,7 +95,7 @@ export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: Veg
                 }}
               >
                 <span className="block">inflação da cesta</span>
-                <span className="block">de hortifruti MoM</span>
+                <span className="block">de hortifruti</span>
               </span>
             </motion.button>
           )}
@@ -104,13 +107,13 @@ export default function VeggieTitle({ selectedMonth, dismissed, onDismiss }: Veg
         style={{
           color: "#A89B8C",
           fontFamily: "var(--font-card-summary)",
-          visibility: selectedMonth ? "visible" : "hidden",
+          visibility: displayMonth ? "visible" : "hidden",
           minHeight: "1.4em",
         }}
       >
-        {selectedMonth
+        {displayMonth
           ? (() => {
-              const [y, m] = selectedMonth.split("-").map(Number);
+              const [y, m] = displayMonth.split("-").map(Number);
               return new Date(y, m - 1, 1).toLocaleString("pt-BR", {
                 month: "long",
                 year: "numeric",

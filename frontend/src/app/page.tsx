@@ -1,4 +1,5 @@
 import UpdateBanner from "../components/shared/UpdateBanner";
+import Menu from "../components/shared/Menu";
 import DashboardWrapper from "../components/DashboardWrapper";
 import { getBasketSummaryProps } from "../lib/basket";
 import { getVeggieBasketSummaryProps } from "../lib/veggieBasket";
@@ -20,6 +21,7 @@ export default async function Home() {
       <UpdateBanner />
 
       <header>
+        <Menu />
         <section
           className="space-y-1 w-full flex flex-col items-center text-center mt-6 md:mt-8"
           aria-labelledby="carometro-title"
@@ -32,13 +34,12 @@ export default async function Home() {
           </h1>
 
           <div
-            className="w-[80vw] h-[1px] bg-black mt-0 mb-1 mx-auto"
+            className="w-[60vw] h-[0.5px] bg-black mt-0 mb-1 mx-auto" 
             aria-hidden="true"
           />
 
           <p
-            className="small-header text-xs uppercase tracking-[0.20em]"
-            style={{ fontStyle: "italic" }}
+            className="small-header text-xs uppercase tracking-widest"
           >
             a inflação da cesta básica curitibana
           </p>

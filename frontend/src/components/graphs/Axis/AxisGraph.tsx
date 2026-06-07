@@ -11,7 +11,7 @@ import {
   ReferenceLine,
   Area,
 } from "recharts";
-import getAnnualInflation from "../../../lib/annualInflation";
+import getAnnualInflation, { getBaseMinimumWage } from "../../../lib/annualInflation";
 import { basketTypesIcons } from "../../../lib/basketIcons";
 import { ChartDot } from "./ChartDot";
 import { ChartTooltip } from "./ChartTooltip";
@@ -43,6 +43,7 @@ export default function AxisGraph() {
 
   const [data, setData] = useState<DataPoint[]>([]);
   const [basePrice, setBasePrice] = useState<number>(0);
+  const [baseSalary, setBaseSalary] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
   const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
@@ -50,10 +51,14 @@ export default function AxisGraph() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const rows = await getAnnualInflation();
+      const [rows, baseWage] = await Promise.all([
+        getAnnualInflation(),
+        getBaseMinimumWage(),
+      ]);
       if (!rows || !mounted) return;
       const basePrice = Number(rows[0]?.start_month_value_brl ?? 0);
       setBasePrice(basePrice);
+      setBaseSalary(baseWage ?? 0);
 
       let cumulativeIpca = 0;
       let cumulativeWage = 0;
@@ -286,6 +291,7 @@ export default function AxisGraph() {
             ipca={tooltipData.ipca}
             wageIncrease={tooltipData.wageIncrease}
             basePrice={basePrice}
+            baseSalary={baseSalary}
             side={
               tooltipData.index === data.length - 1
                 ? "left"

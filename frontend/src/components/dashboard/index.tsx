@@ -80,7 +80,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.25 }}
             >
-              <BasketTitle selectedMonth={selectedMonth} dismissed={basicaoDismissed} onDismiss={() => setBasicaoDismissed(true)} />
+              <BasketTitle selectedMonth={selectedMonth} currentMonthRef={currentMonthRef} isHistoryOpen={isHistoryOpen} dismissed={basicaoDismissed} onDismiss={() => setBasicaoDismissed(true)} />
             </motion.div>
           ) : (
             <motion.div
@@ -90,7 +90,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.25 }}
             >
-              <VeggieTitle selectedMonth={selectedMonth} dismissed={feiraoDismissed} onDismiss={() => setFeiraoDismissed(true)} />
+              <VeggieTitle selectedMonth={selectedMonth} currentMonthRef={currentMonthRef} isHistoryOpen={isHistoryOpen} dismissed={feiraoDismissed} onDismiss={() => setFeiraoDismissed(true)} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -158,6 +158,8 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
             isOpen={isHistoryOpen}
             isLoading={isLoadingMonths}
             onToggle={handleHistoryToggle}
+            currentMonthRef={currentMonthRef}
+            selectedMonth={selectedMonth}
           />
         </div>
 
@@ -181,6 +183,8 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
             isOpen={isHistoryOpen}
             isLoading={isLoadingMonths}
             onToggle={handleHistoryToggle}
+            currentMonthRef={currentMonthRef}
+            selectedMonth={selectedMonth}
           />
         </div>
       </div>
