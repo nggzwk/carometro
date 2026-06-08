@@ -166,6 +166,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
           annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
+          ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
         />
 
         <div className="flex-1 flex justify-end">
@@ -177,6 +178,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
           annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
+          ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
         />
         <div className="pb-2">
           <BasketHistoryButton

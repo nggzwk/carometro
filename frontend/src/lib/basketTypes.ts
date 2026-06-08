@@ -21,4 +21,5 @@ export type BasketSummaryProps = {
   totalInflationPct: number;
   monthlyIpca: number | null;
   annualIpca: number | null;
+  ipcaMonthRef: string | null;
 };

@@ -8,29 +8,15 @@ const MONTHS_PT = [
   "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
 ];
 
-const getBannerMessage = (latestMonthRef: string | null): string => {
-  if (!latestMonthRef) return "próxima atualização em breve";
+const nextMonth = new Date();
+nextMonth.setMonth(nextMonth.getMonth() + 1);
+const BANNER_MESSAGE = `próxima atualização em 5 de ${MONTHS_PT[nextMonth.getMonth()]}`;
 
-  const [year, month] = latestMonthRef.split("-").map(Number);
-  const dataDate = new Date(year, month, 1);
-  const publishDate = new Date(year, month + 1, 19);
-
-  const dataMonthName = MONTHS_PT[dataDate.getMonth()];
-  const publishMonthName = MONTHS_PT[publishDate.getMonth()];
-
-  return `atualização de ${dataMonthName} ocorrerá em 19 de ${publishMonthName}`;
-};
-
-interface UpdateBannerProps {
-  latestMonthRef?: string | null;
-}
-
-const UpdateBanner: React.FC<UpdateBannerProps> = ({ latestMonthRef = null }) => {
+const UpdateBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [done, setDone] = useState(false);
   const [paused, setPaused] = useState(false);
   const iterationsRef = useRef(0);
-  const bannerMessage = getBannerMessage(latestMonthRef);
 
   useEffect(() => {
     setVisible(true);
@@ -59,7 +45,7 @@ const UpdateBanner: React.FC<UpdateBannerProps> = ({ latestMonthRef = null }) =>
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="fixed top-0 left-0 w-full z-50 bg-[#f2f2f2af] py-2 md:py-3 overflow-hidden"
           >
-            <div className="banner-marquee" aria-label={bannerMessage}>
+            <div className="banner-marquee" aria-label={BANNER_MESSAGE}>
               <div
                 className="banner-marquee-track"
                 style={{ animationPlayState: paused ? "paused" : "running" }}
@@ -67,12 +53,12 @@ const UpdateBanner: React.FC<UpdateBannerProps> = ({ latestMonthRef = null }) =>
               >
                 <div className="banner-marquee-group">
                   <span className="banner-marquee-text text-black text-base md:text-lg font-light lowercase whitespace-nowrap">
-                    {bannerMessage}
+                    {BANNER_MESSAGE}
                   </span>
                 </div>
                 <div className="banner-marquee-group" aria-hidden="true">
                   <span className="banner-marquee-text text-black text-base md:text-lg font-light lowercase whitespace-nowrap">
-                    {bannerMessage}
+                    {BANNER_MESSAGE}
                   </span>
                 </div>
               </div>

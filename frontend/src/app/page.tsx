@@ -1,25 +1,24 @@
 import UpdateBanner from "../components/shared/UpdateBanner";
 import Menu from "../components/shared/Menu";
 import DashboardWrapper from "../components/DashboardWrapper";
-import { getBasketSummaryProps, getLatestMonthRef } from "../lib/basket";
+import { getBasketSummaryProps } from "../lib/basket";
 import { getVeggieBasketSummaryProps } from "../lib/veggieBasket";
 import { getLatestVillainsMonth, getLatestFeiraoVillains } from "../lib/villains";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
 
 export default async function Home() {
-  const [basketSummary, feiraoSummary, feiraoVillains, basicaoVillains, latestMonthRef] =
+  const [basketSummary, feiraoSummary, feiraoVillains, basicaoVillains] =
     await Promise.all([
       getBasketSummaryProps(),
       getVeggieBasketSummaryProps(),
       getLatestFeiraoVillains(),
       getLatestVillainsMonth(),
-      getLatestMonthRef(),
     ]);
 
   return (
     <div className="min-h-screen bg-brand text-black overflow-x-hidden">
-      <UpdateBanner latestMonthRef={latestMonthRef} />
+      <UpdateBanner />
 
       <header>
         <Menu />

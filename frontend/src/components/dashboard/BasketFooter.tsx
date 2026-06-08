@@ -3,11 +3,21 @@ import React from "react";
 interface BasketFooterProps {
   monthlyIpca: number | null;
   annualIpca: number | null;
+  ipcaMonthRef: string | null;
+}
+
+function formatMonthName(monthRef: string): string {
+  const [year, month] = monthRef.split("-").map(Number);
+  return new Date(year, month - 1, 1)
+    .toLocaleString("pt-BR", { month: "long" })
+    .replace(".", "")
+    .toUpperCase();
 }
 
 export const BasketFooter: React.FC<BasketFooterProps> = ({
   monthlyIpca,
   annualIpca,
+  ipcaMonthRef,
 }) => {
   try {
     return (
@@ -27,11 +37,21 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
           </span>
         </div>
 
-        <div
-          className="text-[12px] font-semibold tracking-tighter uppercase"
-          style={{ color: "#C4B8AC", fontFamily: "var(--font-card-summary)" }}
-        >
-          IPCA
+        <div className="relative flex items-center">
+          <div
+            className="text-[12px] font-semibold tracking-widest uppercase leading-none"
+            style={{ color: "#C4B8AC", fontFamily: "var(--font-card-summary)" }}
+          >
+            IPCA
+          </div>
+          {ipcaMonthRef && (
+            <div
+              className="absolute top-full left-1/2 -translate-x-1/2 pt-0.5 text-[9px] uppercase tracking-wide whitespace-nowrap"
+              style={{ color: "#998f85", fontFamily: "var(--font-card-summary)" }}
+            >
+              {formatMonthName(ipcaMonthRef)}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

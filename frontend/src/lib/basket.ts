@@ -68,6 +68,9 @@ export async function getBasketDataForMonth(
       : [];
 
     const latestInflation = inflationData[0];
+    const latestIpcaEntry = inflationData.find(
+      (e) => e.ipca_monthly_pct !== null && e.annual_ipca_pct !== null
+    ) ?? null;
 
     return {
       items: itemsData.items.map((item) => ({
@@ -78,8 +81,9 @@ export async function getBasketDataForMonth(
       })),
       totalValue: latestInflation?.basket_difference_brl ?? 0,
       totalInflationPct: latestInflation?.inflation_pct ?? 0,
-      monthlyIpca: latestInflation?.ipca_monthly_pct ?? null,
-      annualIpca: latestInflation?.annual_ipca_pct ?? null,
+      monthlyIpca: latestIpcaEntry?.ipca_monthly_pct ?? null,
+      annualIpca: latestIpcaEntry?.annual_ipca_pct ?? null,
+      ipcaMonthRef: latestIpcaEntry?.month_ref ?? null,
     };
   } catch {
     return null;
@@ -104,14 +108,17 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
         totalInflationPct: 0,
         monthlyIpca: null,
         annualIpca: null,
+        ipcaMonthRef: null,
       };
     }
 
     const itemsData = (await itemsResponse.json()) as BasketItemsApiResponse;
     const inflationData = (await inflationResponse.json()) as BasketInflationApiResponse;
 
-    const firstItem = itemsData.items[0];
     const latestInflation = inflationData[0];
+    const latestIpcaEntry = inflationData.find(
+      (e) => e.ipca_monthly_pct !== null && e.annual_ipca_pct !== null
+    ) ?? null;
 
     return {
       items: itemsData.items.map((item) => ({
@@ -122,8 +129,9 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
       })),
       totalValue: latestInflation?.basket_difference_brl ?? 0,
       totalInflationPct: latestInflation?.inflation_pct ?? 0,
-      monthlyIpca: firstItem?.ipca_monthly_pct ?? latestInflation?.ipca_monthly_pct ?? null,
-      annualIpca: latestInflation?.annual_ipca_pct ?? null,
+      monthlyIpca: latestIpcaEntry?.ipca_monthly_pct ?? null,
+      annualIpca: latestIpcaEntry?.annual_ipca_pct ?? null,
+      ipcaMonthRef: latestIpcaEntry?.month_ref ?? null,
     };
   } catch {
     return {
@@ -132,6 +140,7 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
       totalInflationPct: 0,
       monthlyIpca: null,
       annualIpca: null,
+      ipcaMonthRef: null,
     };
   }
 }

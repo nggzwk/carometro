@@ -135,6 +135,7 @@ export const VeggieSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
           annualIpca={activeData.annualIpca}
+          ipcaMonthRef={activeData.ipcaMonthRef}
         />
 
         <div className="flex-1 hidden sm:flex justify-end">
@@ -146,6 +147,7 @@ export const VeggieSummary: React.FC<BasketSummaryProps> = (liveProps) => {
         <BasketFooter
           monthlyIpca={activeData.monthlyIpca}
           annualIpca={activeData.annualIpca}
+          ipcaMonthRef={activeData.ipcaMonthRef}
         />
         <div className="pb-2">
           <BasketHistoryButton

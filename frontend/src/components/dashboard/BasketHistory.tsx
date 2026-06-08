@@ -16,9 +16,13 @@ interface BasketHistoryButtonProps {
   isOpen: boolean;
   isLoading: boolean;
   onToggle: () => void;
+  currentMonthRef?: string | null;
+  selectedMonth?: string | null;
 }
 
-export function BasketHistoryButton({ isOpen, isLoading, onToggle }: BasketHistoryButtonProps) {
+export function BasketHistoryButton({ isOpen, isLoading, onToggle, currentMonthRef, selectedMonth }: BasketHistoryButtonProps) {
+  const subtitleMonth = selectedMonth ?? (isOpen ? currentMonthRef : null);
+  const subtitle = subtitleMonth ? formatMonthLabel(subtitleMonth) : null;
   return (
     <motion.button
       type="button"
@@ -56,6 +60,27 @@ export function BasketHistoryButton({ isOpen, isLoading, onToggle }: BasketHisto
           ▶
         </motion.span>
       )}
+      <AnimatePresence>
+        {subtitle && (
+          <motion.span
+            key={subtitle}
+            initial={{ opacity: 0, x: -4 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -4 }}
+            transition={{ duration: 0.2 }}
+            className="uppercase whitespace-nowrap"
+            style={{
+              fontFamily: "var(--font-card-summary)",
+              color: ACCENT,
+              fontSize: "0.82rem",
+              letterSpacing: "0.14em",
+              fontWeight: 500,
+            }}
+          >
+            {subtitle}
+          </motion.span>
+        )}
+      </AnimatePresence>
     </motion.button>
   );
 }

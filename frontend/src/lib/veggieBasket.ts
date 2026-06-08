@@ -85,6 +85,7 @@ export async function getVeggieBasketSummaryProps(): Promise<BasketSummaryProps>
     totalInflationPct: 0,
     monthlyIpca: null,
     annualIpca: null,
+    ipcaMonthRef: null,
   };
 
   try {
@@ -113,6 +114,7 @@ export async function getVeggieBasketSummaryProps(): Promise<BasketSummaryProps>
       totalInflationPct,
       monthlyIpca: items[0]?.ipca_monthly_pct ?? null,
       annualIpca: null,
+      ipcaMonthRef: null,
     };
   } catch {
     return empty;
@@ -148,6 +150,7 @@ export async function getVeggieBasketDataForMonth(
       totalInflationPct,
       monthlyIpca: items[0]?.ipca_monthly_pct ?? null,
       annualIpca: null,
+      ipcaMonthRef: null,
     };
   } catch {
     return null;
