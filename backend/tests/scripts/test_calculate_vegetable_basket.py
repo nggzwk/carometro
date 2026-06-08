@@ -153,7 +153,9 @@ def test_basket_value_sums_all_items(conn):
     with patch.object(cvb, "_unit_price", side_effect=mock_unit_price):
         result = cvb._basket_value(conn, items, "2026-04")
 
-    assert result == Decimal("14.54")
+    # 50008 multiplier=1.15: 8.75*1.15=10.0625; 50005 multiplier=1.12: 5.79*1.12=6.4848
+    expected = Decimal("8.75") * cvb.VEGGIE_MULTIPLIERS[50008] + Decimal("5.79") * cvb.VEGGIE_MULTIPLIERS[50005]
+    assert result == expected
 
 
 def test_basket_value_skips_items_without_price(conn):
@@ -165,7 +167,9 @@ def test_basket_value_skips_items_without_price(conn):
     with patch.object(cvb, "_unit_price", side_effect=mock_unit_price):
         result = cvb._basket_value(conn, items, "2026-04")
 
-    assert result == Decimal("8.75")
+    # 50099 has no price (skipped); 50008 multiplier=1.15
+    expected = Decimal("8.75") * cvb.VEGGIE_MULTIPLIERS[50008]
+    assert result == expected
 
 
 def test_basket_value_returns_none_when_no_prices(conn):
