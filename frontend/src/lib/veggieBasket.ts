@@ -62,6 +62,16 @@ export type VeggieBasketApiResponse = {
   }>;
 };
 
+export type VeggieInflationApiResponse = Array<{
+  month_ref: string;
+  actual_month_value_brl: number;
+  previous_month_value_brl: number | null;
+  basket_difference_brl: number | null;
+  inflation_pct: number | null;
+  ipca_monthly_pct: number | null;
+  annual_ipca_pct: number | null;
+}>;
+
 export async function getVeggieBasketItems(
   month_ref?: string
 ): Promise<VeggieBasketApiResponse | null> {
@@ -89,32 +99,39 @@ export async function getVeggieBasketSummaryProps(): Promise<BasketSummaryProps>
   };
 
   try {
-    const data = await getVeggieBasketItems();
-    if (!data) return empty;
+    const [itemsResponse, inflationResponse] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/vegetable-basket/items/price`, {
+        cache: "no-store",
+      }),
+      fetch(`${API_BASE_URL}/api/vegetable-basket/inflation/month`, {
+        cache: "no-store",
+      }),
+    ]);
 
-    const items: BasketItemData[] = data.items.map((item) => ({
-      ...item,
-      month_price: item.month_price === null ? "0" : String(item.month_price),
-      previous_price:
-        item.previous_price === null ? null : String(item.previous_price),
-    }));
+    if (!itemsResponse.ok || !inflationResponse.ok) {
+      return empty;
+    }
 
-    const totalInflationPct =
-      items.reduce((sum, item) => sum + (item.mom_pct ?? 0), 0) /
-      (items.filter((i) => i.mom_pct !== null).length || 1);
+    const itemsData = (await itemsResponse.json()) as VeggieBasketApiResponse;
+    const inflationData = (await inflationResponse.json()) as VeggieInflationApiResponse;
 
-    const totalValue = items.reduce(
-      (sum, item) => sum + parseFloat(item.month_price || "0"),
-      0
-    );
+    const latestInflation = inflationData[0];
+    const latestIpcaEntry = inflationData.find(
+      (e) => e.ipca_monthly_pct !== null && e.annual_ipca_pct !== null
+    ) ?? null;
 
     return {
-      items,
-      totalValue,
-      totalInflationPct,
-      monthlyIpca: items[0]?.ipca_monthly_pct ?? null,
-      annualIpca: null,
-      ipcaMonthRef: null,
+      items: itemsData.items.map((item) => ({
+        ...item,
+        month_price: item.month_price === null ? "0" : String(item.month_price),
+        previous_price:
+          item.previous_price === null ? null : String(item.previous_price),
+      })),
+      totalValue: latestInflation?.basket_difference_brl ?? 0,
+      totalInflationPct: latestInflation?.inflation_pct ?? 0,
+      monthlyIpca: latestIpcaEntry?.ipca_monthly_pct ?? null,
+      annualIpca: latestIpcaEntry?.annual_ipca_pct ?? null,
+      ipcaMonthRef: latestIpcaEntry?.month_ref ?? null,
     };
   } catch {
     return empty;
@@ -125,32 +142,40 @@ export async function getVeggieBasketDataForMonth(
   month_ref: string
 ): Promise<BasketSummaryProps | null> {
   try {
-    const data = await getVeggieBasketItems(month_ref);
-    if (!data) return null;
+    const [itemsRes, inflationRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/vegetable-basket/items/price?month_ref=${month_ref}`, {
+        cache: "no-store",
+      }),
+      fetch(
+        `${API_BASE_URL}/api/vegetable-basket/inflation/month?month_ref=${month_ref}`,
+        { cache: "no-store" }
+      ),
+    ]);
 
-    const items: BasketItemData[] = data.items.map((item) => ({
-      ...item,
-      month_price: item.month_price === null ? "0" : String(item.month_price),
-      previous_price:
-        item.previous_price === null ? null : String(item.previous_price),
-    }));
+    if (!itemsRes.ok) return null;
 
-    const totalInflationPct =
-      items.reduce((sum, item) => sum + (item.mom_pct ?? 0), 0) /
-      (items.filter((i) => i.mom_pct !== null).length || 1);
+    const itemsData = (await itemsRes.json()) as VeggieBasketApiResponse;
+    const inflationData = inflationRes.ok
+      ? ((await inflationRes.json()) as VeggieInflationApiResponse)
+      : [];
 
-    const totalValue = items.reduce(
-      (sum, item) => sum + parseFloat(item.month_price || "0"),
-      0
-    );
+    const latestInflation = inflationData[0];
+    const latestIpcaEntry = inflationData.find(
+      (e) => e.ipca_monthly_pct !== null && e.annual_ipca_pct !== null
+    ) ?? null;
 
     return {
-      items,
-      totalValue,
-      totalInflationPct,
-      monthlyIpca: items[0]?.ipca_monthly_pct ?? null,
-      annualIpca: null,
-      ipcaMonthRef: null,
+      items: itemsData.items.map((item) => ({
+        ...item,
+        month_price: item.month_price === null ? "0" : String(item.month_price),
+        previous_price:
+          item.previous_price === null ? null : String(item.previous_price),
+      })),
+      totalValue: latestInflation?.basket_difference_brl ?? 0,
+      totalInflationPct: latestInflation?.inflation_pct ?? 0,
+      monthlyIpca: latestIpcaEntry?.ipca_monthly_pct ?? null,
+      annualIpca: latestIpcaEntry?.annual_ipca_pct ?? null,
+      ipcaMonthRef: latestIpcaEntry?.month_ref ?? null,
     };
   } catch {
     return null;

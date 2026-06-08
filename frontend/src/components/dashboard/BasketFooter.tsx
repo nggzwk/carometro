@@ -21,7 +21,7 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
 }) => {
   try {
     return (
-      <div id="basket-footer" className="w-full px-4 py-3 flex items-center justify-center gap-4 select-none">
+      <div id="basket-footer" className="px-4 py-3 flex items-center justify-center gap-4 select-none" style={{ minWidth: "280px" }}>
         <div className="flex items-center gap-2">
           <span
             className="text-[10px] uppercase tracking-[0.18em] font-medium"

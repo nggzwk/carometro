@@ -60,7 +60,7 @@ export default function ChangeMenu({ onClick, variant = "default", label = "Menu
       }}
       transition={{ duration: 3, repeat: 9, ease: "easeInOut" }}
       className="flex items-center gap-2 cursor-pointer select-none"
-      style={{ borderBottom: `1px solid ${ACCENT}55`, padding: "4px 8px 4px 6px" }}
+      style={{ borderBottom: `1px solid ${ACCENT}55`, padding: "4px 8px 4px 6px", minWidth: "110px" }}
     >
       <span
         className="uppercase whitespace-nowrap"
