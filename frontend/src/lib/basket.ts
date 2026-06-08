@@ -135,3 +135,15 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
     };
   }
 }
+
+export async function getLatestMonthRef(): Promise<string | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/basket/items/price`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as BasketItemsApiResponse;
+    const refs = data.items.map((i) => i.month_ref).filter(Boolean).sort().reverse();
+    return refs[0] ?? null;
+  } catch {
+    return null;
+  }
+}

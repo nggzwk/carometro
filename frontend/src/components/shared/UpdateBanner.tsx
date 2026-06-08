@@ -3,31 +3,34 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const getLastBusinessDayOfMonth = (): string => {
-  const today = new Date();
-  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+const MONTHS_PT = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+];
 
-  while (lastDay.getDay() === 0 || lastDay.getDay() === 6) {
-    lastDay.setDate(lastDay.getDate() - 1);
-  }
+const getBannerMessage = (latestMonthRef: string | null): string => {
+  if (!latestMonthRef) return "próxima atualização em breve";
 
-  const day = lastDay.getDate();
-  const month = lastDay.getMonth() + 1;
+  const [year, month] = latestMonthRef.split("-").map(Number);
+  const dataDate = new Date(year, month, 1);
+  const publishDate = new Date(year, month + 1, 19);
 
-  return `${day}/${month}`;
+  const dataMonthName = MONTHS_PT[dataDate.getMonth()];
+  const publishMonthName = MONTHS_PT[publishDate.getMonth()];
+
+  return `atualização de ${dataMonthName} ocorrerá em 19 de ${publishMonthName}`;
 };
 
-const getBannerMessage = (updateDate: string): string => {
-  return `próxima atualização ${updateDate}`;
-};
+interface UpdateBannerProps {
+  latestMonthRef?: string | null;
+}
 
-const UpdateBanner: React.FC = () => {
+const UpdateBanner: React.FC<UpdateBannerProps> = ({ latestMonthRef = null }) => {
   const [visible, setVisible] = useState(false);
   const [done, setDone] = useState(false);
   const [paused, setPaused] = useState(false);
   const iterationsRef = useRef(0);
-  const updateDate = getLastBusinessDayOfMonth();
-  const bannerMessage = getBannerMessage(updateDate);
+  const bannerMessage = getBannerMessage(latestMonthRef);
 
   useEffect(() => {
     setVisible(true);
@@ -44,7 +47,6 @@ const UpdateBanner: React.FC = () => {
 
   return (
     <>
-      {/* Spacer always present so page layout never shifts */}
       <div className="h-10 md:h-12" aria-hidden="true" />
 
       <AnimatePresence>
