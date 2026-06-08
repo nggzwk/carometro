@@ -107,7 +107,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         }}
       >
         <div className="absolute top-2 right-2 z-20 sm:hidden">
-          <ChangeMenu variant="icon" onClick={handleMenuClick} />
+          <ChangeMenu id="btn-switch-view-icon" variant="icon" onClick={handleMenuClick} />
         </div>
 
         <AnimatePresence>
@@ -155,6 +155,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
       <div className="w-full hidden sm:flex items-center px-1 py-1">
         <div className="flex-1 flex justify-start">
           <BasketHistoryButton
+            id="btn-historico"
             isOpen={isHistoryOpen}
             isLoading={isLoadingMonths}
             onToggle={handleHistoryToggle}
@@ -170,7 +171,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         />
 
         <div className="flex-1 flex justify-end">
-          <ChangeMenu label={menuLabel} onClick={handleMenuClick} />
+          <ChangeMenu id="btn-switch-view" label={menuLabel} onClick={handleMenuClick} />
         </div>
       </div>
 
@@ -182,6 +183,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         />
         <div className="pb-2">
           <BasketHistoryButton
+            id="btn-historico"
             isOpen={isHistoryOpen}
             isLoading={isLoadingMonths}
             onToggle={handleHistoryToggle}

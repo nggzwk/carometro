@@ -77,7 +77,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
 
   try {
     return (
-      <div className="w-full flex items-center justify-center py-3 px-4 select-none">
+      <div id="basket-header" className="w-full flex items-center justify-center py-3 px-4 select-none">
         <motion.div
           initial="rest"
           animate={showTooltip ? "hover" : "rest"}
@@ -86,6 +86,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
           className="relative"
         >
           <motion.div
+            id="header-hint-tooltip"
             variants={{
               rest: { opacity: 0, y: 6, scale: 0.94 },
               hover: { opacity: 1, y: 0, scale: 1 },
@@ -109,6 +110,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
           </motion.div>
 
           <motion.button
+            id="header-inflation-toggle"
             type="button"
             onClick={() => {
               setHasInteracted(true);
@@ -129,6 +131,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
             />
             <AnimatePresence mode="wait">
               <motion.span
+                id="header-inflation-label"
                 key={label}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}

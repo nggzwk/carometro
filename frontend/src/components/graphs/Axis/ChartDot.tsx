@@ -10,6 +10,7 @@ interface ChartDotProps {
   onMouseLeave: () => void;
   onClick: () => void;
   onPointerDown?: (e: React.PointerEvent) => void;
+  id?: string;
 }
 
 export const ChartDot: React.FC<ChartDotProps> = ({
@@ -21,6 +22,7 @@ export const ChartDot: React.FC<ChartDotProps> = ({
   onMouseLeave,
   onClick,
   onPointerDown,
+  id,
 }) => {
   if (cx == null || cy == null) return null;
 
@@ -28,6 +30,7 @@ export const ChartDot: React.FC<ChartDotProps> = ({
   
   return (
     <g
+      id={id}
       className={styles.dotGroup}
       transform={`translate(${cx}, ${cy})`}
       onMouseEnter={onMouseEnter}

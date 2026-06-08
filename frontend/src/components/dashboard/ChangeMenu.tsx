@@ -8,12 +8,14 @@ interface ChangeMenuProps {
   onClick: () => void;
   variant?: "default" | "icon";
   label?: string;
+  id?: string;
 }
 
-export default function ChangeMenu({ onClick, variant = "default", label = "Menu" }: ChangeMenuProps) {
+export default function ChangeMenu({ onClick, variant = "default", label = "Menu", id }: ChangeMenuProps) {
   if (variant === "icon") {
     return (
       <motion.button
+        id={id}
         type="button"
         onClick={onClick}
         whileTap={{ scale: 0.90 }}
@@ -45,6 +47,7 @@ export default function ChangeMenu({ onClick, variant = "default", label = "Menu
 
   return (
     <motion.button
+      id={id}
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.97 }}

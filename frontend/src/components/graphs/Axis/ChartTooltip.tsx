@@ -111,6 +111,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
 
   return (
     <div
+      id="chart-tooltip"
       ref={tooltipRef}
       className={`${styles.tooltipAnchor} ${side === "right" ? styles.tooltipRight : side === "left" ? styles.tooltipLeft : ""}`}
       style={positionStyle}
@@ -125,6 +126,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
           const isExpanded = expandedMetric === key;
           return (
             <div
+              id={`chart-tooltip-${key}`}
               key={key}
               className={`${styles.metric} ${brl ? styles.metricClickable : ""}`}
               style={{ color }}
@@ -132,9 +134,9 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
             >
               <span className={styles.square} style={{ backgroundColor: color }} />
               <div className={styles.metricValues}>
-                <span className={styles.value}>{formatValue(value)}</span>
+                <span id={`chart-tooltip-${key}-value`} className={styles.value}>{formatValue(value)}</span>
                 {isExpanded && brl && (
-                  <span className={styles.brlValue}>{brl}</span>
+                  <span id={`chart-tooltip-${key}-brl`} className={styles.brlValue}>{brl}</span>
                 )}
               </div>
             </div>

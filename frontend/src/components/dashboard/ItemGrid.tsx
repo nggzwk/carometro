@@ -12,6 +12,7 @@ interface ItemGridProps {
 export const ItemGrid: React.FC<ItemGridProps> = ({ items }) => {
   return (
     <div
+      id="item-grid"
       className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 p-3 bg-transparent"
       style={{ gap: "10px" }}
     >
@@ -20,6 +21,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({ items }) => {
           key={`${item.produto_subcategoria}-${item.month_ref}`}
           item={item}
           index={i}
+          id={`item-${item.produto_subcategoria}`}
         />
       ))}
     </div>

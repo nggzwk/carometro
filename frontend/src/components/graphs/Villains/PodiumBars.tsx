@@ -98,9 +98,11 @@ function PodiumBarItem({
   index: number;
   displayItems: any[];
 }) {
+  const rank = (displayItems.indexOf(item) + 1);
   const pctValue = item.mom_pct ?? 0;
   const nameValue = item.item_name ?? "";
   const rankIndex = displayItems.indexOf(item);
+  const barId = `villain-bar-${rank}`;
 
   const heights = [
     MAX_BAR_HEIGHT,
@@ -118,6 +120,7 @@ function PodiumBarItem({
 
   return (
     <motion.div
+      id={barId}
       initial="rest"
       animate="rest"
       whileHover="hover"
@@ -125,6 +128,7 @@ function PodiumBarItem({
       style={{ width: 80 }}
     >
       <motion.div
+        id={`${barId}-tooltip`}
         variants={{
           rest: { opacity: 0, y: 6, scale: 0.95 },
           hover: { opacity: 1, y: 0, scale: 1 },
@@ -133,6 +137,7 @@ function PodiumBarItem({
         className="absolute -top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden sm:block"
       >
         <div
+          id={`${barId}-pct`}
           className="whitespace-nowrap px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase"
           style={{
             fontFamily: "var(--font-card-summary)",
@@ -170,7 +175,8 @@ function PodiumBarItem({
           delay: isLineVisible ? BAR_GROW_DURATION + entryDelay + 0.05 : 0,
           duration: 0.4,
         }}
-        className="mb-2 text-[10px] font-semibold tracking-[0.08em] uppercase px-2.5 py-1 sm:hidden"
+        id={`${barId}-pct-mobile`}
+      className="mb-2 text-[10px] font-semibold tracking-[0.08em] uppercase px-2.5 py-1 sm:hidden"
         style={{
           fontFamily: "var(--font-card-summary)",
           color: accentColor,
@@ -242,6 +248,7 @@ function PodiumBarItem({
           delay: isLineVisible ? BAR_GROW_DURATION + entryDelay + 0.2 : 0,
           duration: 0.4,
         }}
+        id={`${barId}-name`}
         className="mt-2 text-center text-[10px] leading-tight font-medium uppercase tracking-wider"
         style={{
           fontFamily: "var(--font-subheader)",

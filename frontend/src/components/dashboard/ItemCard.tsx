@@ -12,9 +12,10 @@ import { formatBrl, formatPct, shortName } from "../../lib/formatters";
 interface ItemCardProps {
   item: BasketItemData;
   index?: number;
+  id?: string;
 }
 
-export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
+export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0, id }) => {
   const {
     item_name,
     mom_pct,
@@ -84,6 +85,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
           ? { y: -2, scale: 1.015, transition: { duration: 0.2 } }
           : {}
       }
+      id={id}
       className="relative rounded-2xl overflow-hidden h-full cursor-pointer select-none"
       style={{
         border: `1px solid ${borderColor}`,
@@ -137,6 +139,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
             >
               <div className="flex items-center justify-between tracking-tight gap-1">
                 <span
+                  id={id ? `${id}-pct` : undefined}
                   className="tabular-nums font-bold leading-none text-[0.78rem] lg:text-[1rem]"
                   style={{
                     fontFamily: "'DM Mono', monospace",
@@ -165,6 +168,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
 
               <div className="flex items-end justify-end">
                 <span
+                  id={id ? `${id}-price` : undefined}
                   className="tabular-nums font-medium leading-none"
                   style={{
                     fontFamily: "'DM Mono', monospace",
@@ -205,6 +209,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0 }) => {
               duration: 0.34,
               ease: [0.16, 1, 0.3, 1],
             }}
+            id={id ? `${id}-name` : undefined}
             className="text-center leading-none uppercase tracking-wide"
             style={{
               fontFamily: "var(--font-header)",

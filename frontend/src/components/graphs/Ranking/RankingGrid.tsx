@@ -151,7 +151,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                   const isExpanded = expandedId === row.id;
 
                   return (
-                    <div key={row.id} className="relative w-full">
+                    <div key={row.id} id={`ranking-row-${row.rank}`} className="relative w-full">
                       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20">
                         <span
                           className={`inline-flex h-7 px-3 items-center justify-center rounded-full border text-xs font-bold shadow-sm ${styles.badge}`}
@@ -189,7 +189,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                               }}
                               className="grid grid-cols-3 items-center w-full text-center"
                             >
-                              <div className="flex flex-col items-start text-left gap-0.5">
+                              <div id={`ranking-${row.rank}-usd`} className="flex flex-col items-start text-left gap-0.5">
                                 <div className="text-[9px] uppercase tracking-[0.16em] text-[#A89B8C]">
                                   USD
                                 </div>
@@ -204,7 +204,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                                 </span>
                               </div>
 
-                              <div className="flex flex-col items-end text-right gap-0.5">
+                              <div id={`ranking-${row.rank}-wage-pct`} className="flex flex-col items-end text-right gap-0.5">
                                 <div className="text-[9px] uppercase tracking-[0.16em] text-[#A89B8C]">
                                   Salário
                                 </div>
@@ -264,6 +264,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                                     A cesta básica oficial custa
                                   </p>
                                   <div
+                                    id={`ranking-${row.rank}-usd-expanded`}
                                     className="flex justify-between items-center rounded-xl bg-[#FFF8F1] px-3 py-2.5"
                                     style={styleOnCollapsedGrid}
                                   >
@@ -276,6 +277,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                                   </div>
 
                                   <div
+                                    id={`ranking-${row.rank}-wage-pct-expanded`}
                                     className="flex justify-between items-center rounded-xl bg-[#FAF7F4] px-3 py-2.5"
                                     style={styleOnCollapsedGrid}
                                   >
@@ -288,6 +290,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                                   </div>
 
                                   <div
+                                    id={`ranking-${row.rank}-hours-expanded`}
                                     className="flex justify-between items-center rounded-xl bg-[#F8F6F2] px-3 py-2.5"
                                     style={styleOnCollapsedGrid}
                                   >
@@ -328,6 +331,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                   return (
                     <motion.article
                       key={row.id}
+                      id={`ranking-row-${row.rank}`}
                       variants={itemVariants}
                       className="relative overflow-hidden rounded-2xl border px-4 py-4 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(26,18,11,0.08)] sm:px-5 sm:py-5"
                       style={{
@@ -373,7 +377,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                           </span>
                         </div>
 
-                        <div className="flex min-w-0 flex-col justify-center rounded-2xl bg-[#FFF8F1] px-3 py-2 md:bg-transparent md:px-0 md:py-0">
+                        <div id={`ranking-${row.rank}-usd`} className="flex min-w-0 flex-col justify-center rounded-2xl bg-[#FFF8F1] px-3 py-2 md:bg-transparent md:px-0 md:py-0">
                           <span className="text-[10px] uppercase tracking-[0.16em] text-[#A89B8C] md:hidden">
                             Valor em USD por pessoa
                           </span>
@@ -385,7 +389,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                           </span>
                         </div>
 
-                        <div className="flex min-w-0 flex-col justify-center rounded-2xl bg-[#FAF7F4] px-3 py-2 md:bg-transparent md:px-0 md:py-0">
+                        <div id={`ranking-${row.rank}-wage-pct`} className="flex min-w-0 flex-col justify-center rounded-2xl bg-[#FAF7F4] px-3 py-2 md:bg-transparent md:px-0 md:py-0">
                           <span className="text-[10px] uppercase tracking-[0.16em] text-[#A89B8C] md:hidden">
                             % da cesta vs salário
                           </span>
@@ -397,7 +401,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                           </span>
                         </div>
 
-                        <div className="flex min-w-0 flex-col justify-center rounded-2xl bg-[#F8F6F2] px-3 py-2 md:bg-transparent md:px-0 md:py-0">
+                        <div id={`ranking-${row.rank}-hours`} className="flex min-w-0 flex-col justify-center rounded-2xl bg-[#F8F6F2] px-3 py-2 md:bg-transparent md:px-0 md:py-0">
                           <span className="text-[10px] uppercase tracking-[0.16em] text-[#A89B8C] md:hidden">
                             Horas necessárias
                           </span>

@@ -162,6 +162,7 @@ export default function AxisGraph() {
 
     return (
       <ChartDot
+        id={`axis-dot-${data[index]?.year ?? index}`}
         cx={cx}
         cy={cy}
         icon={icon}
@@ -184,10 +185,11 @@ export default function AxisGraph() {
   }
 
   return (
-    <div className="relative w-full">
+    <div id="axis-graph" className="relative w-full">
       <div className="flex flex-col items-center leading-none mb-4">
       </div>
       <div
+        id="axis-graph-chart"
         className={`relative w-full ${styles.chartNoSelect}`}
         aria-label="Gráfico de inflação anual"
       >
@@ -304,9 +306,13 @@ export default function AxisGraph() {
           />
         )}
       </div>
-      <div className={`${styles.metricsSubtitle} flex justify-center gap-6 mt-4 flex-wrap`}>
+      <div id="axis-subtitles" className={`${styles.metricsSubtitle} flex justify-center gap-6 mt-4 flex-wrap`}>
         {metricsSubtitle.map((metric) => (
-          <div key={metric.label} className={styles.metricsSubtitleItem}>
+          <div
+            key={metric.label}
+            id={`axis-subtitle-${metric.label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")}`}
+            className={styles.metricsSubtitleItem}
+          >
             <span
               className={`${styles.metricsSubtitleSquare}`}
               style={{ backgroundColor: metric.color }}

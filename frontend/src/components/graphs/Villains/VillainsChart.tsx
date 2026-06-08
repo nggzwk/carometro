@@ -59,7 +59,7 @@ export default function VillainsChart({ data, source }: Props) {
           }}
         >
           <div className="flex divide-x divide-[#E8DDD3]">
-            <div className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
+            <div id="villain-card-basket-value" className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
               <span
                 className="text-[10px] uppercase tracking-[0.16em] font-medium"
                 style={{ color: "#A89B8C" }}
@@ -84,7 +84,7 @@ export default function VillainsChart({ data, source }: Props) {
               </span>
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
+            <div id="villain-card-salary-pct" className="flex-1 flex flex-col items-center justify-center py-5 px-3 gap-0.5">
               <span
                 className="text-[10px] uppercase tracking-[0.16em] font-medium"
                 style={{ color: "#A89B8C" }}

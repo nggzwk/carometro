@@ -67,7 +67,7 @@ export default function BasketTitle({ selectedMonth, currentMonthRef, isHistoryO
               type="button"
               aria-label="Inflação da cesta básica mensal mês sobre mês"
               onClick={handleClick}
-              className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 inline-flex items-center justify-center cursor-pointer"
+              className="absolute left-full top-0 ml-1.5 inline-flex items-center justify-center cursor-pointer"
               animate={{
                 filter: showTooltip
                   ? "drop-shadow(0 0 6px rgba(168,155,140,0.9))"

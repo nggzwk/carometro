@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import getAnnualInflation from "../../../lib/annualInflation";
+import { getBasketItemIcon } from "../../../lib/basketIcons";
 
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -127,12 +128,12 @@ export default function Transparency() {
           O Carômetro nasceu da vontade de tornar acessível e democrático ao
           público curitibano o impacto real da inflação no cotidiano. Todos os
           dados desse projeto são públicos, extraídos de
-          /dadosabertos.curitiba.pr.gov.br
+          dadosabertos.curitiba.pr.gov.br
         </div>
 
         <div className="flex flex-col gap-3">
           <ExternalLink href="#">API pública — em breve</ExternalLink>
-          <ExternalLink href="#">Repositório no GitHub</ExternalLink>
+          <ExternalLink href="https://github.com/nggzwk/carometro">Repositório no GitHub</ExternalLink>
         </div>
       </section>
       <Divider />
@@ -198,79 +199,19 @@ export default function Transparency() {
               </thead>
               <tbody>
                 {[
-                  {
-                    item: "Carne Vermelha",
-                    a: "3,90 kg",
-                    b: "2,10 kg",
-                    c: "2,00 kg",
-                    final: "2,81 kg",
-                  },
-                  {
-                    item: "Filé de Frango",
-                    a: "3,90 kg",
-                    b: "3,80 kg",
-                    c: "2,00 kg",
-                    final: "3,57 kg",
-                  },
-                  {
-                    item: "Ovos",
-                    a: "75 unid.",
-                    b: "21 unid.",
-                    c: "24 unid.",
-                    final: "43 unid.",
-                  },
-                  {
-                    item: "Leite Integral",
-                    a: "10,0 L",
-                    b: "3,2 L",
-                    c: "5,0 L",
-                    final: "6,19 L",
-                  },
-                  {
-                    item: "Arroz Polido",
-                    a: "2,25 kg",
-                    b: "3,40 kg",
-                    c: "2,50 kg",
-                    final: "2,81 kg",
-                  },
-                  {
-                    item: "Feijão Carioca",
-                    a: "1,00 kg",
-                    b: "1,50 kg",
-                    c: "1,00 kg",
-                    final: "1,23 kg",
-                  },
-                  {
-                    item: "Café a Vácuo",
-                    a: "500 g",
-                    b: "480 g",
-                    c: "500 g",
-                    final: "491 g",
-                  },
-                  {
-                    item: "Óleo de Soja",
-                    a: "800 ml",
-                    b: "1.100 ml",
-                    c: "900 ml",
-                    final: "950 ml",
-                  },
-                  {
-                    item: "Açúcar",
-                    a: "0,70 kg",
-                    b: "2,10 kg",
-                    c: "1,00 kg",
-                    final: "1,38 kg",
-                  },
-                  {
-                    item: "Farinha de Trigo",
-                    a: "1,25 kg",
-                    b: "0,60 kg",
-                    c: "1,00 kg",
-                    final: "0,92 kg",
-                  },
-                ].map(({ item, a, b, c, final }) => (
-                  <tr key={item} className="border-t border-black/5">
-                    <td className="py-1.5 font-light text-[#6B5C4E]">{item}</td>
+                  { name: "Carne Vermelha", subcat: 10023, a: "3,90 kg", b: "2,10 kg", c: "2,00 kg", final: "2,81 kg" },
+                  { name: "Filé de Frango", subcat: 10011, a: "3,90 kg", b: "3,80 kg", c: "2,00 kg", final: "3,57 kg" },
+                  { name: "Ovos", subcat: 20001, a: "75 unid.", b: "21 unid.", c: "24 unid.", final: "43 unid." },
+                  { name: "Leite Integral", subcat: 30001, a: "10,0 L", b: "3,2 L", c: "5,0 L", final: "6,19 L" },
+                  { name: "Arroz Polido", subcat: 40003, a: "2,25 kg", b: "3,40 kg", c: "2,50 kg", final: "2,81 kg" },
+                  { name: "Feijão Carioca", subcat: 40012, a: "1,00 kg", b: "1,50 kg", c: "1,00 kg", final: "1,23 kg" },
+                  { name: "Café a Vácuo", subcat: 90001, a: "500 g", b: "480 g", c: "500 g", final: "491 g" },
+                  { name: "Óleo de Soja", subcat: 60001, a: "800 ml", b: "1.100 ml", c: "900 ml", final: "950 ml" },
+                  { name: "Açúcar", subcat: 80002, a: "0,70 kg", b: "2,10 kg", c: "1,00 kg", final: "1,38 kg" },
+                  { name: "Farinha de Trigo", subcat: 40017, a: "1,25 kg", b: "0,60 kg", c: "1,00 kg", final: "0,92 kg" },
+                ].map(({ name, subcat, a, b, c, final }) => (
+                  <tr key={name} className="border-t border-black/5">
+                    <td className="py-1.5 font-light text-[#6B5C4E]">{getBasketItemIcon(subcat)} {name}</td>
                     <td className="py-1.5 text-right font-light text-[#6B5C4E]">
                       {a}
                     </td>
@@ -344,69 +285,19 @@ export default function Transparency() {
               </thead>
               <tbody>
                 {[
-                  {
-                    item: "Tomate 🍅",
-                    piso: "0,416 kg",
-                    teto: "1,150 kg",
-                    final: "0,783 kg",
-                  },
-                  {
-                    item: "Banana 🍌",
-                    piso: "0,583 kg",
-                    teto: "1,200 kg",
-                    final: "0,891 kg",
-                  },
-                  {
-                    item: "Batata 🥔",
-                    piso: "0,439 kg",
-                    teto: "1,120 kg",
-                    final: "0,779 kg",
-                  },
-                  {
-                    item: "Cebola 🧅",
-                    piso: "0,289 kg",
-                    teto: "0,510 kg",
-                    final: "0,399 kg",
-                  },
-                  {
-                    item: "Alface 🥬",
-                    piso: "0,080 kg",
-                    teto: "0,220 kg",
-                    final: "0,150 kg",
-                  },
-                  {
-                    item: "Cenoura 🥕",
-                    piso: "0,140 kg",
-                    teto: "0,320 kg",
-                    final: "0,230 kg",
-                  },
-                  {
-                    item: "Laranja 🍊",
-                    piso: "1,330 kg",
-                    teto: "2,400 kg",
-                    final: "1,865 kg",
-                  },
-                  {
-                    item: "Abóbora 🎃",
-                    piso: "0,160 kg",
-                    teto: "0,340 kg",
-                    final: "0,250 kg",
-                  },
-                  {
-                    item: "Maçã 🍎",
-                    piso: "0,310 kg",
-                    teto: "0,450 kg",
-                    final: "0,380 kg",
-                  },
-                  {
-                    item: "Batata-doce 🥔",
-                    piso: "0,125 kg",
-                    teto: "0,280 kg",
-                    final: "0,202 kg",
-                  },
-                ].map(({ item, piso, teto, final }) => (
-                  <tr key={item} className="border-t border-black/5">
-                    <td className="py-1.5 font-light text-[#6B5C4E]">{item}</td>
+                  { name: "Tomate", subcat: 50008, piso: "0,416 kg", teto: "1,150 kg", final: "0,783 kg" },
+                  { name: "Banana", subcat: 50025, piso: "0,583 kg", teto: "1,200 kg", final: "0,891 kg" },
+                  { name: "Batata", subcat: 50005, piso: "0,439 kg", teto: "1,120 kg", final: "0,779 kg" },
+                  { name: "Cebola", subcat: 50002, piso: "0,289 kg", teto: "0,510 kg", final: "0,399 kg" },
+                  { name: "Alface", subcat: 50079, piso: "0,080 kg", teto: "0,220 kg", final: "0,150 kg" },
+                  { name: "Cenoura", subcat: 50007, piso: "0,140 kg", teto: "0,320 kg", final: "0,230 kg" },
+                  { name: "Laranja", subcat: 50021, piso: "1,330 kg", teto: "2,400 kg", final: "1,865 kg" },
+                  { name: "Abóbora", subcat: 50017, piso: "0,160 kg", teto: "0,340 kg", final: "0,250 kg" },
+                  { name: "Maçã", subcat: 50029, piso: "0,310 kg", teto: "0,450 kg", final: "0,380 kg" },
+                  { name: "Batata-doce", subcat: 50004, piso: "0,125 kg", teto: "0,280 kg", final: "0,202 kg" },
+                ].map(({ name, subcat, piso, teto, final }) => (
+                  <tr key={name} className="border-t border-black/5">
+                    <td className="py-1.5 font-light text-[#6B5C4E]">{getBasketItemIcon(subcat)} {name}</td>
                     <td className="py-1.5 text-right font-light text-[#6B5C4E]">
                       {piso}
                     </td>
@@ -512,7 +403,7 @@ export default function Transparency() {
               LinkedIn
             </ExternalLink>
 
-            <ExternalLink href="https://twitter.com/nggzwk">
+            <ExternalLink href="https://x.com/nggzwk">
               Twitter
             </ExternalLink>
           </div>

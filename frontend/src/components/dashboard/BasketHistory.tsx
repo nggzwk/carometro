@@ -18,13 +18,15 @@ interface BasketHistoryButtonProps {
   onToggle: () => void;
   currentMonthRef?: string | null;
   selectedMonth?: string | null;
+  id?: string;
 }
 
-export function BasketHistoryButton({ isOpen, isLoading, onToggle, currentMonthRef, selectedMonth }: BasketHistoryButtonProps) {
+export function BasketHistoryButton({ isOpen, isLoading, onToggle, currentMonthRef, selectedMonth, id }: BasketHistoryButtonProps) {
   const subtitleMonth = selectedMonth ?? (isOpen ? currentMonthRef : null);
   const subtitle = subtitleMonth ? formatMonthLabel(subtitleMonth) : null;
   return (
     <motion.button
+      id={id}
       type="button"
       onClick={onToggle}
       whileTap={{ scale: 0.97 }}
@@ -147,6 +149,7 @@ export default function BasketHistoryPanel({
                 return (
                   <motion.button
                     key={m}
+                    id={`btn-month-${m}`}
                     type="button"
                     onClick={() => handlePillClick(m)}
                     whileTap={{ scale: 0.95 }}
