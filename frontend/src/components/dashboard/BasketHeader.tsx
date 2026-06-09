@@ -105,7 +105,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
                 color: "#6B5C4E",
               }}
             >
-              clique para ver valor
+              clique para ver o valor
             </div>
           </motion.div>
 

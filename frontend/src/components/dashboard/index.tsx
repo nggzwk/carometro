@@ -152,48 +152,51 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         </AnimatePresence>
       </motion.div>
 
-      <div className="w-full hidden sm:flex items-center px-1 py-1">
-        <div className="flex-1 flex justify-start">
-          <BasketHistoryButton
-            id="btn-historico"
-            isOpen={isHistoryOpen}
-            isLoading={isLoadingMonths}
-            onToggle={handleHistoryToggle}
-            currentMonthRef={currentMonthRef}
-            selectedMonth={selectedMonth}
+      <div className="w-full">
+        {/* Desktop footer row */}
+        <div className="hidden sm:flex items-center px-1 py-1">
+          <div className="flex-1 flex justify-start">
+            <BasketHistoryButton
+              id="btn-historico"
+              isOpen={isHistoryOpen}
+              isLoading={isLoadingMonths}
+              onToggle={handleHistoryToggle}
+              currentMonthRef={currentMonthRef}
+              selectedMonth={selectedMonth}
+            />
+          </div>
+
+          <BasketFooter
+            monthlyIpca={activeData.monthlyIpca}
+            annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
+            ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
           />
+
+          <div className="flex-1 flex justify-end">
+            <ChangeMenu id="btn-switch-view" label={menuLabel} onClick={handleMenuClick} />
+          </div>
         </div>
 
-        <BasketFooter
-          monthlyIpca={activeData.monthlyIpca}
-          annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
-          ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
-        />
-
-        <div className="flex-1 flex justify-end">
-          <ChangeMenu id="btn-switch-view" label={menuLabel} onClick={handleMenuClick} />
-        </div>
-      </div>
-
-      <div className="w-full flex sm:hidden flex-col items-center px-1">
-        <BasketFooter
-          monthlyIpca={activeData.monthlyIpca}
-          annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
-          ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
-        />
-        <div className="pb-2">
-          <BasketHistoryButton
-            id="btn-historico"
-            isOpen={isHistoryOpen}
-            isLoading={isLoadingMonths}
-            onToggle={handleHistoryToggle}
-            currentMonthRef={currentMonthRef}
-            selectedMonth={selectedMonth}
+        {/* Mobile footer row */}
+        <div className="w-full flex sm:hidden flex-col items-center px-1">
+          <BasketFooter
+            monthlyIpca={activeData.monthlyIpca}
+            annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
+            ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
           />
+          <div className="pb-2">
+            <BasketHistoryButton
+              id="btn-historico"
+              isOpen={isHistoryOpen}
+              isLoading={isLoadingMonths}
+              onToggle={handleHistoryToggle}
+              currentMonthRef={currentMonthRef}
+              selectedMonth={selectedMonth}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="relative w-full">
+        {/* History panel — sits in the same section as the footer, expands downward */}
         <BasketHistoryPanel
           isOpen={isHistoryOpen}
           months={months}

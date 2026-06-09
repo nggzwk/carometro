@@ -123,8 +123,7 @@ export default function BasketHistoryPanel({
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full overflow-hidden absolute left-0 right-0"
-          style={{ top: 0 }}
+          className="w-full overflow-hidden"
         >
           <div
             className="rounded-xl overflow-hidden mt-1"

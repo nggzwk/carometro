@@ -21,6 +21,7 @@ const BASKET_ICONS: Record<number, string> = {
   50021: "🍊", // Laranja Pera
   50017: "🎃", // Abobora
   50029: "🍎", // Maca Gala
+  50028: "🍎", // Maça fuji (fallback to maca)
   50004: "🍠", // Batata Doce
 };
 
