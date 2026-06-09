@@ -11,7 +11,9 @@ import {
   ReferenceLine,
   Area,
 } from "recharts";
-import getAnnualInflation, { getBaseMinimumWage } from "../../../lib/annualInflation";
+import getAnnualInflation, {
+  getBaseMinimumWage,
+} from "../../../lib/annualInflation";
 import { basketTypesIcons } from "../../../lib/basketIcons";
 import { ChartDot } from "./ChartDot";
 import { ChartTooltip } from "./ChartTooltip";
@@ -37,8 +39,8 @@ type TooltipData = {
 export default function AxisGraph() {
   const metricsSubtitle = [
     { label: "DIEESE", color: "#e0aa59" },
-    { label: "IPCA", color: "#b300ff" },
     { label: "SALÁRIO", color: "#2563eb" },
+    { label: "IPCA", color: "#b300ff" },
   ] as const;
 
   const [data, setData] = useState<DataPoint[]>([]);
@@ -72,7 +74,9 @@ export default function AxisGraph() {
             ? null
             : Number(r.annual_minimum_wage_increase_pct);
         const annualDieese =
-          r.annual_inflation_pct === null ? null : Number(r.annual_inflation_pct);
+          r.annual_inflation_pct === null
+            ? null
+            : Number(r.annual_inflation_pct);
 
         if (annualIpca !== null)
           cumulativeIpca =
@@ -88,7 +92,8 @@ export default function AxisGraph() {
           cumulativeDieese =
             i === 0
               ? annualDieese
-              : (1 + cumulativeDieese / 100) * (1 + annualDieese / 100) * 100 - 100;
+              : (1 + cumulativeDieese / 100) * (1 + annualDieese / 100) * 100 -
+                100;
 
         const endPrice =
           r.end_month_value_brl === null ? null : Number(r.end_month_value_brl);
@@ -186,8 +191,7 @@ export default function AxisGraph() {
 
   return (
     <div id="axis-graph" className="relative w-full">
-      <div className="flex flex-col items-center leading-none mb-4">
-      </div>
+      <div className="flex flex-col items-center leading-none mb-4"></div>
       <div
         id="axis-graph-chart"
         className={`relative w-full ${styles.chartNoSelect}`}
@@ -220,7 +224,11 @@ export default function AxisGraph() {
             <XAxis
               dataKey="year"
               stroke="#8B7355"
-              tick={{ fill: "#8B7355", fontSize: 13, fontFamily: "var(--font-card-summary)" }}
+              tick={{
+                fill: "#8B7355",
+                fontSize: 13,
+                fontFamily: "var(--font-card-summary)",
+              }}
               tickMargin={10}
               axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
@@ -229,7 +237,11 @@ export default function AxisGraph() {
             <YAxis
               yAxisId="pct"
               stroke="#8B7355"
-              tick={{ fill: "#8B7355", fontSize: 13, fontFamily: "var(--font-card-summary)" }}
+              tick={{
+                fill: "#8B7355",
+                fontSize: 13,
+                fontFamily: "var(--font-card-summary)",
+              }}
               tickFormatter={(v) => `${v}%`}
               width={62}
               tickMargin={4}
@@ -306,7 +318,10 @@ export default function AxisGraph() {
           />
         )}
       </div>
-      <div id="axis-subtitles" className={`${styles.metricsSubtitle} flex justify-center gap-6 mt-4 flex-wrap`}>
+      <div
+        id="axis-subtitles"
+        className={`${styles.metricsSubtitle} flex justify-center gap-6 mt-4 flex-wrap`}
+      >
         {metricsSubtitle.map((metric) => (
           <div
             key={metric.label}

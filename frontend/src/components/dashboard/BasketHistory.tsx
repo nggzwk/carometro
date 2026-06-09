@@ -22,8 +22,7 @@ interface BasketHistoryButtonProps {
 }
 
 export function BasketHistoryButton({ isOpen, isLoading, onToggle, currentMonthRef, selectedMonth, id }: BasketHistoryButtonProps) {
-  const subtitleMonth = selectedMonth ?? (isOpen ? currentMonthRef : null);
-  const subtitle = subtitleMonth ? formatMonthLabel(subtitleMonth) : null;
+  const subtitle = selectedMonth ? formatMonthLabel(selectedMonth) : null;
   return (
     <motion.button
       id={id}
@@ -124,7 +123,8 @@ export default function BasketHistoryPanel({
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full overflow-hidden"
+          className="w-full overflow-hidden absolute left-0 right-0"
+          style={{ top: 0 }}
         >
           <div
             className="rounded-xl overflow-hidden mt-1"

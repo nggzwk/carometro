@@ -193,14 +193,16 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         </div>
       </div>
 
-      <BasketHistoryPanel
-        isOpen={isHistoryOpen}
-        months={months}
-        currentMonthRef={currentMonthRef}
-        selectedMonth={selectedMonth}
-        onMonthSelect={handleMonthSelect}
-        onClose={() => setIsHistoryOpen(false)}
-      />
+      <div className="relative w-full">
+        <BasketHistoryPanel
+          isOpen={isHistoryOpen}
+          months={months}
+          currentMonthRef={currentMonthRef}
+          selectedMonth={selectedMonth}
+          onMonthSelect={handleMonthSelect}
+          onClose={() => setIsHistoryOpen(false)}
+        />
+      </div>
     </div>
   );
 };
