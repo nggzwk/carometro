@@ -69,8 +69,10 @@ test.describe("Ranking - Desktop Experience", () => {
     expect(footerText).toBeTruthy();
     expect(footerText).toContain("Cotação atualizada em");
 
-    const hasDate = /\d{1,2}\s+de\s+\w+|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/i
-      .test(footerText ?? "");
+    const hasDate =
+      /\d{1,2}\s+de\s+\w+|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/i.test(
+        footerText ?? "",
+      );
     expect(hasDate).toBeTruthy();
 
     expect(await ranking.getFooterDisplay()).not.toBe("none");

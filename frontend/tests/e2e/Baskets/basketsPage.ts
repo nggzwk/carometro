@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator, expect } from "@playwright/test";
 
 export const BASICAO_EMOJIS: Record<string, string> = {
   "40003": "🍚", // Arroz
@@ -61,21 +61,29 @@ export class BasketsPage {
     this.page = page;
 
     this.historicoButton = page.locator('button:has-text("Histórico")').first();
-    this.basicaoButton = page.locator('button:has-text("Basicão"), button:has-text("BASICÃO")').first();
-    this.feiraoButton  = page.locator('button:has-text("Feirão"), button:has-text("FEIRÃO")').first();
+    this.basicaoButton = page
+      .locator('button:has-text("Basicão"), button:has-text("BASICÃO")')
+      .first();
+    this.feiraoButton = page
+      .locator('button:has-text("Feirão"), button:has-text("FEIRÃO")')
+      .first();
 
-    this.mensalLabel = page.locator('text=/MENSAL|mensal/i').first();
-    this.acumuladoLabel = page.locator('text=/ACUMULADO|acumulado/i').first();
+    this.mensalLabel = page.locator("text=/MENSAL|mensal/i").first();
+    this.acumuladoLabel = page.locator("text=/ACUMULADO|acumulado/i").first();
 
     this.basketCards = page.locator("#item-grid > div");
 
     this.inflationLabel = page.locator("#header-inflation-label").first();
     this.inflationValue = page
-      .locator('[data-testid="inflation-value"], .inflation-value, [class*="value"]')
+      .locator(
+        '[data-testid="inflation-value"], .inflation-value, [class*="value"]',
+      )
       .first();
 
-    this.tooltip = page.locator('#header-hint-tooltip');
-    this.helpIcon = page.locator('button[aria-label^="Inflação da cesta"]').first();
+    this.tooltip = page.locator("#header-hint-tooltip");
+    this.helpIcon = page
+      .locator('button[aria-label^="Inflação da cesta"]')
+      .first();
     this.helpTooltip = this.helpIcon.locator("span").first();
 
     this.monthOptions = page.locator('button[id^="btn-month-"]');
@@ -84,19 +92,21 @@ export class BasketsPage {
   // ---------- Navigation ----------
 
   async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto("/");
+    await this.page.waitForLoadState("networkidle");
   }
 
   async clickHistoricoButton() {
     await this.historicoButton.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState("networkidle");
   }
 
   async openBasicao() {
-    if (await this.basicaoButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (
+      await this.basicaoButton.isVisible({ timeout: 2000 }).catch(() => false)
+    ) {
       await this.basicaoButton.click();
-      await this.page.waitForLoadState('networkidle');
+      await this.page.waitForLoadState("networkidle");
     }
   }
 
@@ -119,7 +129,7 @@ export class BasketsPage {
 
   async reload() {
     await this.page.reload();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState("networkidle");
   }
 
   // ---------- Card-relative locators ----------
@@ -136,7 +146,6 @@ export class BasketsPage {
     const id = await card.getAttribute("id");
     return id?.startsWith("item-") ? id.slice("item-".length) : null;
   }
-
 
   cardName(card: Locator): Locator {
     return card.locator('[id$="-name"]');
@@ -166,7 +175,7 @@ export class BasketsPage {
 
   async clickCard(card: Locator) {
     await card.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState("networkidle");
   }
 
   async getCardName(card: Locator): Promise<string | null> {
@@ -193,10 +202,9 @@ export class BasketsPage {
     return card.evaluate((el) => window.getComputedStyle(el).borderColor);
   }
 
-  /** Iterate the first `limit` cards, invoking `callback` for each. */
   async forEachCard(
     callback: (card: Locator, index: number) => Promise<void>,
-    limit = 3
+    limit = 3,
   ) {
     const count = await this.getCardCount();
     for (let i = 0; i < Math.min(count, limit); i++) {
@@ -214,7 +222,7 @@ export class BasketsPage {
   async getTooltipOpacity(): Promise<number> {
     if (!(await this.tooltip.count())) return 0;
     const opacity = await this.tooltip.evaluate(
-      (el) => window.getComputedStyle(el).opacity
+      (el) => window.getComputedStyle(el).opacity,
     );
     return Number(opacity);
   }
@@ -254,7 +262,7 @@ export class BasketsPage {
   async getHelpTooltipOpacity(): Promise<number> {
     if (!(await this.helpTooltip.count())) return 0;
     const opacity = await this.helpTooltip.evaluate(
-      (el) => window.getComputedStyle(el).opacity
+      (el) => window.getComputedStyle(el).opacity,
     );
     return Number(opacity);
   }
@@ -297,7 +305,7 @@ export class BasketsPage {
       .waitFor({ state: "attached", timeout: 5000 })
       .catch(() => {});
     const ids = await this.monthOptions.evaluateAll((els) =>
-      els.map((el) => el.id)
+      els.map((el) => el.id),
     );
     return ids.map((id) => id.replace("btn-month-", ""));
   }
@@ -323,7 +331,7 @@ export class BasketsPage {
 
   async selectMonthAndReadValue(
     ref: string,
-    previousValue?: string
+    previousValue?: string,
   ): Promise<string | undefined> {
     await this.monthOption(ref).click();
     await this.page.waitForLoadState("networkidle");
@@ -339,7 +347,7 @@ export class BasketsPage {
 
   async isMonthActive(ref: string): Promise<boolean> {
     const bg = await this.monthOption(ref).evaluate(
-      (el) => window.getComputedStyle(el).backgroundColor
+      (el) => window.getComputedStyle(el).backgroundColor,
     );
     return /rgb\(\s*168,\s*155,\s*140\s*\)/i.test(bg);
   }
@@ -353,11 +361,17 @@ export class BasketsPage {
 
   // Inflation border = var(--color-inflation) = #E63946 = rgb(230, 57, 70).
   isRedBorder(borderColor: string): boolean {
-    return /rgb\(\s*230,\s*57,\s*70\s*\)/i.test(borderColor) || /#e63946/i.test(borderColor);
+    return (
+      /rgb\(\s*230,\s*57,\s*70\s*\)/i.test(borderColor) ||
+      /#e63946/i.test(borderColor)
+    );
   }
 
   // Deflation/neutral border = var(--color-deflation) = #2A9D8F = rgb(42, 157, 143).
   isGreenBorder(borderColor: string): boolean {
-    return /rgb\(\s*42,\s*157,\s*143\s*\)/i.test(borderColor) || /#2a9d8f/i.test(borderColor);
+    return (
+      /rgb\(\s*42,\s*157,\s*143\s*\)/i.test(borderColor) ||
+      /#2a9d8f/i.test(borderColor)
+    );
   }
 }

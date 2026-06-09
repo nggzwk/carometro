@@ -1,16 +1,16 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator, expect } from "@playwright/test";
 
 export const COUNTRY_FLAGS: Record<string, string> = {
-  Brazil:    '🇧🇷',
-  Germany:   '🇩🇪',
-  USA:       '🇺🇸',
-  Argentina: '🇦🇷',
-  Chile:     '🇨🇱',
-  India:     '🇮🇳',
-  Portugal:  '🇵🇹',
-  Russia:    '🇷🇺',
-  Paraguay:  '🇵🇾',
-  China:     '🇨🇳',
+  Brazil: "🇧🇷",
+  Germany: "🇩🇪",
+  USA: "🇺🇸",
+  Argentina: "🇦🇷",
+  Chile: "🇨🇱",
+  India: "🇮🇳",
+  Portugal: "🇵🇹",
+  Russia: "🇷🇺",
+  Paraguay: "🇵🇾",
+  China: "🇨🇳",
 };
 
 export const EXPECTED_FLAGS = Object.values(COUNTRY_FLAGS);
@@ -31,14 +31,16 @@ export class RankingPage {
 
     this.items = page.locator('article[id^="ranking-row-"]');
 
-    this.footer = page.locator('span:has-text("Cotação atualizada em")').first();
+    this.footer = page
+      .locator('span:has-text("Cotação atualizada em")')
+      .first();
   }
 
   // ---------- Navigation ----------
 
   async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto("/");
+    await this.page.waitForLoadState("networkidle");
   }
 
   async open() {
@@ -68,11 +70,11 @@ export class RankingPage {
   // ---------- Cell value getters (relative to a row article) ----------
 
   async getCountry(item: Locator): Promise<string | null> {
-    return item.locator('span.truncate').first().textContent();
+    return item.locator("span.truncate").first().textContent();
   }
 
   async getCountryFlag(item: Locator): Promise<string | null> {
-    return item.locator('span.mr-1.text-xl').first().textContent();
+    return item.locator("span.mr-1.text-xl").first().textContent();
   }
 
   async getUsd(item: Locator): Promise<string | null> {
@@ -100,6 +102,8 @@ export class RankingPage {
   // ---------- Parsing helpers (pure) ----------
 
   parseNumber(text: string | null | undefined): number {
-    return parseFloat((text ?? '').replace(/[^\d.,]/g, '').replace(',', '.') || '0');
+    return parseFloat(
+      (text ?? "").replace(/[^\d.,]/g, "").replace(",", ".") || "0",
+    );
   }
 }
