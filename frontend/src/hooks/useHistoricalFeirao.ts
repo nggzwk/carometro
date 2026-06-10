@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { BasketSummaryProps } from "../lib/basketTypes";
-import { getVeggieBasketDataForMonth } from "../lib/veggieBasket";
+import { fetchVeggieMonth } from "../lib/historyActions";
 
 export function useHistoricalFeirao(liveProps: BasketSummaryProps) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export function useHistoricalFeirao(liveProps: BasketSummaryProps) {
       return;
     }
     setIsLoadingHistory(true);
-    const data = await getVeggieBasketDataForMonth(month_ref);
+    const data = await fetchVeggieMonth(month_ref);
     setHistoricalData(data);
     setIsLoadingHistory(false);
   };

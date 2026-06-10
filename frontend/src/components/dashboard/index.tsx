@@ -11,8 +11,7 @@ import BasketTitle from "./BasketTitle";
 import { useHistoricalBasket } from "../../hooks/useHistoricalBasket";
 import { useHistoricalFeirao } from "../../hooks/useHistoricalFeirao";
 import { inViewMotionProps } from "../../lib/motionPresets";
-import { getAvailableMonths } from "../../lib/basket";
-import { getVeggieAvailableMonths } from "../../lib/veggieBasket";
+import { fetchBasketMonths, fetchVeggieMonths } from "../../lib/historyActions";
 import ChangeMenu from "./ChangeMenu";
 import VeggieTitle from "./veggieBasket/VeggieTitle";
 
@@ -55,7 +54,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
       return;
     }
     setIsLoadingMonths(true);
-    const fn = view === "basicao" ? getAvailableMonths : getVeggieAvailableMonths;
+    const fn = view === "basicao" ? fetchBasketMonths : fetchVeggieMonths;
     const available = await fn(new Date().getFullYear());
     setMonths(available);
     setIsLoadingMonths(false);
@@ -67,6 +66,24 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
     view === "basicao"
       ? liveProps.items[0]?.month_ref ?? null
       : feiraoProps.items[0]?.month_ref ?? null;
+
+  const annualIpca = activeData.annualIpca ?? basicao.activeData.annualIpca;
+  const ipcaMonthRef = activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef;
+
+  const footerProps = {
+    monthlyIpca: activeData.monthlyIpca,
+    annualIpca,
+    ipcaMonthRef,
+  };
+
+  const historyButtonProps = {
+    id: "btn-historico",
+    isOpen: isHistoryOpen,
+    isLoading: isLoadingMonths,
+    onToggle: handleHistoryToggle,
+    currentMonthRef,
+    selectedMonth,
+  };
 
   return (
     <div className="w-full text-center flex flex-col items-center">
@@ -135,7 +152,7 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         <BasketHeader
           totalInflationPct={activeData.totalInflationPct}
           totalValue={activeData.totalValue}
-          annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
+          annualIpca={annualIpca}
           monthlyIpca={activeData.monthlyIpca}
         />
 
@@ -156,21 +173,10 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         {/* Desktop footer row */}
         <div className="hidden sm:flex items-center px-1 py-1">
           <div className="flex-1 flex justify-start">
-            <BasketHistoryButton
-              id="btn-historico"
-              isOpen={isHistoryOpen}
-              isLoading={isLoadingMonths}
-              onToggle={handleHistoryToggle}
-              currentMonthRef={currentMonthRef}
-              selectedMonth={selectedMonth}
-            />
+            <BasketHistoryButton {...historyButtonProps} />
           </div>
 
-          <BasketFooter
-            monthlyIpca={activeData.monthlyIpca}
-            annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
-            ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
-          />
+          <BasketFooter {...footerProps} />
 
           <div className="flex-1 flex justify-end">
             <ChangeMenu id="btn-switch-view" label={menuLabel} onClick={handleMenuClick} />
@@ -179,20 +185,9 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
 
         {/* Mobile footer row */}
         <div className="w-full flex sm:hidden flex-col items-center px-1">
-          <BasketFooter
-            monthlyIpca={activeData.monthlyIpca}
-            annualIpca={activeData.annualIpca ?? basicao.activeData.annualIpca}
-            ipcaMonthRef={activeData.ipcaMonthRef ?? basicao.activeData.ipcaMonthRef}
-          />
-          <div className="pb-2">
-            <BasketHistoryButton
-              id="btn-historico"
-              isOpen={isHistoryOpen}
-              isLoading={isLoadingMonths}
-              onToggle={handleHistoryToggle}
-              currentMonthRef={currentMonthRef}
-              selectedMonth={selectedMonth}
-            />
+          <BasketFooter {...footerProps} />
+          <div className="mt-3 pb-2">
+            <BasketHistoryButton {...historyButtonProps} />
           </div>
         </div>
 

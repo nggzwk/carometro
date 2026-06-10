@@ -95,7 +95,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
             className="absolute -top-9 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
           >
             <div
-              className="text-[10px] font-medium uppercase tracking-[0.16em] rounded-xl px-3 py-1.5 whitespace-nowrap"
+              className="text-[10px] font-medium uppercase tracking-normal rounded-xl px-3 py-1.5 whitespace-nowrap"
               style={{
                 backgroundColor: "rgba(255,255,255,0.45)",
                 backdropFilter: "blur(12px)",
@@ -143,7 +143,7 @@ export const BasketHeader: React.FC<BasketHeaderProps> = ({
                   color: accentColor,
                   fontSize: "1rem",
                   fontWeight: 500,
-                  letterSpacing: "0.18em",
+                  letterSpacing: "0.1em",
                 }}
               >
                 {label}

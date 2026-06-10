@@ -6,8 +6,13 @@ import type { BasketItemData } from "../../lib/basketTypes";
 import {
   getBasketItemIcon,
   getBasketItemSubtitle,
+  getQtdEmbalagemSigla,
 } from "../../lib/basketIcons";
 import { formatBrl, formatPct, shortName } from "../../lib/formatters";
+
+const MONO = "'DM Mono', monospace";
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const EASE_BACK: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
 interface ItemCardProps {
   item: BasketItemData;
@@ -22,7 +27,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0, id }) => {
     month_price,
     previous_price,
     produto_subcategoria,
+    qtd_embalagem,
   } = item;
+
+  const sigla = getQtdEmbalagemSigla(qtd_embalagem, produto_subcategoria);
 
   const [nameRevealed, setNameRevealed] = useState(false);
 
@@ -78,7 +86,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0, id }) => {
       transition={{
         duration: 0.55,
         delay: (index % 5) * 0.06,
-        ease: [0.23, 1, 0.32, 1],
+        ease: EASE_BACK,
       }}
       whileHover={
         !nameRevealed
@@ -103,83 +111,83 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0, id }) => {
           key="default"
           initial={{ opacity: 0, y: 4 }}
           animate={nameRevealed ? { opacity: 0, y: -3 } : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.42, ease: EASE_OUT }}
           className="absolute inset-0 flex"
           style={{ pointerEvents: nameRevealed ? "none" : "auto" }}
         >
-            <div
-              className="flex items-center justify-center"
+          <div
+            className="flex items-center justify-center"
+            style={{
+              width: "50%",
+              borderRight: `2px solid ${accentColor}20`,
+            }}
+          >
+            <motion.span
+              key="emoji-big"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 240,
+                damping: 18,
+                delay: (index % 5) * 0.06 + 0.2,
+              }}
               style={{
-                width: "50%",
-                borderRight: `2px solid ${accentColor}20`,
+                fontSize: "clamp(3.5rem, 15vw, 3.2rem)",
+                lineHeight: 1,
               }}
             >
-              <motion.span
-                key="emoji-big"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 240,
-                  damping: 18,
-                  delay: (index % 5) * 0.06 + 0.2,
-                }}
+              {icon}
+            </motion.span>
+          </div>
+
+          <div
+            className="flex flex-col justify-between py-2.5 px-2.5"
+            style={{ width: "50%" }}
+          >
+            <div className="flex items-center justify-between tracking-tight gap-1">
+              <span
+                id={id ? `${id}-pct` : undefined}
+                className="tabular-nums font-bold leading-none text-[0.78rem] lg:text-[1rem]"
                 style={{
-                  fontSize: "clamp(3.5rem, 15vw, 3.2rem)",
-                  lineHeight: 1,
+                  fontFamily: MONO,
+                  color: accentColor,
                 }}
               >
-                {icon}
-              </motion.span>
+                {formatPct(mom_pct, true)}
+              </span>
+              <span
+                ref={arrowRef}
+                className={`font-bold leading-none text-[0.7rem] lg:text-[0.85rem] ${arrowVisible ? arrowMotionClass : ""}`}
+                style={{
+                  color: accentColor,
+                }}
+              >
+                {arrowDir}
+              </span>
             </div>
 
             <div
-              className="flex flex-col justify-between py-2.5 px-2.5"
-              style={{ width: "50%" }}
-            >
-              <div className="flex items-center justify-between tracking-tight gap-1">
-                <span
-                  id={id ? `${id}-pct` : undefined}
-                  className="tabular-nums font-bold leading-none text-[0.78rem] lg:text-[1rem]"
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    color: accentColor,
-                  }}
-                >
-                  {formatPct(mom_pct, true)}
-                </span>
-                <span
-                  ref={arrowRef}
-                  className={`font-bold leading-none text-[0.7rem] lg:text-[0.85rem] ${arrowVisible ? arrowMotionClass : ""}`}
-                  style={{
-                    color: accentColor,
-                  }}
-                >
-                  {arrowDir}
-                </span>
-              </div>
+              style={{
+                height: "2px",
+                background: `${accentColor}22`,
+              }}
+            />
 
-              <div
+            <div className="flex items-end justify-end">
+              <span
+                id={id ? `${id}-price` : undefined}
+                className="tabular-nums font-medium leading-none"
                 style={{
-                  height: "2px",
-                  background: `${accentColor}22`,
+                  fontFamily: MONO,
+                  fontSize: "clamp(0.88rem, 2.8vw, 0.92rem)",
+                  color: "#000000",
                 }}
-              />
-
-              <div className="flex items-end justify-end">
-                <span
-                  id={id ? `${id}-price` : undefined}
-                  className="tabular-nums font-medium leading-none"
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: "clamp(0.88rem, 2.8vw, 0.92rem)",
-                    color: "#000000",
-                  }}
-                >
-                  {formatBrl(deltaBrl)}
-                </span>
-              </div>
+              >
+                {formatBrl(deltaBrl)}
+              </span>
             </div>
+          </div>
         </motion.div>
       </AnimatePresence>
 
@@ -187,18 +195,47 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0, id }) => {
         <motion.div
           key="revealed"
           initial={{ opacity: 0, scale: 0.88 }}
-          animate={nameRevealed ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.88 }}
-          transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
+          animate={
+            nameRevealed
+              ? { opacity: 1, scale: 1 }
+              : { opacity: 0, scale: 0.88 }
+          }
+          transition={{ duration: 0.24, ease: EASE_BACK }}
           className="absolute inset-0 flex flex-col items-center justify-center gap-1.5"
-          style={{ background: "var(--color-background)", pointerEvents: nameRevealed ? "auto" : "none" }}
+          style={{
+            background: "var(--color-background)",
+            pointerEvents: nameRevealed ? "auto" : "none",
+          }}
         >
           <motion.span
             initial={{ scale: 1.4, opacity: 0, y: 4 }}
-            animate={{ scale: 1, opacity: 0.65, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            style={{ fontSize: "0.95rem", lineHeight: 1 }}
+            animate={{ scale: 1, opacity: 0.6, y: 0 }}
+            transition={{ duration: 0.4, ease: EASE_OUT }}
+            style={{ fontSize: "1.1rem", lineHeight: 1 }}
           >
             {icon}
+          </motion.span>
+
+          <motion.span
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.34,
+              duration: 0.34,
+              ease: EASE_OUT,
+            }}
+            style={{
+              position: "absolute",
+              top: "0.6rem",
+              right: "0.7rem",
+              fontFamily: MONO,
+              fontSize: "0.50rem",
+              color: "#A89B8C",
+              textTransform: "uppercase",
+            }}
+          >
+            {parseFloat(month_price).toFixed(2).replace(".", ",")}
+            {sigla ? ` ${sigla}` : ""}
           </motion.span>
 
           <motion.span
@@ -207,7 +244,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0, id }) => {
             transition={{
               delay: 0.22,
               duration: 0.34,
-              ease: [0.16, 1, 0.3, 1],
+              ease: EASE_OUT,
             }}
             id={id ? `${id}-name` : undefined}
             className="text-center leading-none uppercase tracking-wide"
@@ -227,10 +264,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index = 0, id }) => {
             transition={{
               delay: 0.34,
               duration: 0.34,
-              ease: [0.16, 1, 0.3, 1],
+              ease: EASE_OUT,
             }}
             style={{
-              fontFamily: "'DM Mono', monospace",
+              fontFamily: MONO,
               fontSize: "0.60rem",
               letterSpacing: "0.10em",
               color: "#A89B8C",
