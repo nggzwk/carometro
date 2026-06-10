@@ -5,6 +5,22 @@ from datetime import datetime, timedelta
 from typing import Callable, Optional, Tuple
 
 
+def parse_date_br(value: str) -> Optional[datetime]:
+    """Parse a date string in DD/MM/YYYY format."""
+    try:
+        return datetime.strptime(value, "%d/%m/%Y")
+    except (ValueError, TypeError):
+        return None
+
+
+def parse_date_iso(value: str) -> Optional[datetime]:
+    """Parse a date string in YYYY-MM-DD format."""
+    try:
+        return datetime.strptime(value, "%Y-%m-%d")
+    except (ValueError, TypeError):
+        return None
+
+
 SECTION_LINE = "=" * 70
 
 
@@ -146,5 +162,3 @@ def find_date_in_dataframe(
     
     print(f"✗ No valid date found within ±{max_days_offset} days from {target_date_str}")
     return None
-
-

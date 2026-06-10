@@ -10,7 +10,7 @@ const MONTHS_PT = [
 
 const nextMonth = new Date();
 nextMonth.setMonth(nextMonth.getMonth() + 1);
-const BANNER_MESSAGE = `próxima atualização em 5 de ${MONTHS_PT[nextMonth.getMonth()]}`;
+const BANNER_MESSAGE = `próxima atualização em 5 de ${MONTHS_PT[nextMonth.getMonth()]} `;
 
 const UpdateBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
