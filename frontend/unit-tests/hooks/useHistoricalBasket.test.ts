@@ -16,6 +16,7 @@ const liveProps: BasketSummaryProps = {
   totalInflationPct: 2.5,
   monthlyIpca: 0.4,
   annualIpca: 4.8,
+  ipcaMonthRef: "2024-02",
 };
 
 const historicalProps: BasketSummaryProps = {
@@ -24,6 +25,7 @@ const historicalProps: BasketSummaryProps = {
   totalInflationPct: 1.2,
   monthlyIpca: 0.3,
   annualIpca: 3.9,
+  ipcaMonthRef: "2024-01",
 };
 
 describe("useHistoricalBasket", () => {
