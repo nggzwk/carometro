@@ -44,7 +44,7 @@ export default function VeggieTitle({ selectedMonth, currentMonthRef, isHistoryO
   return (
     <div className="flex flex-col items-center gap-1">
       <p
-        className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-1 text-center"
+        className="text-[11px] uppercase tracking-[0.22em] font-semibold mb-1 text-center"
         style={{ color: "#A89B8C" }}
       >
         Itens monitorados
@@ -52,7 +52,7 @@ export default function VeggieTitle({ selectedMonth, currentMonthRef, isHistoryO
 
       <div className="flex items-center justify-center mb-4">
         <h2
-          className="relative text-3xl sm:text-4xl font-bold tracking-tight"
+          className="relative text-4xl sm:text-4xl font-bold tracking-tight"
           style={{
             fontFamily: "var(--font-header)",
             color: "#1A120B",

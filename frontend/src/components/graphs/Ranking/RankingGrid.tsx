@@ -107,12 +107,12 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
   return (
     <section className="w-full py-8 sm:py-12 mb-4">
       <div className="flex flex-col items-center gap-1 px-4 text-center sm:px-6 mb-6 sm:mb-12">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#A89B8C]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.20em] text-[#A89B8C]">
           Valor médio da cesta básica oficial
         </p>
         <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
           <h2
-            className="text-3xl font-bold tracking-tight sm:text-4xl"
+            className="text-4xl font-bold tracking-tight sm:text-4xl"
             style={{
               fontFamily: "var(--font-header)",
               color: "#1A120B",
