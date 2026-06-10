@@ -145,34 +145,142 @@ def get_vegetable_basket_items(
 ) -> BasketItemsWithReferenceResponse:
     """
     Fetch all vegetable basket items with prices and MoM data.
-    Omit month_ref for latest. Blank / wrong format / no data -> 404.
+    Omit month_ref to return all months latest first. Blank / wrong format / no data -> 404.
     Tomate Rasteiro, Banana Caturra, Alface Lisa and Maca Fuji are fallback items if the primary ones are missing prices.
     """
     validate_month_ref(month_ref, db)
 
-    if month_ref is None:
-        month_ref = db.execute(
-            text("SELECT MAX(month_ref) FROM inflacao_brasil.item_monthly_price")
-        ).scalar()
+    if month_ref is not None:
+        prev_month = _previous_month_ref(month_ref)
+        ipca = _get_ipca_monthly_pct(db, month_ref)
 
-    if not month_ref:
-        raise HTTPException(status_code=404, detail="No price data available.")
+        items: list[BasketItemResponse] = []
+        for primary_subcat, fallback_subcat, unit_sigla in _load_veggie_items(db):
+            response = _build_item_response(
+                db, primary_subcat, fallback_subcat, unit_sigla,
+                month_ref, prev_month, ipca,
+            )
+            if response is not None:
+                items.append(response)
 
-    prev_month = _previous_month_ref(month_ref)
-    ipca = _get_ipca_monthly_pct(db, month_ref)
-
-    items: list[BasketItemResponse] = []
-    for primary_subcat, fallback_subcat, unit_sigla in _load_veggie_items(db):
-        response = _build_item_response(
-            db, primary_subcat, fallback_subcat, unit_sigla,
-            month_ref, prev_month, ipca,
+        return BasketItemsWithReferenceResponse(
+            basket_items=list(VEGGIE_ITEM_NAMES.values()),
+            items=items,
         )
-        if response is not None:
-            items.append(response)
+
+    name_case_sql = _veggie_name_case_sql("ip.used_subcat")
+    rows = db.execute(text(f"""
+        WITH veggie_items AS (
+            SELECT
+                vbi.sort_order,
+                vbi.primary_subcategoria,
+                vbi.fallback_subcategoria,
+                vbi.unit_sigla,
+                ik_p.id AS primary_item_id,
+                ik_p.produto_categoria,
+                ik_f.id AS fallback_item_id
+            FROM inflacao_brasil.vegetable_basket_item vbi
+            LEFT JOIN inflacao_brasil.item_key ik_p
+                ON ik_p.produto_subcategoria = vbi.primary_subcategoria
+               AND ik_p.unidade_sigla = vbi.unit_sigla
+            LEFT JOIN inflacao_brasil.item_key ik_f
+                ON ik_f.produto_subcategoria = vbi.fallback_subcategoria
+               AND ik_f.unidade_sigla = vbi.unit_sigla
+        ),
+        price_candidates AS (
+            SELECT
+                vi.sort_order,
+                vi.primary_subcategoria,
+                vi.unit_sigla,
+                vi.produto_categoria,
+                imp.month_ref,
+                imp.median_price,
+                vi.primary_subcategoria AS used_subcat,
+                0 AS source_priority
+            FROM veggie_items vi
+            INNER JOIN inflacao_brasil.item_monthly_price imp ON vi.primary_item_id = imp.item_id
+
+            UNION ALL
+
+            SELECT
+                vi.sort_order,
+                vi.primary_subcategoria,
+                vi.unit_sigla,
+                vi.produto_categoria,
+                imp.month_ref,
+                imp.median_price,
+                vi.fallback_subcategoria AS used_subcat,
+                1 AS source_priority
+            FROM veggie_items vi
+            INNER JOIN inflacao_brasil.item_monthly_price imp ON vi.fallback_item_id = imp.item_id
+            WHERE vi.fallback_item_id IS NOT NULL
+        ),
+        resolved_prices AS (
+            SELECT
+                sort_order,
+                primary_subcategoria,
+                unit_sigla,
+                produto_categoria,
+                month_ref,
+                median_price,
+                used_subcat,
+                ROW_NUMBER() OVER (
+                    PARTITION BY primary_subcategoria, month_ref
+                    ORDER BY source_priority
+                ) AS source_rn
+            FROM price_candidates
+        ),
+        item_prices AS (
+            SELECT
+                sort_order,
+                primary_subcategoria,
+                unit_sigla,
+                produto_categoria,
+                month_ref,
+                median_price,
+                used_subcat,
+                LAG(median_price) OVER (
+                    PARTITION BY primary_subcategoria
+                    ORDER BY month_ref
+                ) AS prev_price
+            FROM resolved_prices
+            WHERE source_rn = 1
+        )
+        SELECT
+            ip.produto_categoria,
+            ip.used_subcat AS produto_subcategoria,
+            {name_case_sql} AS item_name,
+            ('1' || ip.unit_sigla) AS qtd_embalagem,
+            ip.month_ref,
+            ip.median_price AS month_price,
+            ip.prev_price AS previous_price,
+            CASE
+                WHEN ip.prev_price IS NULL OR ip.prev_price = 0 THEN NULL
+                ELSE ROUND(((ip.median_price / ip.prev_price) - 1) * 100, 2)
+            END AS mom_pct,
+            (SELECT monthly_inflation_pct FROM inflacao_brasil.ipca_monthly_public ipca WHERE ipca.month_ref = ip.month_ref) AS ipca_monthly_pct
+        FROM item_prices ip
+        ORDER BY ip.month_ref DESC, ip.sort_order
+    """)).fetchall()
+
+    all_items = [
+        BasketItemResponse(
+            produto_categoria=row[0],
+            produto_subcategoria=row[1],
+            item_name=row[2],
+            qtd_embalagem=row[3],
+            month_ref=row[4],
+            month_price=round(float(row[5]), 4),
+            previous_price=round(float(row[6]), 4) if row[6] is not None else None,
+            mom_pct=row[7],
+            ipca_monthly_pct=row[8],
+        )
+        for row in rows
+    ]
 
     return BasketItemsWithReferenceResponse(
         basket_items=list(VEGGIE_ITEM_NAMES.values()),
-        items=items,
+        items=all_items,
     )
 
 

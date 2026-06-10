@@ -232,11 +232,16 @@ def _item_name_case_sql(column_name: str) -> str:
     return f"CASE\n{cases}\n                ELSE 'Produto'\n            END"
 
 
-def _basket_item_sort_key(row: tuple) -> tuple[int, str, str]:
+def _basket_item_sort_key(row: tuple) -> tuple[int, int, str]:
     subcategory = row[1]
+    month_ref = str(row[4])
+    try:
+        month_sort = -int(month_ref.replace("-", ""))
+    except (ValueError, AttributeError):
+        month_sort = 0
     return (
+        month_sort,
         BASKET_ITEM_ORDER.get(subcategory, len(BASKET_ITEM_ORDER)),
-        str(row[4]),
         str(row[2]),
     )
 
@@ -300,7 +305,6 @@ def validate_month_ref(month_ref: str, db: Session) -> None:
     if len(month_ref) == 0:
         raise HTTPException(status_code=400, detail="month_ref cannot be empty")
 
-    # Check if data exists for this month
     check_query = text("""
         SELECT COUNT(*) FROM inflacao_brasil.item_monthly_price 
         WHERE month_ref = :month_ref
@@ -315,7 +319,7 @@ def get_basket_items(
     month_ref: str | None = Query(
         None,
         max_length=8,
-        description="Month in YYYY-MM format. If null, returns latest month available.",
+        description="Month in YYYY-MM format. If null, returns all months latest first.",
     ),
     db: Session = Depends(get_db),
 ) -> list[BasketItemResponse]:
@@ -323,7 +327,7 @@ def get_basket_items(
     Fetch all items in the default basket with their prices and month-over-month data.
 
     Args:
-        month_ref: Optional month in YYYY-MM format. If not provided, returns latest month data.
+        month_ref: Optional month in YYYY-MM format. If not provided, returns all months latest first.
         db: Database session dependency.
 
     Returns:
@@ -389,7 +393,7 @@ def get_basket_items(
                 )
             )
     else:
-        item_name_case_sql = _item_name_case_sql("lp.produto_subcategoria")
+        item_name_case_sql = _item_name_case_sql("ip.produto_subcategoria")
         query = text(f"""
         WITH basket_items AS (
             SELECT
@@ -470,39 +474,22 @@ def get_basket_items(
                 ) AS prev_price
             FROM resolved_prices
             WHERE source_rn = 1
-        ),
-        latest_prices AS (
-            SELECT
-                item_id,
-                qtd_embalagem,
-                unidade_sigla,
-                produto_categoria,
-                produto_subcategoria,
-                median_price,
-                month_ref,
-                prev_price,
-                row_number() OVER (
-                    PARTITION BY item_id
-                    ORDER BY month_ref DESC
-                ) AS rn
-            FROM item_prices
         )
         SELECT
-            lp.produto_categoria,
-            lp.produto_subcategoria,
+            ip.produto_categoria,
+            ip.produto_subcategoria,
             {item_name_case_sql} AS item_name,
-            (lp.qtd_embalagem || lp.unidade_sigla) AS qtd_embalagem,
-            lp.month_ref,
-            lp.median_price AS month_price,
-            lp.prev_price AS previous_price,
+            (ip.qtd_embalagem || ip.unidade_sigla) AS qtd_embalagem,
+            ip.month_ref,
+            ip.median_price AS month_price,
+            ip.prev_price AS previous_price,
             CASE
-                WHEN lp.prev_price IS NULL OR lp.prev_price = 0 THEN NULL
-                ELSE round(((lp.median_price / lp.prev_price) - 1) * 100, 2)
+                WHEN ip.prev_price IS NULL OR ip.prev_price = 0 THEN NULL
+                ELSE round(((ip.median_price / ip.prev_price) - 1) * 100, 2)
             END AS mom_pct
-            , (SELECT monthly_inflation_pct FROM inflacao_brasil.ipca_monthly_public ip WHERE ip.month_ref = lp.month_ref) AS ipca_monthly_pct
-        FROM latest_prices lp
-        WHERE lp.rn = 1
-        ORDER BY lp.produto_categoria, lp.produto_subcategoria, lp.month_ref
+            , (SELECT monthly_inflation_pct FROM inflacao_brasil.ipca_monthly_public ipca WHERE ipca.month_ref = ip.month_ref) AS ipca_monthly_pct
+        FROM item_prices ip
+        ORDER BY ip.month_ref DESC, ip.produto_categoria, ip.produto_subcategoria
         """)
         result = db.execute(query)
     if not month_ref:
@@ -520,7 +507,7 @@ def get_basket_items(
             qtd_embalagem=row[3],
             month_ref=row[4],
             month_price=round(float(row[5]), 2),
-            previous_price=round(float(row[6]), 2),
+            previous_price=round(float(row[6]), 2) if row[6] is not None else None,
             mom_pct=row[7],
             ipca_monthly_pct=row[8],
         )

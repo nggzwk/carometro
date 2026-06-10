@@ -508,15 +508,6 @@ export default function Transparency() {
             </table>
           </div>
         </div>
-
-        <div className="text-sm font-light text-[#6B5C4E] leading-relaxed mt-4">
-          <p>
-            O projeto foi idealizado e executado por mim, Para mais detalhes
-            sobre metodologia e fontes, consulte o{" "}
-            <ExternalLink href="#">PDF (Em breve)</ExternalLink>.
-          </p>
-        </div>
-
         <Divider />
         <SectionTitle>Sobre o desenvolvimento</SectionTitle>
 
@@ -538,6 +529,21 @@ export default function Transparency() {
             uma sociedade!
           </p>
           <Divider />
+
+          <div className="text-sm font-light text-[#6B5C4E] leading-relaxed mt-4">
+            <p className="mb-2">
+              Para mais detalhes sobre metodologia e fontes, consulte o{" "}
+              <ExternalLink href="#">PDF (Em breve)</ExternalLink>.
+            </p>
+
+            <div>
+              <p>Atualizações futuras:</p>
+              <ul className="list-disc list-inside mt-2">
+                <li>Todos os itens disponíveis na API.</li>
+                <li>Faxinão.</li>
+              </ul>
+            </div>
+          </div>
 
           <div className="flex flex-row items-center gap-5">
             <a
