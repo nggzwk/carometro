@@ -308,75 +308,87 @@ def get_veggie_villains(
         if cnt == 0:
             raise HTTPException(status_code=404, detail=f"No data found for year {year}.")
 
-    year_filter = "AND SUBSTRING(month_ref, 1, 4) = :year" if year is not None else ""
-    name_case = _veggie_name_case_sql("im.used_subcat")
+    # Apply the year filter at the very end so each slot's prev_price (which may
+    # come from December of the previous year) is preserved.
+    year_filter = "AND SUBSTRING(r.month_ref, 1, 4) = :year" if year is not None else ""
+    name_case = _veggie_name_case_sql("ip.used_subcat")
 
+    # Resolve each basket slot to a single item per month, preferring the primary
+    # subcategoria and only falling back when the primary has no price that month —
+    # identical to /items/price. This prevents a fallback item (e.g. Tomate Rasteiro)
+    # from being ranked as its own villain alongside its primary (Tomate Comum).
     query = text(f"""
-        WITH months AS (
-            SELECT DISTINCT month_ref
-            FROM inflacao_brasil.vegetable_basket_monthly_value
-            WHERE 1=1 {year_filter}
-            ORDER BY month_ref DESC
-        ),
-        veggie_items AS (
+        WITH veggie_items AS (
             SELECT
-                ik.id            AS item_id,
-                ik.produto_subcategoria AS used_subcat,
                 vbi.primary_subcategoria,
                 vbi.fallback_subcategoria,
-                vbi.unit_sigla
+                vbi.unit_sigla,
+                ik_p.id AS primary_item_id,
+                ik_f.id AS fallback_item_id
             FROM inflacao_brasil.vegetable_basket_item vbi
-            JOIN inflacao_brasil.item_key ik
-                ON ik.produto_subcategoria = vbi.primary_subcategoria
-               AND ik.unidade_sigla = vbi.unit_sigla
+            LEFT JOIN inflacao_brasil.item_key ik_p
+                ON ik_p.produto_subcategoria = vbi.primary_subcategoria
+               AND ik_p.unidade_sigla = vbi.unit_sigla
+            LEFT JOIN inflacao_brasil.item_key ik_f
+                ON ik_f.produto_subcategoria = vbi.fallback_subcategoria
+               AND ik_f.unidade_sigla = vbi.unit_sigla
+        ),
+        price_candidates AS (
+            SELECT
+                vi.primary_subcategoria,
+                imp.month_ref,
+                imp.median_price,
+                vi.primary_subcategoria AS used_subcat,
+                0 AS source_priority
+            FROM veggie_items vi
+            INNER JOIN inflacao_brasil.item_monthly_price imp ON vi.primary_item_id = imp.item_id
+
             UNION ALL
+
             SELECT
-                ik.id,
-                ik.produto_subcategoria,
-                vbi.primary_subcategoria,
-                vbi.fallback_subcategoria,
-                vbi.unit_sigla
-            FROM inflacao_brasil.vegetable_basket_item vbi
-            JOIN inflacao_brasil.item_key ik
-                ON ik.produto_subcategoria = vbi.fallback_subcategoria
-               AND ik.unidade_sigla = vbi.unit_sigla
-            WHERE vbi.fallback_subcategoria IS NOT NULL
+                vi.primary_subcategoria,
+                imp.month_ref,
+                imp.median_price,
+                vi.fallback_subcategoria AS used_subcat,
+                1 AS source_priority
+            FROM veggie_items vi
+            INNER JOIN inflacao_brasil.item_monthly_price imp ON vi.fallback_item_id = imp.item_id
+            WHERE vi.fallback_item_id IS NOT NULL
         ),
-        item_months AS (
+        resolved_prices AS (
             SELECT
-                m.month_ref,
-                vi.item_id,
-                vi.used_subcat,
-                (
-                    SELECT imp.median_price
-                    FROM inflacao_brasil.item_monthly_price imp
-                    WHERE imp.item_id = vi.item_id
-                      AND imp.month_ref <= m.month_ref
-                    ORDER BY imp.month_ref DESC LIMIT 1
-                ) AS cur_price,
-                (
-                    SELECT imp2.median_price
-                    FROM inflacao_brasil.item_monthly_price imp2
-                    WHERE imp2.item_id = vi.item_id
-                      AND imp2.month_ref < m.month_ref
-                    ORDER BY imp2.month_ref DESC LIMIT 1
+                primary_subcategoria,
+                month_ref,
+                median_price,
+                used_subcat,
+                ROW_NUMBER() OVER (
+                    PARTITION BY primary_subcategoria, month_ref
+                    ORDER BY source_priority
+                ) AS source_rn
+            FROM price_candidates
+        ),
+        item_prices AS (
+            SELECT
+                primary_subcategoria,
+                month_ref,
+                median_price,
+                used_subcat,
+                LAG(median_price) OVER (
+                    PARTITION BY primary_subcategoria
+                    ORDER BY month_ref
                 ) AS prev_price
-            FROM months m
-            CROSS JOIN (
-                SELECT DISTINCT ON (used_subcat) item_id, used_subcat
-                FROM veggie_items
-                ORDER BY used_subcat, item_id
-            ) vi
+            FROM resolved_prices
+            WHERE source_rn = 1
         ),
         computed AS (
             SELECT
-                im.month_ref,
-                im.used_subcat,
+                ip.month_ref,
+                ip.used_subcat,
                 {name_case} AS item_name,
-                im.cur_price  AS value,
-                ROUND(((im.cur_price / im.prev_price) - 1) * 100, 2) AS inflation
-            FROM item_months im
-            WHERE im.cur_price IS NOT NULL AND im.prev_price IS NOT NULL AND im.prev_price > 0
+                ip.median_price AS value,
+                ROUND(((ip.median_price / ip.prev_price) - 1) * 100, 2) AS inflation
+            FROM item_prices ip
+            WHERE ip.prev_price IS NOT NULL AND ip.prev_price > 0
         ),
         ranked AS (
             SELECT *,
@@ -394,7 +406,7 @@ def get_veggie_villains(
                 WHERE ip.month_ref = r.month_ref LIMIT 1
             ) AS ipca_monthly_pct
         FROM ranked r
-        WHERE rn <= 3
+        WHERE r.rn <= 3 {year_filter}
         ORDER BY r.month_ref DESC, r.inflation DESC
     """)
 
