@@ -33,13 +33,13 @@ export default async function Home() {
         >
           <h1
             id="carometro-title"
-            className="heading max-w-3xl text-3xl leading-none sm:text-7xl"
+            className="heading max-w-4xl text-4xl leading-none sm:text-7xl"
           >
             CARÔMETRO
           </h1>
 
           <div
-            className="w-[60vw] h-[0.5px] bg-black mt-0 mb-1 mx-auto"
+            className="w-[70vw] h-[0.5px] bg-black mt-0 mb-1 mx-auto"
             aria-hidden="true"
           />
 

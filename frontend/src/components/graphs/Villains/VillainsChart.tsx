@@ -31,14 +31,14 @@ export default function VillainsChart({ data, source }: Props) {
           style={{ backgroundColor: "#ffffff", color: "#A89B8C" }}
         >
           <span
-            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+            className="text-[11px] font-semibold uppercase tracking-[0.14em]"
             style={{ fontFamily: "var(--font-card-summary)" }}
           >
             Mês de {currentMonthName}
           </span>
         </div>
         <h2
-          className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-10"
+          className="text-4xl sm:text-4xl font-bold tracking-tight text-center mb-10"
           style={{
             fontFamily: "var(--font-subheader)",
             color: "#1A120B",
