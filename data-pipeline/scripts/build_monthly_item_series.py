@@ -139,7 +139,6 @@ class ObservationParser:
         if preco <= 0:
             return None
 
-        # Extract raw unit values
         qtd_embalagem = (raw.get("qtd_embalagem") or "").strip()
         unidade_sigla = (raw.get("unidade_sigla") or "").strip()
         produto_subcategoria = _parse_optional_int(raw.get("produto_subcategoria", ""))
@@ -170,52 +169,6 @@ class ObservationParser:
             produto_subcategoria=produto_subcategoria,
             source_file=source_file,
         )
-
-
-def parse(self, raw: dict[str, str], source_file: str) -> PriceObservation | None:
-    try:
-        reference_date = _parse_date(raw.get("data_pesquisa", ""))
-        preco = _parse_decimal(raw.get("preco", ""))
-    except ValueError:
-        return None
-
-    if preco <= 0:
-        return None
-
-    qtd_embalagem = (raw.get("qtd_embalagem") or "").strip()
-    unidade_sigla = (raw.get("unidade_sigla") or "").strip()
-    produto_subcategoria = _parse_optional_int(raw.get("produto_subcategoria", ""))
-
-    if produto_subcategoria == 20001:
-        unidade_upper = unidade_sigla.upper()
-        if (
-            "DZ" in unidade_upper
-            or "DUZIA" in unidade_upper
-            or "DÚZIA" in unidade_upper
-        ):
-            qtd_embalagem = "12"
-            unidade_sigla = "UNIDADES"
-
-    if produto_subcategoria == 30001:
-        unidade_upper = unidade_sigla.upper()
-        if unidade_upper in ("LITRO", "LITROS"):
-            unidade_sigla = "L"
-
-    return PriceObservation(
-        reference_date=reference_date,
-        month_ref=self._month_ref_resolver.resolve(reference_date, source_file),
-        text_rede=(raw.get("rede") or "").strip(),
-        endereco=(raw.get("endereco") or "").strip(),
-        produto=(raw.get("produto") or "").strip(),
-        marca=(raw.get("marca") or "").strip(),
-        preco=preco,
-        qtd_embalagem=qtd_embalagem,
-        unidade_sigla=unidade_sigla,
-        categoria_score=_parse_optional_decimal(raw.get("categoria_score", "")),
-        produto_categoria=_parse_optional_int(raw.get("produto_categoria", "")),
-        produto_subcategoria=produto_subcategoria,
-        source_file=source_file,
-    )
 
 
 class MonthRefResolver(Protocol):
