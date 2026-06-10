@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { BasketSummaryProps } from "../lib/basketTypes";
-import { getBasketDataForMonth } from "../lib/basket";
+import { fetchBasketMonth } from "../lib/historyActions";
 
 export function useHistoricalBasket(liveProps: BasketSummaryProps) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export function useHistoricalBasket(liveProps: BasketSummaryProps) {
     }
 
     setIsLoadingHistory(true);
-    const data = await getBasketDataForMonth(month_ref);
+    const data = await fetchBasketMonth(month_ref);
     setHistoricalData(data);
     setIsLoadingHistory(false);
   };

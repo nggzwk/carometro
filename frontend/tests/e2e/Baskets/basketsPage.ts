@@ -250,8 +250,29 @@ export class BasketsPage {
     return this.inflationLabel.textContent();
   }
 
+  private async waitForSettled(locator: Locator, timeout = 5000) {
+    const start = Date.now();
+    let prev = await locator.boundingBox();
+    while (Date.now() - start < timeout) {
+      await this.page.waitForTimeout(100);
+      const curr = await locator.boundingBox();
+      if (
+        prev &&
+        curr &&
+        prev.x === curr.x &&
+        prev.y === curr.y &&
+        prev.width === curr.width &&
+        prev.height === curr.height
+      ) {
+        return;
+      }
+      prev = curr;
+    }
+  }
+
   async clickHelpIcon() {
     await expect(this.helpIcon).toBeVisible({ timeout: 5000 });
+    await this.waitForSettled(this.helpIcon);
     await this.helpIcon.click();
   }
 

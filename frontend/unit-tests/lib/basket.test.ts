@@ -56,6 +56,7 @@ describe("getBasketSummaryProps", () => {
       totalInflationPct: 0,
       monthlyIpca: null,
       annualIpca: null,
+      ipcaMonthRef: null,
     });
   });
 

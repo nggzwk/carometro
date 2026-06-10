@@ -64,3 +64,33 @@ export const basketTypesIcons = {
   vegetablesBasketIcon: "🧺",
   cleaningBasketIcon: "🧼",
 };
+
+const SIGLA_OVERRIDES: Record<number, string> = {
+  20001: "DZ", // Ovos (12 unidades = 1 dúzia)
+  60001: "UN", // Óleo de soja
+  90001: "UN", // Café
+  50079: "UN", // Alface Crespa
+  50080: "UN", // Alface Lisa (fallback)
+};
+
+export function getQtdEmbalagemSigla(
+  qtdEmbalagem: string,
+  subcat?: number,
+): string {
+  if (subcat != null && SIGLA_OVERRIDES[subcat]) {
+    return SIGLA_OVERRIDES[subcat];
+  }
+
+  const raw = (qtdEmbalagem ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/UNIDADES?/g, "UN");
+  if (!raw) return "";
+
+  const match = raw.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/);
+  if (!match) return raw;
+
+  const [, qty, unit] = match;
+  const cleanUnit = unit.trim();
+  return qty === "1" ? cleanUnit : `${qty}${cleanUnit}`;
+}
