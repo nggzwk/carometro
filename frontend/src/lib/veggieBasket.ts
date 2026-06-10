@@ -115,13 +115,18 @@ export async function getVeggieBasketSummaryProps(): Promise<BasketSummaryProps>
     const itemsData = (await itemsResponse.json()) as VeggieBasketApiResponse;
     const inflationData = (await inflationResponse.json()) as VeggieInflationApiResponse;
 
+    const latestMonthRef = itemsData.items[0]?.month_ref ?? null;
+    const latestItems = latestMonthRef
+      ? itemsData.items.filter((item) => item.month_ref === latestMonthRef)
+      : itemsData.items;
+
     const latestInflation = inflationData[0];
     const latestIpcaEntry = inflationData.find(
       (e) => e.ipca_monthly_pct !== null && e.annual_ipca_pct !== null
     ) ?? null;
 
     return {
-      items: itemsData.items.map((item) => ({
+      items: latestItems.map((item) => ({
         ...item,
         month_price: item.month_price === null ? "0" : String(item.month_price),
         previous_price:
