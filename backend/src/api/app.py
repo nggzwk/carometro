@@ -7,7 +7,7 @@ from . import basket
 from . import global_baskets
 from . import vegetable_basket
 
-_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://ocarometro.com,https://www.ocarometro.com")
 ALLOWED_ORIGINS = [origin.strip() for origin in _raw.split(",") if origin.strip()]
 
 app = FastAPI(
