@@ -71,7 +71,7 @@ export async function getAnnualMinimumWageIncrease(): Promise<
 > {
   try {
     const res = await fetch(`${API_BASE_URL}/api/basket/wage`, {
-      cache: "no-store",
+      next: { revalidate: 604800 },
     });
     if (!res.ok) return null;
 
@@ -85,7 +85,7 @@ export async function getAnnualMinimumWageIncrease(): Promise<
 export async function getBaseMinimumWage(): Promise<number | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/basket/wage`, {
-      cache: "no-store",
+      next: { revalidate: 604800 },
     });
     if (!res.ok) return null;
 
@@ -105,7 +105,7 @@ export async function getAnnualInflation(): Promise<AnnualRow[] | null> {
   try {
     const [inflationRes, wageIncreaseByYear] = await Promise.all([
       fetch(`${API_BASE_URL}/api/global-baskets/dieese/inflation/annual`, {
-        cache: "no-store",
+        next: { revalidate: 604800 },
       }),
       getAnnualMinimumWageIncrease(),
     ]);

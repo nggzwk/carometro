@@ -80,7 +80,7 @@ export async function getVeggieBasketItems(
       ? `${API_BASE_URL}/api/vegetable-basket/items/price?month_ref=${month_ref}`
       : `${API_BASE_URL}/api/vegetable-basket/items/price`;
 
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { next: { revalidate: 604800 } });
     if (!res.ok) return null;
     return (await res.json()) as VeggieBasketApiResponse;
   } catch {
@@ -101,10 +101,10 @@ export async function getVeggieBasketSummaryProps(): Promise<BasketSummaryProps>
   try {
     const [itemsResponse, inflationResponse] = await Promise.all([
       fetch(`${API_BASE_URL}/api/vegetable-basket/items/price`, {
-        cache: "no-store",
+        next: { revalidate: 604800 },
       }),
       fetch(`${API_BASE_URL}/api/vegetable-basket/inflation/month`, {
-        cache: "no-store",
+        next: { revalidate: 604800 },
       }),
     ]);
 
@@ -149,11 +149,11 @@ export async function getVeggieBasketDataForMonth(
   try {
     const [itemsRes, inflationRes] = await Promise.all([
       fetch(`${API_BASE_URL}/api/vegetable-basket/items/price?month_ref=${month_ref}`, {
-        cache: "no-store",
+        next: { revalidate: 604800 },
       }),
       fetch(
         `${API_BASE_URL}/api/vegetable-basket/inflation/month?month_ref=${month_ref}`,
-        { cache: "no-store" }
+        { next: { revalidate: 604800 } }
       ),
     ]);
 
@@ -196,7 +196,7 @@ export async function getVeggieAvailableMonths(year: number): Promise<string[]> 
       const month_ref = `${year}-${String(i + 1).padStart(2, "0")}`;
       return fetch(
         `${API_BASE_URL}/api/vegetable-basket/items/price?month_ref=${month_ref}`,
-        { cache: "no-store" }
+        { next: { revalidate: 604800 } }
       )
         .then(async (res) => {
           if (!res.ok) return null;

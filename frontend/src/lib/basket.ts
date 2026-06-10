@@ -31,7 +31,7 @@ export async function getAvailableMonths(year: number): Promise<string[]> {
   const results = await Promise.all(
     Array.from({ length: lastMonth }, (_, i) => {
       const month_ref = `${year}-${String(i + 1).padStart(2, "0")}`;
-      return fetch(`${API_BASE_URL}/api/basket/items/price?month_ref=${month_ref}`, { cache: "no-store" })
+      return fetch(`${API_BASE_URL}/api/basket/items/price?month_ref=${month_ref}`, { next: { revalidate: 604800 } })
         .then(async (res) => {
           if (!res.ok) return null;
           const { items } = (await res.json()) as BasketItemsApiResponse;
@@ -52,11 +52,11 @@ export async function getBasketDataForMonth(
   try {
     const [itemsRes, inflationRes] = await Promise.all([
       fetch(`${API_BASE_URL}/api/basket/items/price?month_ref=${month_ref}`, {
-        cache: "no-store",
+        next: { revalidate: 604800 },
       }),
       fetch(
         `${API_BASE_URL}/api/basket/inflation/month?month_ref=${month_ref}`,
-        { cache: "no-store" }
+        { next: { revalidate: 604800 } }
       ),
     ]);
 
@@ -94,10 +94,10 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
   try {
     const [itemsResponse, inflationResponse] = await Promise.all([
       fetch(`${API_BASE_URL}/api/basket/items/price`, {
-        cache: "no-store",
+        next: { revalidate: 604800 },
       }),
       fetch(`${API_BASE_URL}/api/basket/inflation/month`, {
-        cache: "no-store",
+        next: { revalidate: 604800 },
       }),
     ]);
 
@@ -152,7 +152,7 @@ export async function getBasketSummaryProps(): Promise<BasketSummaryProps> {
 
 export async function getLatestMonthRef(): Promise<string | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/basket/items/price`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/api/basket/items/price`, { next: { revalidate: 604800 } });
     if (!res.ok) return null;
     const data = (await res.json()) as BasketItemsApiResponse;
     const refs = data.items.map((i) => i.month_ref).filter(Boolean).sort().reverse();

@@ -76,7 +76,7 @@ function toRankingMetrics(row: GlobalBasketRow): Omit<GlobalBasketRankingRow, "r
 export async function getGlobalBasketRanking(limit = 10): Promise<GlobalBasketRankingRow[]> {
 	try {
 		const res = await fetch(`${API_BASE_URL}/api/global-baskets`, {
-			cache: "no-store",
+			next: { revalidate: 604800 },
 		});
 
 		if (!res.ok) return [];

@@ -84,8 +84,8 @@ async function getLatestVillains(
 ): Promise<MonthlyVillainsData | null> {
   try {
     const [villainsRes, wageRes] = await Promise.all([
-      fetch(villainsUrl, { cache: "no-store" }),
-      fetch(wageUrl, { cache: "no-store" }),
+      fetch(villainsUrl, { next: { revalidate: 604800 } }),
+      fetch(wageUrl, { next: { revalidate: 604800 } }),
     ]);
 
     if (!villainsRes.ok) return null;
