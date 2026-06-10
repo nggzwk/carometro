@@ -86,7 +86,7 @@ export default function VeggieTitle({ selectedMonth, currentMonthRef, isHistoryO
                     : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
                 }
               >
-                <BsFillQuestionDiamondFill className="text-[15px] flex-shrink-0" style={{ color: "#A89B8C" }} />
+                <BsFillQuestionDiamondFill className="text-[19px] flex-shrink-0" style={{ color: "#A89B8C" }} />
               </motion.span>
 
               <span

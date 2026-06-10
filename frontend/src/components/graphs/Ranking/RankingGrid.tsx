@@ -174,46 +174,34 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                             : "0 1px 0 rgba(0,0,0,0.02)",
                         }}
                       >
-                        <AnimatePresence mode="wait" initial={false}>
-                          {!isExpanded ? (
-                            <motion.div
-                              key="collapsed"
-                              initial={{ opacity: 0, y: 10, scale: 0.99 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: -10, scale: 0.99 }}
-                              transition={{
-                                type: "spring",
-                                stiffness: 420,
-                                damping: 32,
-                                mass: 0.9,
-                              }}
-                              className="grid grid-cols-3 items-center w-full text-center"
-                            >
-                              <div id={`ranking-${row.rank}-usd`} className="flex flex-col items-start text-left gap-0.5">
-                                <div className="text-[9px] uppercase tracking-[0.16em] text-[#A89B8C]">
-                                  USD
-                                </div>
-                                <div className="text-s font-semibold text-[#1A120B]">
-                                  {formatUsd(row.basket_usd)}
-                                </div>
-                              </div>
+                        <div className="grid grid-cols-3 items-center w-full text-center">
+                          <div id={`ranking-${row.rank}-usd`} className="flex flex-col items-start text-left gap-0.5">
+                            <div className="text-[9px] uppercase tracking-[0.16em] text-[#A89B8C]">
+                              USD
+                            </div>
+                            <div className="text-s font-semibold text-[#1A120B]">
+                              {formatUsd(row.basket_usd)}
+                            </div>
+                          </div>
 
-                              <div className="flex justify-center">
-                                <span className="inline-flex h-11 w-11 items-center justify-center text-4xl">
-                                  {flag}
-                                </span>
-                              </div>
+                          <div className="flex justify-center">
+                            <span className="inline-flex h-11 w-11 items-center justify-center text-4xl">
+                              {flag}
+                            </span>
+                          </div>
 
-                              <div id={`ranking-${row.rank}-wage-pct`} className="flex flex-col items-end text-right gap-0.5">
-                                <div className="text-[9px] uppercase tracking-[0.16em] text-[#A89B8C]">
-                                  Salário
-                                </div>
-                                <div className="text-s font-semibold text-[#A23C2B]">
-                                  {formatPercent(row.wage_pct)}
-                                </div>
-                              </div>
-                            </motion.div>
-                          ) : (
+                          <div id={`ranking-${row.rank}-wage-pct`} className="flex flex-col items-end text-right gap-0.5">
+                            <div className="text-[9px] uppercase tracking-[0.16em] text-[#A89B8C]">
+                              Salário
+                            </div>
+                            <div className="text-s font-semibold text-[#A23C2B]">
+                              {formatPercent(row.wage_pct)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <AnimatePresence initial={false}>
+                          {isExpanded && (
                             <motion.div
                               key="expanded"
                               initial={{ height: 0, opacity: 0 }}
@@ -221,31 +209,29 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                                 height: "auto",
                                 opacity: 1,
                                 transition: {
-                                  height: { duration: 0.2, ease: "easeOut" },
-                                  opacity: { duration: 0.15 },
+                                  height: { duration: 0.38, ease: [0.16, 1, 0.3, 1] },
+                                  opacity: { duration: 0.28, delay: 0.08 },
                                 },
                               }}
                               exit={{
                                 height: 0,
                                 opacity: 0,
                                 transition: {
-                                  height: { duration: 0.2, ease: "easeIn" },
-                                  opacity: { duration: 0.15 },
+                                  height: { duration: 0.28, ease: [0.4, 0, 1, 1] },
+                                  opacity: { duration: 0.16 },
                                 },
                               }}
-                              className="space-y-4 overflow-hidden"
+                              style={{ overflow: "hidden" }}
                             >
-                              <div className="pt-2 pb-1 space-y-4">
-                                <div className="flex items-start justify-between">
+                              <div className="pt-4 pb-1 space-y-4">
+                                <div className="flex items-start justify-between border-t border-[#E8DDD3] pt-4">
                                   <div>
                                     <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#A89B8C]">
                                       País
                                     </div>
                                     <p
                                       className="text-lg font-semibold text-black uppercase tracking-tight"
-                                      style={{
-                                        fontFamily: "var(--font-subtitle)",
-                                      }}
+                                      style={{ fontFamily: "var(--font-subtitle)" }}
                                     >
                                       {translateCountry(row.country_region)}
                                     </p>
@@ -259,7 +245,7 @@ export default function RankingGrid({ rows, lastUpdatedAt }: RankingGridProps) {
                                   </span>
                                 </div>
 
-                                <div className="space-y-3 border-t border-[#E8DDD3] pt-4">
+                                <div className="space-y-3">
                                   <p className="flex justify-between items-center mt-1 text-sm text-[#7B6758] px-3">
                                     A cesta básica oficial custa
                                   </p>

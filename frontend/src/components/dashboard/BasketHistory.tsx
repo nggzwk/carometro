@@ -22,7 +22,6 @@ interface BasketHistoryButtonProps {
 }
 
 export function BasketHistoryButton({ isOpen, isLoading, onToggle, currentMonthRef, selectedMonth, id }: BasketHistoryButtonProps) {
-  const subtitle = selectedMonth ? formatMonthLabel(selectedMonth) : null;
   return (
     <motion.button
       id={id}
@@ -61,27 +60,6 @@ export function BasketHistoryButton({ isOpen, isLoading, onToggle, currentMonthR
           ▶
         </motion.span>
       )}
-      <AnimatePresence>
-        {subtitle && (
-          <motion.span
-            key={subtitle}
-            initial={{ opacity: 0, x: -4 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -4 }}
-            transition={{ duration: 0.2 }}
-            className="uppercase whitespace-nowrap"
-            style={{
-              fontFamily: "var(--font-card-summary)",
-              color: ACCENT,
-              fontSize: "0.82rem",
-              letterSpacing: "0.14em",
-              fontWeight: 500,
-            }}
-          >
-            {subtitle}
-          </motion.span>
-        )}
-      </AnimatePresence>
     </motion.button>
   );
 }
