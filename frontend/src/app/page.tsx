@@ -3,9 +3,14 @@ import Menu from "../components/shared/Menu";
 import DashboardWrapper from "../components/DashboardWrapper";
 import { getBasketSummaryProps } from "../lib/basket";
 import { getVeggieBasketSummaryProps } from "../lib/veggieBasket";
-import { getLatestVillainsMonth, getLatestFeiraoVillains } from "../lib/villains";
+import {
+  getLatestVillainsMonth,
+  getLatestFeiraoVillains,
+} from "../lib/villains";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
+import Footer from "../components/shared/Footer";
+
 
 export default async function Home() {
   const [basketSummary, feiraoSummary, feiraoVillains, basicaoVillains] =
@@ -34,13 +39,11 @@ export default async function Home() {
           </h1>
 
           <div
-            className="w-[60vw] h-[0.5px] bg-black mt-0 mb-1 mx-auto" 
+            className="w-[60vw] h-[0.5px] bg-black mt-0 mb-1 mx-auto"
             aria-hidden="true"
           />
 
-          <p
-            className="small-header text-xs uppercase tracking-widest"
-          >
+          <p className="small-header text-xs uppercase tracking-widest">
             a inflação da cesta básica curitibana
           </p>
         </section>
@@ -63,19 +66,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="w-full py-6 text-center text-sm text-gray-600">
-        <p>
-          Desenvolvido por{" "}
-          <a
-            href="https://github.com/nggzwk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            nggzwk
-          </a>
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }
