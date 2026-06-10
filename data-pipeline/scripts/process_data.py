@@ -4,7 +4,32 @@
 import argparse
 import sys
 from csv_utils import print_results_summary, print_section
-from pipeline_core import CLEANED_DIR, DATASETS, RAW_DIR, download_all, download_dataset, process_all, process_dataset
+from pipeline_core import (
+    CLEANED_DIR,
+    DATASETS,
+    RAW_DIR,
+    download_all,
+    download_dataset,
+    process_all,
+    process_dataset,
+)
+
+
+# Convenience aliases that fan a single --dataset value out to several datasets.
+DATASET_GROUPS: dict[str, list[str]] = {
+    "old_2022_2024": ["old_portal", "cotacoes_old"],
+    "old_legacy_2022_2023": ["old_portal"],
+    "old_cotacoes_2023_2024": ["cotacoes_old"],
+    "new_cotacoes_2025_plus": ["cotacoes_new"],
+}
+
+
+def _resolve_datasets(dataset: str) -> list[str]:
+    if dataset == "all":
+        return list(DATASETS.keys())
+    if dataset in DATASET_GROUPS:
+        return DATASET_GROUPS[dataset]
+    return [dataset]
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -19,8 +44,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--dataset",
         default="all",
-        choices=["all", *DATASETS.keys()],
-        help="Dataset to target (default: all)",
+        choices=["all", *DATASETS.keys(), *DATASET_GROUPS.keys()],
+        help="Dataset (or dataset group) to target (default: all)",
     )
     return parser
 
@@ -28,15 +53,15 @@ def build_parser() -> argparse.ArgumentParser:
 def run_process(dataset: str) -> int:
     if dataset == "all":
         return print_results_summary("PROCESS SUMMARY", process_all())
-    result = process_dataset(dataset)
-    return print_results_summary("PROCESS SUMMARY", {dataset: result})
+    results = {key: process_dataset(key) for key in _resolve_datasets(dataset)}
+    return print_results_summary("PROCESS SUMMARY", results)
 
 
 def run_download(dataset: str) -> int:
     if dataset == "all":
         return print_results_summary("DOWNLOAD SUMMARY", download_all())
-    result = download_dataset(dataset)
-    return print_results_summary("DOWNLOAD SUMMARY", {dataset: result})
+    results = {key: download_dataset(key) for key in _resolve_datasets(dataset)}
+    return print_results_summary("DOWNLOAD SUMMARY", results)
 
 
 def run_all(dataset: str) -> int:

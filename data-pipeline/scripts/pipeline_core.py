@@ -5,30 +5,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Callable, Dict, Optional
+from typing import Callable
 
 import pandas as pd
 import requests
 from dateutil.relativedelta import relativedelta
 from csv_utils import (
     extract_date_from_filename,
+    parse_date_iso,
     print_section,
 )
-from csv_cleaner.base.legacy_format_cleaner import clean_old_format_csv
-from csv_cleaner.base.new_format_cleaner import clean_new_format_csv
+from csv_cleaner.cleaners import clean_new_format_csv, clean_old_format_csv
 
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR.parent / "data"
 RAW_DIR = DATA_DIR / "raw"
 CLEANED_DIR = DATA_DIR / "cleaned"
-
-
-def parse_date_iso(date_str: str) -> Optional[datetime]:
-    try:
-        return datetime.strptime(date_str, "%Y-%m-%d")
-    except (ValueError, TypeError):
-        return None
 
 
 def _generate_monthly_dates(start: datetime, end: datetime, include_end_always: bool) -> list[datetime]:
@@ -110,7 +103,7 @@ class DatasetConfig:
     dedupe_cleaned_files: bool = False
 
 
-def _cleaned_file_signature(file_path: Path) -> Optional[tuple[str, int]]:
+def _cleaned_file_signature(file_path: Path) -> tuple[str, int] | None:
     try:
         frame = pd.read_csv(file_path, usecols=["data_pesquisa"], dtype=str, on_bad_lines="skip", engine="c")
     except Exception as exc:
@@ -133,7 +126,7 @@ def _remove_duplicate_cleaned_files(output_dir: Path) -> int:
     if not cleaned_files:
         return 0
 
-    signatures: Dict[tuple[str, int], Path] = {}
+    signatures: dict[tuple[str, int], Path] = {}
     removed = 0
 
     for file_path in cleaned_files:
@@ -175,7 +168,7 @@ def _match_cotacoes_filename(filename: str) -> bool:
     return "_Clique_Economia_-_Cotacoes_-_Base_de_Dados.csv" in filename
 
 
-def _extract_cotacoes_filename_date(filename: str) -> Optional[datetime]:
+def _extract_cotacoes_filename_date(filename: str) -> datetime | None:
     if not _match_cotacoes_filename(filename):
         return None
     if len(filename) < 10:
@@ -202,7 +195,7 @@ def _current_month_last_day() -> datetime:
     return _last_day_of_month(now)
 
 
-DATASETS: Dict[str, DatasetConfig] = {
+DATASETS: dict[str, DatasetConfig] = {
     "old_portal": DatasetConfig(
         key="old_portal",
         title="Old Portal Legacy (2022-2023)",
