@@ -1,0 +1,219 @@
+/* ---- Container --------------------------------------------------------- */
+.total-cart {
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+/* ---- Trigger row ------------------------------------------------------- */
+.total-cart__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.total-cart__trigger:hover .total-cart__label {
+  font-weight: 700;
+}
+
+.total-cart__trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.total-cart__cart-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  user-select: none;
+}
+
+.total-cart__label {
+  font-family: var(--font-card-summary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a89b8c;
+  transition: color 180ms ease;
+}
+
+.total-cart__trigger-right {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.total-cart__total-value {
+  font-family: var(--font-card-summary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1a120b;
+  letter-spacing: -0.01em;
+}
+
+.total-cart__empty-hint {
+  font-family: var(--font-card-summary);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a89b8c;
+}
+
+.total-cart__chevron {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #a89b8c;
+  line-height: 1;
+}
+
+/* ---- Collapsed body ---------------------------------------------------- */
+.total-cart__body {
+  border-top: 1px solid rgba(200, 185, 170, 0.3);
+  padding: 0.75rem 1.25rem 1.1rem;
+}
+
+.total-cart__empty-msg {
+  margin: 0;
+  padding: 1rem 0;
+  font-size: 0.82rem;
+  text-align: center;
+  color: #a89b8c;
+  text-transform: uppercase;
+}
+
+/* ---- Item lines -------------------------------------------------------- */
+.total-cart__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.total-cart__line {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0;
+}
+
+.total-cart__line + .total-cart__line {
+  border-top: 1px solid rgba(200, 185, 170, 0.18);
+}
+
+.total-cart__line-icon {
+  font-size: 1.55rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
+}
+
+.total-cart__line-qty {
+  font-family: var(--font-card-summary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #a89b8c;
+  flex-shrink: 0;
+  min-width: 1.4rem;
+}
+
+.total-cart__line-sigla {
+  flex: 1;
+  font-family: var(--font-card-summary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1a120b;
+}
+
+.total-cart__line-subtotal {
+  width: 90px;
+  text-align: left;
+  font-family: var(--font-card-summary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1a120b;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.total-cart__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  background: transparent;
+  color: var(--color-inflation, #e63946);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 150ms ease;
+}
+
+.total-cart__remove:hover {
+  background: rgba(230, 57, 70, 0.07);
+}
+
+/* ---- Footer ------------------------------------------------------------ */
+.total-cart__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  margin-top: 0.4rem;
+  border-top: 1px solid rgba(200, 185, 170, 0.25);
+}
+
+.total-cart__clear {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-card-summary);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1a120b;
+  transition: color 150ms ease;
+}
+
+.total-cart__clear:hover {
+  color: var(--color-inflation, #e63946);
+}
+
+.total-cart__total-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.total-cart__total-label {
+  font-family: var(--font-card-summary);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  color: #1a120b;
+  text-transform: uppercase;
+}
+
+.total-cart__total-big {
+  font-family: var(--font-card-summary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a120b;
+  letter-spacing: -0.01em;
+}

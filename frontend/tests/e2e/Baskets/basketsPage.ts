@@ -253,6 +253,7 @@ export class BasketsPage {
   private async waitForSettled(locator: Locator, timeout = 5000) {
     const start = Date.now();
     let prev = await locator.boundingBox();
+    let stableCount = 0;
     while (Date.now() - start < timeout) {
       await this.page.waitForTimeout(100);
       const curr = await locator.boundingBox();
@@ -264,7 +265,10 @@ export class BasketsPage {
         prev.width === curr.width &&
         prev.height === curr.height
       ) {
-        return;
+        stableCount++;
+        if (stableCount >= 3) return;
+      } else {
+        stableCount = 0;
       }
       prev = curr;
     }
@@ -343,7 +347,6 @@ export class BasketsPage {
     return id.replace("btn-month-", "");
   }
 
-  /** Clicks a month pill by ref and returns it. */
   async selectMonthByRef(ref: string): Promise<string> {
     await this.monthOption(ref).click();
     await this.page.waitForLoadState("networkidle");
@@ -374,7 +377,6 @@ export class BasketsPage {
   }
 
   async closeMonthPanel() {
-    // The panel is toggled by the Histórico button.
     await this.clickHistoricoButton();
   }
 

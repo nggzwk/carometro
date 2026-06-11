@@ -9,27 +9,35 @@ import {
 } from "../lib/villains";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
+import CustomBasket from "../components/custom/CustomBasket";
 import Footer from "../components/shared/Footer";
+import { getDieeseTableRows } from "../lib/annualInflation";
 
 const Divider = () => (
   <div className="w-full h-[0.5px] bg-black/10 my-10" aria-hidden="true" />
 );
 
 export default async function Home() {
-  const [basketSummary, feiraoSummary, feiraoVillains, basicaoVillains] =
-    await Promise.all([
-      getBasketSummaryProps(),
-      getVeggieBasketSummaryProps(),
-      getLatestFeiraoVillains(),
-      getLatestVillainsMonth(),
-    ]);
+  const [
+    basketSummary,
+    feiraoSummary,
+    feiraoVillains,
+    basicaoVillains,
+    dieeseRows,
+  ] = await Promise.all([
+    getBasketSummaryProps(),
+    getVeggieBasketSummaryProps(),
+    getLatestFeiraoVillains(),
+    getLatestVillainsMonth(),
+    getDieeseTableRows(),
+  ]);
 
   return (
     <div className="min-h-screen bg-brand text-black overflow-x-hidden">
       <UpdateBanner />
 
       <header>
-        <Menu />
+        <Menu dieeseRows={dieeseRows} />
         <section
           className="space-y-1 w-full flex flex-col items-center text-center mt-6 md:mt-8"
           aria-labelledby="carometro-title"
@@ -61,6 +69,13 @@ export default async function Home() {
         />
 
         <section>
+          <CustomBasket
+            basicaoItems={basketSummary.items}
+            feiraoItems={feiraoSummary.items}
+          />
+        </section>
+
+        <section>
           <Divider />
           <Ranking />
         </section>
@@ -70,7 +85,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <Footer />
+      <Footer dieeseRows={dieeseRows} />
     </div>
   );
 }
