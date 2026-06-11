@@ -11,6 +11,9 @@ import AxisGraph from "../components/graphs/Axis/AxisGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
 import Footer from "../components/shared/Footer";
 
+const Divider = () => (
+  <div className="w-full h-[0.5px] bg-black/10 my-10" aria-hidden="true" />
+);
 
 export default async function Home() {
   const [basketSummary, feiraoSummary, feiraoVillains, basicaoVillains] =
@@ -58,6 +61,7 @@ export default async function Home() {
         />
 
         <section>
+          <Divider />
           <Ranking />
         </section>
 

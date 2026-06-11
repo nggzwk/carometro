@@ -6,6 +6,7 @@ import { getBasketItemIcon } from "../../../lib/basketIcons";
 import { RiTwitterXFill } from "react-icons/ri";
 import { LiaLinkedin } from "react-icons/lia";
 import { LiaGithubSquare } from "react-icons/lia";
+import { TbMoneybagHeart } from "react-icons/tb";
 
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -129,13 +130,15 @@ export default function Transparency() {
 
         <div className="text-sm font-light text-[#6B5C4E] leading-relaxed mb-6">
           O Carômetro nasceu da vontade de tornar acessível e democrático ao
-          público curitibano o impacto real da inflação no cotidiano. Todos os
+          público curitibano o impacto real da inflação no dia a dia. Todos os
           dados desse projeto são públicos, extraídos de
           dadosabertos.curitiba.pr.gov.br
         </div>
 
         <div className="flex flex-col gap-3">
-          <ExternalLink href="#">API pública — em breve</ExternalLink>
+          <ExternalLink href="https://api.ocarometro.com/docs#/">
+            API pública
+          </ExternalLink>
           <ExternalLink href="https://github.com/nggzwk/carometro">
             Repositório no GitHub
           </ExternalLink>
@@ -202,87 +205,87 @@ export default function Transparency() {
                   <th className="text-right pb-2 font-light">Final</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="tracking-tight">
                 {[
                   {
-                    name: "Carne Vermelha",
+                    name: "Carne",
                     subcat: 10023,
-                    a: "3,90 kg",
-                    b: "2,10 kg",
-                    c: "2,00 kg",
-                    final: "2,81 kg",
+                    a: "3,90kg",
+                    b: "2,10kg",
+                    c: "2,00kg",
+                    final: "2,81kg",
                   },
                   {
-                    name: "Filé de Frango",
+                    name: "Frango",
                     subcat: 10011,
-                    a: "3,90 kg",
-                    b: "3,80 kg",
-                    c: "2,00 kg",
-                    final: "3,57 kg",
+                    a: "3,90kg",
+                    b: "3,80kg",
+                    c: "2,00kg",
+                    final: "3,57kg",
                   },
                   {
                     name: "Ovos",
                     subcat: 20001,
-                    a: "75 unid.",
-                    b: "21 unid.",
-                    c: "24 unid.",
-                    final: "43 unid.",
+                    a: "75 un",
+                    b: "21 un",
+                    c: "24 un",
+                    final: "43 un",
                   },
                   {
-                    name: "Leite Integral",
+                    name: "Leite",
                     subcat: 30001,
-                    a: "10,0 L",
-                    b: "3,2 L",
-                    c: "5,0 L",
-                    final: "6,19 L",
+                    a: "10,0L",
+                    b: "3,2L",
+                    c: "5,0L",
+                    final: "6,19L",
                   },
                   {
-                    name: "Arroz Polido",
+                    name: "Arroz",
                     subcat: 40003,
-                    a: "2,25 kg",
-                    b: "3,40 kg",
-                    c: "2,50 kg",
-                    final: "2,81 kg",
+                    a: "2,25kg",
+                    b: "3,40kg",
+                    c: "2,50kg",
+                    final: "2,81kg",
                   },
                   {
-                    name: "Feijão Carioca",
+                    name: "Feijão",
                     subcat: 40012,
-                    a: "1,00 kg",
-                    b: "1,50 kg",
-                    c: "1,00 kg",
-                    final: "1,23 kg",
+                    a: "1,00kg",
+                    b: "1,50kg",
+                    c: "1,00kg",
+                    final: "1,23kg",
                   },
                   {
-                    name: "Café a Vácuo",
+                    name: "Café",
                     subcat: 90001,
-                    a: "500 g",
-                    b: "480 g",
-                    c: "500 g",
-                    final: "491 g",
+                    a: "500g",
+                    b: "480g",
+                    c: "500g",
+                    final: "491g",
                   },
                   {
-                    name: "Óleo de Soja",
+                    name: "Óleo",
                     subcat: 60001,
-                    a: "800 ml",
-                    b: "1.100 ml",
-                    c: "900 ml",
-                    final: "950 ml",
+                    a: "800ml",
+                    b: "1.100ml",
+                    c: "900ml",
+                    final: "950ml",
                   },
                   {
                     name: "Açúcar",
                     subcat: 80002,
-                    a: "0,70 kg",
-                    b: "2,10 kg",
-                    c: "1,00 kg",
-                    final: "1,38 kg",
+                    a: "0,70kg",
+                    b: "2,10kg",
+                    c: "1,00kg",
+                    final: "1,38kg",
                   },
                   {
-                    name: "Farinha de Trigo",
+                    name: "Trigo",
                     subcat: 40017,
-                    a: "1,25 kg",
-                    b: "0,60 kg",
-                    c: "1,00 kg",
-                    final: "0,92 kg",
+                    a: "1,25kg",
+                    b: "0,60kg",
+                    c: "1,00kg",
+                    final: "0,92kg",
                   },
                 ].map(({ name, subcat, a, b, c, final }) => (
                   <tr key={name} className="border-t border-black/5">
@@ -365,72 +368,72 @@ export default function Transparency() {
                   {
                     name: "Tomate",
                     subcat: 50008,
-                    piso: "0,416 kg",
-                    teto: "1,150 kg",
-                    final: "0,783 kg",
+                    piso: "0,416kg",
+                    teto: "1,150kg",
+                    final: "0,783kg",
                   },
                   {
                     name: "Banana",
                     subcat: 50025,
-                    piso: "0,583 kg",
-                    teto: "1,200 kg",
-                    final: "0,891 kg",
+                    piso: "0,583kg",
+                    teto: "1,200kg",
+                    final: "0,891kg",
                   },
                   {
                     name: "Batata",
                     subcat: 50005,
-                    piso: "0,439 kg",
-                    teto: "1,120 kg",
-                    final: "0,779 kg",
+                    piso: "0,439kg",
+                    teto: "1,120kg",
+                    final: "0,779kg",
                   },
                   {
                     name: "Cebola",
                     subcat: 50002,
-                    piso: "0,289 kg",
-                    teto: "0,510 kg",
-                    final: "0,399 kg",
+                    piso: "0,289kg",
+                    teto: "0,510kg",
+                    final: "0,399kg",
                   },
                   {
                     name: "Alface",
                     subcat: 50079,
-                    piso: "0,080 kg",
-                    teto: "0,220 kg",
-                    final: "0,150 kg",
+                    piso: "0,080kg",
+                    teto: "0,220kg",
+                    final: "0,150kg",
                   },
                   {
                     name: "Cenoura",
                     subcat: 50007,
-                    piso: "0,140 kg",
-                    teto: "0,320 kg",
-                    final: "0,230 kg",
+                    piso: "0,140kg",
+                    teto: "0,320kg",
+                    final: "0,230kg",
                   },
                   {
                     name: "Laranja",
                     subcat: 50021,
-                    piso: "1,330 kg",
-                    teto: "2,400 kg",
-                    final: "1,865 kg",
+                    piso: "1,330kg",
+                    teto: "2,400kg",
+                    final: "1,865kg",
                   },
                   {
                     name: "Abóbora",
                     subcat: 50017,
-                    piso: "0,160 kg",
-                    teto: "0,340 kg",
-                    final: "0,250 kg",
+                    piso: "0,160kg",
+                    teto: "0,340kg",
+                    final: "0,250kg",
                   },
                   {
                     name: "Maçã",
                     subcat: 50029,
-                    piso: "0,310 kg",
-                    teto: "0,450 kg",
-                    final: "0,380 kg",
+                    piso: "0,310kg",
+                    teto: "0,450kg",
+                    final: "0,380kg",
                   },
                   {
                     name: "Batata-doce",
                     subcat: 50004,
-                    piso: "0,125 kg",
-                    teto: "0,280 kg",
-                    final: "0,202 kg",
+                    piso: "0,125kg",
+                    teto: "0,280kg",
+                    final: "0,202kg",
                   },
                 ].map(({ name, subcat, piso, teto, final }) => (
                   <tr key={name} className="border-t border-black/5">
@@ -512,33 +515,41 @@ export default function Transparency() {
         <SectionTitle>Sobre o desenvolvimento</SectionTitle>
 
         <div className="text-sm font-light text-[#6B5C4E] leading-relaxed mt-4">
-          <p className="mb-2">
-            O Carômetro foi desenvolvido exclusivamente por mim, sem apoio
-            institucional ou financiamento externo. O projeto é mantido de forma
-            independente e sem fins lucrativos, como uma ferramenta simples e
-            transparente para a população curitibana.
+          <p className="mb-1">
+            O Carômetro foi desenvolvido sem apoio institucional ou
+            financiamento externo. O projeto é mantido de forma independente e
+            sem fins lucrativos. Inconsistências podem ocorrer e são corrigidas
+            assim que identificadas.
           </p>
 
-          <p className="mb-2">
-            Inconsistências podem ocorrer e são corrigidas assim que
-            identificadas. Contribuições e reportes podem ser feitos diretamente
-            no repositório do projeto.
+          <p className="mb-1">
+            Colaborações ou sugestões podem ser feitas diretamente no
+            repositório do projeto. Ou entre em contato. A transparência e a
+            colaboração são fundamentais para o sucesso de uma sociedade!
           </p>
-          <p className="mb-2">
-            A transparência e a colaboração são fundamentais para o sucesso de
-            uma sociedade!
-          </p>
+          <div className="mt-8 uppercase text-[11px] flex items-center gap-2 italic">
+            <a
+              href="https://link.mercadopago.com.br/ocarometro"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#8B7355] hover:text-black transition-colors"
+              aria-label="MercadoPago"
+            >
+              <TbMoneybagHeart size={24} />
+            </a>
+            <span className="mb-[-3px]">Ajude a manter o projeto</span>
+          </div>
           <Divider />
 
           <div className="text-sm font-light text-[#6B5C4E] leading-relaxed mt-4">
-            <p className="mb-2">
+            <p className="mb-4">
               Para mais detalhes sobre metodologia e fontes, consulte o{" "}
-              <ExternalLink href="#">PDF (Em breve)</ExternalLink>.
+              <ExternalLink href="#">PDF(soon)</ExternalLink>
             </p>
 
-            <div>
+            <div className="mb-2">
               <p>Atualizações futuras:</p>
-              <ul className="list-disc list-inside mt-2">
+              <ul className="list-disc list-inside">
                 <li>Todos os itens disponíveis na API.</li>
                 <li>Faxinão.</li>
               </ul>
