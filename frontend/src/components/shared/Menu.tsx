@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TbMenu, TbX, TbChevronRight } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
 import Transparency from "./pages/Transparency";
+import type { DieeseRow } from "../../lib/annualInflation";
 
 type Page = "transparency";
 
@@ -11,13 +12,13 @@ const pages: { id: Page; label: string }[] = [
   { id: "transparency", label: "TRANSPARÊNCIA" },
 ];
 
-const pageComponents: Record<Page, React.ReactNode> = {
-  transparency: <Transparency />,
-};
-
-export default function Menu() {
+export default function Menu({ dieeseRows = [] }: { dieeseRows?: DieeseRow[] }) {
   const [open, setOpen] = useState(false);
   const [activePage, setActivePage] = useState<Page | null>(null);
+
+  const pageComponents: Record<Page, React.ReactNode> = {
+    transparency: <Transparency dieeseRows={dieeseRows} />,
+  };
 
   const handleClose = () => {
     setActivePage(null);

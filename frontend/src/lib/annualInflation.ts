@@ -1,4 +1,7 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  process.env.API_BASE_URL ??
+  "http://localhost:8000";
 
 export type AnnualRow = {
   year: number;
@@ -33,17 +36,20 @@ function getYearFromMonthRef(monthRef: string): number | null {
 export function calculateAnnualMinimumWageIncrease(
   wageRows: WageRow[],
 ): Record<number, number | null> {
-  const latestWageByYear = wageRows.reduce<Record<number, number>>((acc, row) => {
-    const year = getYearFromMonthRef(row.month_ref);
-    const wage = toNumber(row.minimum_wage_brl);
-    if (year === null || wage === null) return acc;
+  const latestWageByYear = wageRows.reduce<Record<number, number>>(
+    (acc, row) => {
+      const year = getYearFromMonthRef(row.month_ref);
+      const wage = toNumber(row.minimum_wage_brl);
+      if (year === null || wage === null) return acc;
 
-    const current = acc[year];
-    if (current === undefined || wage > current) {
-      acc[year] = wage;
-    }
-    return acc;
-  }, {});
+      const current = acc[year];
+      if (current === undefined || wage > current) {
+        acc[year] = wage;
+      }
+      return acc;
+    },
+    {},
+  );
 
   const years = Object.keys(latestWageByYear)
     .map((y) => Number(y))
@@ -66,9 +72,10 @@ export function calculateAnnualMinimumWageIncrease(
   return increaseByYear;
 }
 
-export async function getAnnualMinimumWageIncrease(): Promise<
-  Record<number, number | null> | null
-> {
+export async function getAnnualMinimumWageIncrease(): Promise<Record<
+  number,
+  number | null
+> | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/basket/wage`, {
       next: { revalidate: 604800 },
@@ -93,7 +100,7 @@ export async function getBaseMinimumWage(): Promise<number | null> {
     if (!wageRows.length) return null;
 
     const sorted = [...wageRows].sort((a, b) =>
-      String(a.month_ref).localeCompare(String(b.month_ref))
+      String(a.month_ref).localeCompare(String(b.month_ref)),
     );
     return toNumber(sorted[0].minimum_wage_brl);
   } catch {
@@ -130,5 +137,39 @@ export async function getAnnualInflation(): Promise<AnnualRow[] | null> {
   }
 }
 
-export default getAnnualInflation;
+export type DieeseRow = { year: string; annual: string; cumulative: string };
 
+function formatPct(value: number): string {
+  return `${value.toFixed(2).replace(".", ",")}%`;
+}
+export async function getDieeseTableRows(): Promise<DieeseRow[]> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/global-baskets/dieese/inflation/annual`,
+      { next: { revalidate: 604800 } },
+    );
+    if (!res.ok) return [];
+
+    const data = (await res.json()) as AnnualRow[];
+
+    let cumulative = 0;
+    return data.map((r, i) => {
+      const annual = toNumber(r.annual_inflation_pct);
+      if (annual !== null) {
+        cumulative =
+          i === 0
+            ? annual
+            : (1 + cumulative / 100) * (1 + annual / 100) * 100 - 100;
+      }
+      return {
+        year: String(r.year),
+        annual: annual !== null ? formatPct(annual) : "—",
+        cumulative: annual !== null ? formatPct(cumulative) : "—",
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+export default getAnnualInflation;

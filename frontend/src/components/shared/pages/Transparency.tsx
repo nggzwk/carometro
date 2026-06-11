@@ -1,7 +1,5 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import getAnnualInflation from "../../../lib/annualInflation";
+import React from "react";
+import type { DieeseRow } from "../../../lib/annualInflation";
 import { getBasketItemIcon } from "../../../lib/basketIcons";
 import { RiTwitterXFill } from "react-icons/ri";
 import { LiaLinkedin } from "react-icons/lia";
@@ -76,40 +74,11 @@ const ExternalLink: React.FC<{ href: string; children: React.ReactNode }> = ({
   </a>
 );
 
-type DieeseRow = { year: string; annual: string; cumulative: string };
-
-export default function Transparency() {
-  const [dieeseRows, setDieeseRows] = useState<DieeseRow[]>([]);
-
-  useEffect(() => {
-    getAnnualInflation().then((rows) => {
-      if (!rows) return;
-      let cumulative = 0;
-      const computed = rows.map((r, i) => {
-        const annual =
-          r.annual_inflation_pct === null
-            ? null
-            : Number(r.annual_inflation_pct);
-        if (annual !== null) {
-          cumulative =
-            i === 0
-              ? annual
-              : (1 + cumulative / 100) * (1 + annual / 100) * 100 - 100;
-        }
-        return {
-          year: String(r.year),
-          annual:
-            annual !== null ? `${annual.toFixed(2).replace(".", ",")}%` : "—",
-          cumulative:
-            annual !== null
-              ? `${cumulative.toFixed(2).replace(".", ",")}%`
-              : "—",
-        };
-      });
-      setDieeseRows(computed);
-    });
-  }, []);
-
+export default function Transparency({
+  dieeseRows = [],
+}: {
+  dieeseRows?: DieeseRow[];
+}) {
   return (
     <div
       className="min-h-screen px-8 py-10"

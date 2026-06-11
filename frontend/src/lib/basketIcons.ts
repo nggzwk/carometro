@@ -43,7 +43,7 @@ const ICONS_SUBTITLES: Record<number, string> = {
   30001: "INTEGRAL",
   80002: "CRISTAL",
   20001: "BRANCOS",
-  10011: "INTEIRO",
+  10011: "FILÉ DE PEITO",
   10023: "COXAO MOLE SEM OSSO",
   // Feirao
   50008: "LONGA VIDA",
