@@ -5,12 +5,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import { TbX } from "react-icons/tb";
 import { LiaGithubSquare, LiaLinkedin } from "react-icons/lia";
 import Transparency from "./pages/Transparency";
+import type { DieeseRow } from "../../lib/annualInflation";
 
 const Divider = () => (
   <div className="w-full h-[1px] bg-black/10 my-10" aria-hidden="true" />
 );
 
-export default function Footer() {
+export default function Footer({
+  dieeseRows = [],
+}: {
+  dieeseRows?: DieeseRow[];
+}) {
   const [showTransparency, setShowTransparency] = useState(false);
 
   return (
@@ -101,7 +106,7 @@ export default function Footer() {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto">
-                <Transparency />
+                <Transparency dieeseRows={dieeseRows} />
               </div>
             </motion.aside>
           </>
