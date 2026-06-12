@@ -34,10 +34,10 @@ export class AxisPage {
 
     this.axisTickLabels = page.locator("g.recharts-cartesian-axis-tick-label");
     this.xAxisLabels = page.locator(
-      ".recharts-xAxis-tick-labels g.recharts-cartesian-axis-tick-label"
+      "#axis-graph .recharts-xAxis-tick-labels g.recharts-cartesian-axis-tick-label"
     );
     this.yAxisLabels = page.locator(
-      ".recharts-yAxis-tick-labels g.recharts-cartesian-axis-tick-label"
+      "#axis-graph .recharts-yAxis-tick-labels g.recharts-cartesian-axis-tick-label"
     );
 
     this.tooltipSquares = this.tooltip.locator('div[id^="chart-tooltip-"]');

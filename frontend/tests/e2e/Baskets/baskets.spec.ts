@@ -73,6 +73,7 @@ for (const { viewName, open } of VIEWS) {
       expect(await baskets.isHelpIconVisible()).toBeFalsy();
 
       await baskets.reload();
+      await open(baskets);
       await expect(baskets.helpIcon).toBeVisible();
     });
 

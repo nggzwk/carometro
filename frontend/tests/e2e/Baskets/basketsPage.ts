@@ -277,7 +277,7 @@ export class BasketsPage {
   async clickHelpIcon() {
     await expect(this.helpIcon).toBeVisible({ timeout: 5000 });
     await this.waitForSettled(this.helpIcon);
-    await this.helpIcon.click();
+    await this.helpIcon.click({ force: true });
   }
 
   async isHelpIconVisible(): Promise<boolean> {
