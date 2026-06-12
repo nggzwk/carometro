@@ -5,6 +5,28 @@ import { ITEM_LIMIT, OVER_LIMIT_DURATION_MS } from "./constants";
 import { itemDisplayName } from "./helpers";
 import type { CartEntry, CartLine } from "./types";
 
+const STORAGE_KEY = "carometro_basket";
+
+function loadCart(): Record<number, CartEntry> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return {};
+    return parsed as Record<number, CartEntry>;
+  } catch {
+    return {};
+  }
+}
+
+function saveCart(cart: Record<number, CartEntry>) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  } catch {
+    return;
+  }
+}
+
 export interface CustomBasketState {
   lines: CartLine[];
   count: number;
@@ -17,11 +39,13 @@ export interface CustomBasketState {
 }
 
 export function useCustomBasket(): CustomBasketState {
-  const [cart, setCart] = useState<Record<number, CartEntry>>({});
+  const [cart, setCart] = useState<Record<number, CartEntry>>(() => loadCart());
   const [overLimit, setOverLimit] = useState(false);
   const [popTick, setPopTick] = useState(0);
   const insertCounterRef = useRef(0);
   const overLimitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => saveCart(cart), [cart]);
 
   useEffect(
     () => () => {

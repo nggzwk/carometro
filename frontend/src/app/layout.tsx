@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { plusJakartaSans, jetbrainsMono } from "./fonts";
+import { Analytics } from "@vercel/analytics/next";
 
 const siteUrl = "https://ocarometro.com";
 const title = "Carômetro — A inflação da cesta básica curitibana";
@@ -65,6 +66,7 @@ export default function RootLayout({
             className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
         >
             {children}
+            <Analytics />
         </body>
         </html>
     );
