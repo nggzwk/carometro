@@ -117,22 +117,26 @@ export default function TotalCart({
                           {line.qty === 1 ? "×" : `×${line.qty}`}
                         </span>
 
-                        <span className="total-cart__line-fullname">{line.fullName}</span>
+                        <span className="total-cart__line-name">{line.name}</span>
 
                         <span className="total-cart__line-sigla">{line.sigla}</span>
 
-                        <span className="total-cart__line-subtotal">
-                          {formatBrl(line.subtotal)}
-                        </span>
+                        <div className="total-cart__line-end">
+                          <span className="total-cart__line-subtotal">
+                            {formatBrl(line.subtotal)}
+                          </span>
 
-                        <button
-                          type="button"
-                          className="total-cart__remove"
-                          onClick={() => onRemove(line.subcat)}
-                          aria-label={`Remover um ${line.name}`}
-                        >
-                          −
-                        </button>
+                          <div className="total-cart__line-action">
+                            <button
+                              type="button"
+                              className="total-cart__remove"
+                              onClick={() => onRemove(line.subcat)}
+                              aria-label={`Remover um ${line.name}`}
+                            >
+                              −
+                            </button>
+                          </div>
+                        </div>
                       </motion.li>
                     ))}
                   </ul>

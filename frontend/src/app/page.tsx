@@ -52,7 +52,7 @@ export default async function Home() {
           />
 
           <p className="small-header text-xs uppercase tracking-widest">
-            a inflação da cesta básica curitibana
+            preços de mercado, cesta básica e custo de vida em Curitiba
           </p>
         </section>
       </header>
