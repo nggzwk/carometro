@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./ChartDot.module.css";
 
 interface ChartDotProps {
   cx: number;
   cy: number;
   icon: string;
-  isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onClick: () => void;
@@ -19,7 +18,6 @@ export const ChartDot: React.FC<ChartDotProps> = ({
   cx,
   cy,
   icon,
-  isHovered,
   onMouseEnter,
   onMouseLeave,
   onClick,
@@ -28,17 +26,29 @@ export const ChartDot: React.FC<ChartDotProps> = ({
   color = "#e0aa59",
   hoverColor = "#eabf7e",
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   if (cx == null || cy == null) return null;
 
   const baseR = isHovered ? 19.2 : 16;
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    onMouseEnter();
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    onMouseLeave();
+  };
 
   return (
     <g
       id={id}
       className={styles.dotGroup}
       transform={`translate(${cx}, ${cy})`}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={onClick}
       onPointerDown={onPointerDown}
     >
@@ -54,7 +64,7 @@ export const ChartDot: React.FC<ChartDotProps> = ({
           className={styles.glowRing}
         />
       )}
-      
+
       <circle
         cx={0}
         cy={0}
@@ -67,7 +77,7 @@ export const ChartDot: React.FC<ChartDotProps> = ({
           transition: "r 300ms cubic-bezier(0.4, 0, 0.2, 1), stroke 300ms, stroke-width 300ms",
         }}
       />
-      
+
       <text
         x={0}
         y={isHovered ? 7 : 6}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, useCallback } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -38,7 +38,6 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
   const [selectedSubcat, setSelectedSubcat] = useState<number | null>(
     selectableItems[0]?.subcategoria ?? null,
   );
-  const [hoveredYear, setHoveredYear] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{
@@ -76,18 +75,16 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
 
   const handleSelect = (subcategoria: number) => {
     setSelectedSubcat((prev) => (prev === subcategoria ? null : subcategoria));
-    setHoveredYear(null);
     setTooltip(null);
   };
 
-  const showTooltip = (index: number, cx: number, cy: number) => {
+  const showTooltip = useCallback((index: number, cx: number, cy: number) => {
     const point = data[index];
     if (!point) return;
-    setHoveredYear(point.year);
     setTooltip({ x: cx, y: cy, pct: point.value, priceBrl: point.priceBrl });
-  };
+  }, [data]);
 
-  const renderDot = (props: { cx?: number; cy?: number; index?: number }) => {
+  const renderDot = useCallback((props: { cx?: number; cy?: number; index?: number }) => {
     const { cx, cy, index } = props;
     if (cx == null || cy == null || index == null || selectedSubcat == null)
       return null;
@@ -103,16 +100,12 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
         icon={getBasketItemIcon(selectedSubcat)}
         color={color}
         hoverColor={color}
-        isHovered={hoveredYear === point.year}
         onMouseEnter={() => showTooltip(index, cx, cy)}
-        onMouseLeave={() => {
-          setHoveredYear(null);
-          setTooltip(null);
-        }}
+        onMouseLeave={() => setTooltip(null)}
         onClick={() => showTooltip(index, cx, cy)}
       />
     );
-  };
+  }, [data, color, selectedSubcat, showTooltip]);
 
   if (selectableItems.length === 0) {
     return (
@@ -138,6 +131,7 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
           </span>
         </div>
         <h2
+          id="line-graph-title"
           className="text-4xl sm:text-4xl font-bold tracking-tight text-center"
           style={{
             fontFamily: "var(--font-subheader)",
