@@ -38,6 +38,6 @@ app.include_router(basket.router)
 app.include_router(vegetable_basket.router)
 app.include_router(global_baskets.router)
 
-@app.api_route("/health", methods=["GET", "HEAD"], tags=["health"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["health"], operation_id="health_check")
 def health():
     return {"status": "ok"}

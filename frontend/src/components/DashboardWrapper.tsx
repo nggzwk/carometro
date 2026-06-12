@@ -33,14 +33,14 @@ export default function DashboardWrapper({
 
   return (
     <>
-      <section>
+      <section className="min-h-screen flex flex-col items-center justify-center py-16">
         <BasketSummary
           {...basketSummary}
           feiraoProps={feiraoSummary}
           onViewChange={setView}
         />
       </section>
-      <section>
+      <section className="min-h-screen flex flex-col items-center justify-center py-16">
         <VillainsChart data={villainsData} source={villainsSource} />
       </section>
     </>

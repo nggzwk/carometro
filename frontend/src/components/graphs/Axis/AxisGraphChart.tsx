@@ -133,9 +133,10 @@ export default function AxisGraphChart({
       <div
         id="axis-graph-chart"
         className={`relative w-full ${styles.chartNoSelect}`}
+        style={{ height: "clamp(420px, 60vh, 640px)" }}
         aria-label="Gráfico de inflação anual"
       >
-        <ResponsiveContainer width="100%" height={420}>
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
             margin={{ top: 20, right: 30, left: 5, bottom: 20 }}

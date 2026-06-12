@@ -13,9 +13,6 @@ import CustomBasket from "../components/custom/CustomBasket";
 import Footer from "../components/shared/Footer";
 import { getDieeseTableRows } from "../lib/annualInflation";
 
-const Divider = () => (
-  <div className="w-full h-[0.5px] bg-black/10 my-10" aria-hidden="true" />
-);
 
 export default async function Home() {
   const [
@@ -60,7 +57,7 @@ export default async function Home() {
         </section>
       </header>
 
-      <main className="px-6 pt-8 pb-12 sm:px-10 lg:px-16">
+      <main className="px-6 sm:px-10 lg:px-16">
         <DashboardWrapper
           basketSummary={basketSummary}
           feiraoSummary={feiraoSummary}
@@ -68,19 +65,18 @@ export default async function Home() {
           feiraoVillains={feiraoVillains}
         />
 
-        <section>
+        <section className="min-h-screen flex flex-col items-center justify-center py-16">
           <CustomBasket
             basicaoItems={basketSummary.items}
             feiraoItems={feiraoSummary.items}
           />
         </section>
 
-        <section>
-          <Divider />
+        <section className="min-h-screen flex flex-col items-center justify-center py-16">
           <Ranking />
         </section>
 
-        <section>
+        <section className="min-h-screen flex flex-col items-center justify-center py-16">
           <AxisGraph />
         </section>
       </main>
