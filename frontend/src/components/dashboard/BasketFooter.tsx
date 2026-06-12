@@ -21,10 +21,10 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
 }) => {
   try {
     return (
-      <div id="basket-footer" className="px-4 py-3 flex items-center justify-center gap-4 select-none" style={{ minWidth: "280px" }}>
-        <div className="flex items-center gap-2">
+      <div id="basket-footer" className="px-4 py-3 grid items-center gap-4 select-none" style={{ minWidth: "280px", gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)" }}>
+        <div className="flex items-baseline gap-2 justify-end">
           <span
-            className="text-[10px] uppercase tracking-[0.18em] font-medium"
+            className="text-[10px] uppercase tracking-[0.12em] font-medium"
             style={{ color: "#A89B8C", fontFamily: "var(--font-card-summary)" }}
           >
             Mensal
@@ -57,7 +57,7 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-baseline gap-2 justify-start">
           <span
             id="footer-ipca-annual"
             className="text-[13px] font-bold tabular-nums"
@@ -66,7 +66,7 @@ export const BasketFooter: React.FC<BasketFooterProps> = ({
             {annualIpca !== null ? `${annualIpca}%` : "—"}
           </span>
           <span
-            className="text-[10px] uppercase tracking-[0.18em] font-medium"
+            className="text-[10px] uppercase tracking-[0.12em] font-medium"
             style={{ color: "#A89B8C", fontFamily: "var(--font-card-summary)" }}
           >
             Acumulado

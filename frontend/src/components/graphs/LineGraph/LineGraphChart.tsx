@@ -41,8 +41,6 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
   const [hoveredYear, setHoveredYear] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
-  // Clamped horizontal placement + arrow offset (so the caret keeps pointing
-  // at the dot even when the box is nudged away from the chart edges).
   const [tooltipPos, setTooltipPos] = useState<{
     left: number;
     arrowLeft: number;
@@ -77,7 +75,6 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
   const color = selectedSubcat != null ? getBasketItemColor(selectedSubcat) : "#e0aa59";
 
   const handleSelect = (subcategoria: number) => {
-    // Clicking the active item again clears the chart.
     setSelectedSubcat((prev) => (prev === subcategoria ? null : subcategoria));
     setHoveredYear(null);
     setTooltip(null);

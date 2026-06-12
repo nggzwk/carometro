@@ -184,9 +184,11 @@ export const BasketSummary: React.FC<DashboardProps> = ({ feiraoProps, onViewCha
         </div>
 
         {/* Mobile footer row */}
-        <div className="w-full flex sm:hidden flex-col items-center px-1">
-          <BasketFooter {...footerProps} />
-          <div className="mt-3 pb-2">
+        <div className="w-full sm:hidden flex flex-col">
+          <div className="flex justify-center">
+            <BasketFooter {...footerProps} />
+          </div>
+          <div className="mt-3 pb-2 flex justify-center">
             <BasketHistoryButton {...historyButtonProps} />
           </div>
         </div>
