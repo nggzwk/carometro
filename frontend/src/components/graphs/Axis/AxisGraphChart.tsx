@@ -129,7 +129,25 @@ export default function AxisGraphChart({
 
   return (
     <div id="axis-graph" className="relative w-full">
-      <div className="flex flex-col items-center leading-none mb-4"></div>
+      <div className="flex flex-col items-center text-center mb-10">
+        <span
+          className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+          style={{ fontFamily: "var(--font-card-summary)", color: "#A89B8C" }}
+        >
+          Gráfico de Inflação Acumulada
+        </span>
+        <h2
+          className="text-4xl sm:text-5xl font-bold tracking-tight text-center mt-1"
+          style={{
+            fontFamily: "var(--font-subheader)",
+            color: "#1A120B",
+            letterSpacing: "-0.01em",
+            lineHeight: 1.1,
+          }}
+        >
+          DIEESE<br />×<br />IPCA
+        </h2>
+      </div>
       <div
         id="axis-graph-chart"
         className={`relative w-full ${styles.chartNoSelect}`}

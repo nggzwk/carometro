@@ -61,6 +61,7 @@ export function useCustomBasket(): CustomBasketState {
         return {
           subcat: item.produto_subcategoria,
           name: itemDisplayName(item),
+          fullName: item.item_name ?? itemDisplayName(item),
           sigla: getQtdEmbalagemSigla(
             item.qtd_embalagem,
             item.produto_subcategoria,

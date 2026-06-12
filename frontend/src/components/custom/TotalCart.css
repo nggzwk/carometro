@@ -128,6 +128,10 @@
   min-width: 1.4rem;
 }
 
+.total-cart__line-fullname {
+  display: none;
+}
+
 .total-cart__line-sigla {
   flex: 1;
   font-family: var(--font-card-summary);
@@ -136,6 +140,32 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #1a120b;
+}
+
+@media (min-width: 768px) {
+  .total-cart__line-qty {
+    min-width: 2.5rem;
+    text-align: right;
+  }
+
+  .total-cart__line-fullname {
+    display: block;
+    flex: 1;
+    font-family: var(--font-card-summary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #a89b8c;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .total-cart__line-sigla {
+    flex: none;
+    width: 3rem;
+  }
 }
 
 .total-cart__line-subtotal {

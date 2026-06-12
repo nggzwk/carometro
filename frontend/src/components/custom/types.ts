@@ -5,6 +5,7 @@ export type Menu = "basicao" | "feirao";
 export interface CartLine {
   subcat: number;
   name: string;
+  fullName: string;
   sigla: string;
   icon: string;
   qty: number;
