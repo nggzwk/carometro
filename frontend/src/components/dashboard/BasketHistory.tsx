@@ -50,16 +50,7 @@ export function BasketHistoryButton({ isOpen, isLoading, onToggle, currentMonthR
           className="w-2 h-2 rounded-full border-[1.5px] flex-none"
           style={{ borderColor: ACCENT, borderTopColor: "transparent" }}
         />
-      ) : (
-        <motion.span
-          className="flex-none"
-          style={{ color: "#1A120B", fontSize: 8 }}
-          animate={{ rotate: isOpen ? 90 : 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 22 }}
-        >
-          ▶
-        </motion.span>
-      )}
+      ) : null}
     </motion.button>
   );
 }

@@ -37,3 +37,7 @@ app.add_middleware(
 app.include_router(basket.router)
 app.include_router(vegetable_basket.router)
 app.include_router(global_baskets.router)
+
+@app.get("/health", tags=["health"])
+def health():
+    return {"status": "ok"}

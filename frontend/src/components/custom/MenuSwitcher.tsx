@@ -53,8 +53,8 @@ export default function MenuSwitcher({ menu, onToggle }: MenuSwitcherProps) {
             style={{
               fontFamily: "var(--font-card-summary)",
               fontWeight: 400,
-              letterSpacing: "0.16em",
-              fontSize: "0.95rem",
+              letterSpacing: "0.14em",
+              fontSize: "0.82rem",
               color: "#A89B8C",
             }}
           >

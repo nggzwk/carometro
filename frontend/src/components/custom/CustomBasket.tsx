@@ -29,6 +29,11 @@ export default function CustomBasket({
     useCustomBasket();
 
   const items = menu === "basicao" ? basicaoItems : feiraoItems;
+  const latestMonthRef = basicaoItems[0]?.month_ref ?? feiraoItems[0]?.month_ref ?? null;
+  const monthLabel = latestMonthRef
+    ? new Date(latestMonthRef + "-02")
+        .toLocaleString("pt-BR", { month: "long"})
+    : "mês atual";
   const toggleMenu = () =>
     setMenu((m) => (m === "basicao" ? "feirao" : "basicao"));
   const toggleCart = () => setIsCartOpen((o) => !o);
@@ -56,7 +61,7 @@ export default function CustomBasket({
           className="text-[11px] font-semibold uppercase tracking-[0.20em]"
           style={{ color: "#a89b8c", fontFamily: "var(--font-card-summary)" }}
         >
-          Preços do mês atual
+          Preços de {monthLabel}
         </p>
         <h2
           className="text-4xl font-bold tracking-tight"
