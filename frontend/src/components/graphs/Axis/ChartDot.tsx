@@ -12,6 +12,7 @@ interface ChartDotProps {
   id?: string;
   color?: string;
   hoverColor?: string;
+  isHovered?: boolean;
 }
 
 export const ChartDot: React.FC<ChartDotProps> = ({
@@ -25,20 +26,22 @@ export const ChartDot: React.FC<ChartDotProps> = ({
   id,
   color = "#e0aa59",
   hoverColor = "#eabf7e",
+  isHovered: isHoveredProp = false,
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHoveredLocal, setIsHoveredLocal] = useState(false);
+  const isHovered = isHoveredProp || isHoveredLocal;
 
   if (cx == null || cy == null) return null;
 
   const baseR = isHovered ? 19.2 : 16;
 
   const handleMouseEnter = () => {
-    setIsHovered(true);
+    setIsHoveredLocal(true);
     onMouseEnter();
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
+    setIsHoveredLocal(false);
     onMouseLeave();
   };
 
