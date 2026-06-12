@@ -11,6 +11,8 @@ interface ChartDotProps {
   onClick: () => void;
   onPointerDown?: (e: React.PointerEvent) => void;
   id?: string;
+  color?: string;
+  hoverColor?: string;
 }
 
 export const ChartDot: React.FC<ChartDotProps> = ({
@@ -23,11 +25,13 @@ export const ChartDot: React.FC<ChartDotProps> = ({
   onClick,
   onPointerDown,
   id,
+  color = "#e0aa59",
+  hoverColor = "#eabf7e",
 }) => {
   if (cx == null || cy == null) return null;
 
   const baseR = isHovered ? 19.2 : 16;
-  
+
   return (
     <g
       id={id}
@@ -44,7 +48,7 @@ export const ChartDot: React.FC<ChartDotProps> = ({
           cy={0}
           r={baseR + 8}
           fill="none"
-          stroke="#eabf7e"
+          stroke={hoverColor}
           strokeWidth={2}
           opacity={0.3}
           className={styles.glowRing}
@@ -56,7 +60,7 @@ export const ChartDot: React.FC<ChartDotProps> = ({
         cy={0}
         r={baseR}
         fill="#ffffff"
-        stroke={isHovered ? "#eabf7e" : "#e0aa59"}
+        stroke={isHovered ? hoverColor : color}
         strokeWidth={isHovered ? 2.5 : 1.5}
         className={isHovered ? styles.hoveredCircle : styles.circle}
         style={{

@@ -29,6 +29,44 @@ export function getBasketItemIcon(subcat: number): string {
   return BASKET_ICONS[subcat] || "🛒";
 }
 
+const BASKET_ITEM_NAMES: Record<number, string> = {
+  40003: "Arroz",
+  40012: "Feijão",
+  60001: "Óleo",
+  40017: "Farinha",
+  90001: "Café",
+  30001: "Leite",
+  80002: "Açúcar",
+  20001: "Ovos",
+  10011: "Frango",
+  10023: "Carne",
+};
+
+export function getBasketItemName(subcat: number): string {
+  return BASKET_ITEM_NAMES[subcat] || "Produto";
+}
+
+const BASKET_ITEM_COLORS: Record<number, string> = {
+  40003: "#8f8b61", // Arroz
+  40012: "#683b2a", // Feijão
+  60001: "#5e8097", // Óleo
+  40017: "#D97706", // Farinha
+  90001: "#78350F", // Café
+  30001: "#866c4d", // Leite
+  80002: "#fb11ff", // Açúcar
+  20001: "#F59E0B", // Ovos
+  10011: "#D97706", // Frango
+  10023: "#E11D48", // Carne
+};
+
+export function getBasketItemColor(subcat: number): string {
+  return BASKET_ITEM_COLORS[subcat] || "#e0aa59";
+}
+
+export const BASICAO_SUBCATEGORIES: number[] = [
+  40003, 40012, 60001, 40017, 90001, 30001, 80002, 20001, 10011, 10023,
+];
+
 export function getBasketItemSubtitle(subcat: number): string {
   return ICONS_SUBTITLES[subcat] || "toque para voltar";
 }

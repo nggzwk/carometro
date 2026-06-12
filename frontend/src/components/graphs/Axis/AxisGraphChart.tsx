@@ -202,7 +202,10 @@ export default function AxisGraphChart({
               tickFormatter={(v) => `${v}%`}
               width={62}
               tickMargin={4}
-              domain={[0, "dataMax"]}
+              domain={[
+                0,
+                (dataMax: number) => Math.ceil((dataMax * 1.12) / 5) * 5,
+              ]}
               axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
 
