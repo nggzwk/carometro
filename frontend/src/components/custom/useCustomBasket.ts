@@ -39,13 +39,20 @@ export interface CustomBasketState {
 }
 
 export function useCustomBasket(): CustomBasketState {
-  const [cart, setCart] = useState<Record<number, CartEntry>>(() => loadCart());
+  const [cart, setCart] = useState<Record<number, CartEntry>>({});
+  const [hydrated, setHydrated] = useState(false);
   const [overLimit, setOverLimit] = useState(false);
   const [popTick, setPopTick] = useState(0);
   const insertCounterRef = useRef(0);
   const overLimitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => saveCart(cart), [cart]);
+  useEffect(() => {
+    setCart(loadCart());
+    setHydrated(true);
+  }, []);
+  useEffect(() => {
+    if (hydrated) saveCart(cart);
+  }, [cart, hydrated]);
 
   useEffect(
     () => () => {
