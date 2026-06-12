@@ -4,10 +4,9 @@ import { plusJakartaSans, jetbrainsMono } from "./fonts";
 import { Analytics } from "@vercel/analytics/next";
 
 const siteUrl = "https://ocarometro.com";
-const title =
-    "Preços de mercado e custo de vida em Curitiba — Carômetro";
+const title = "Carômetro - Aumento dos preços em Curitiba";
 const description =
-    "Acompanhe os preços de mercado, o custo da cesta básica e a inflação em Curitiba: valores de supermercado e hortifruti monitorados mês a mês, ranking de itens e os vilões que mais pesam no bolso.";
+    "Acompanhe o aumento dos preços em Curitiba: custo de mercado, cesta básica e hortifruti monitorados mês a mês, ranking de itens e os vilões que mais pesam no bolso.";
 
 export const metadata: Metadata = {
     metadataBase: new URL(siteUrl),

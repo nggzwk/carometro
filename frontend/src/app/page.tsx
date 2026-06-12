@@ -8,11 +8,11 @@ import {
   getLatestFeiraoVillains,
 } from "../lib/villains";
 import AxisGraph from "../components/graphs/Axis/AxisGraph";
+import LineGraph from "../components/graphs/LineGraph/LineGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
 import CustomBasket from "../components/custom/CustomBasket";
 import Footer from "../components/shared/Footer";
 import { getDieeseTableRows } from "../lib/annualInflation";
-
 
 export default async function Home() {
   const [
@@ -28,6 +28,10 @@ export default async function Home() {
     getLatestVillainsMonth(),
     getDieeseTableRows(),
   ]);
+
+  const Divider = () => (
+    <div className="w-full h-[0.5px] bg-black/10 my-10" aria-hidden="true" />
+  );
 
   return (
     <div className="min-h-screen bg-brand text-black overflow-x-hidden">
@@ -52,7 +56,7 @@ export default async function Home() {
           />
 
           <p className="small-header text-xs uppercase tracking-widest">
-            preços de mercado, cesta básica e custo de vida em Curitiba
+            aumento dos preços em Curitiba
           </p>
         </section>
       </header>
@@ -73,6 +77,11 @@ export default async function Home() {
         </section>
 
         <section className="min-h-screen flex flex-col items-center justify-center py-16">
+          <LineGraph />
+        </section>
+
+        <section className="min-h-screen flex flex-col items-center justify-center py-16">
+          <Divider />
           <Ranking />
         </section>
 
