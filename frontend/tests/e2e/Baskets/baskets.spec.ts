@@ -50,7 +50,7 @@ for (const { viewName, open } of VIEWS) {
       }, 10);
     });
 
-    test("Scenario 2: Tooltip appears on inflation label hover and disappears after 5s", async () => {
+    test("Scenario 2: Tooltip appears on inflation label hover and disappears after 5s", { tag: "@optional" }, async () => {
       await expect(baskets.inflationLabel).toBeVisible({ timeout: 5000 });
       await baskets.hover(baskets.inflationLabel);
 

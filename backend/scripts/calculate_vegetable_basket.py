@@ -13,7 +13,10 @@ from decimal import Decimal
 
 import psycopg
 
-import _env  # noqa: F401  (loads repo-root .env into os.environ on import)
+try:
+    import _env  # noqa: F401  (run as a script: scripts/ is on sys.path)
+except ModuleNotFoundError:
+    from backend.scripts import _env  # noqa: F401  (imported as a package, e.g. pytest)
 
 
 def _load_veggie_items(conn) -> list[tuple[int, int | None, str]]:

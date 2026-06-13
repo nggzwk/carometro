@@ -16,7 +16,10 @@ from datetime import datetime, timezone
 
 import psycopg
 
-import _env  # noqa: F401  (loads repo-root .env into os.environ on import)
+try:
+    import _env  # noqa: F401  (run as a script: scripts/ is on sys.path)
+except ModuleNotFoundError:
+    from backend.scripts import _env  # noqa: F401  (imported as a package, e.g. pytest)
 
 
 def _parse_pack_size(qtd_embalagem: str) -> Decimal | None:
