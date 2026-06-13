@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 
 import psycopg
 
+import _env  # noqa: F401  (loads repo-root .env into os.environ on import)
+
 
 def _parse_pack_size(qtd_embalagem: str) -> Decimal | None:
     try:

@@ -16,6 +16,8 @@ from decimal import Decimal, InvalidOperation
 from typing import Iterable
 from urllib.request import urlopen
 
+import _env  # noqa: F401  (loads repo-root .env into os.environ on import)
+
 SOURCE_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?formato=json"
 TABLE_NAME = "inflacao_brasil.ipca_monthly_public"
 # Keep monthly IPCA from 2023-01 onward for inline use in endpoints
