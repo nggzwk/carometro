@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./ChartTooltip.module.css";
+import { SERIES_COLORS } from "../../../lib/chartColors";
 
 interface ChartTooltipProps {
   x: number;
@@ -104,9 +105,9 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
       : { left: clampedX, top: y + DOT_RADIUS + GAP, transform: "translate(-50%, 0)" };
 
   const metrics: { key: "inflation" | "ipca" | "wageIncrease"; color: string; value: number | null }[] = [
-    { key: "inflation", color: "#e0aa59", value: inflation },
-    { key: "wageIncrease", color: "#2563eb", value: wageIncrease },
-    { key: "ipca", color: "#b300ff", value: ipca },
+    { key: "inflation", color: SERIES_COLORS.inflation, value: inflation },
+    { key: "wageIncrease", color: SERIES_COLORS.wageIncrease, value: wageIncrease },
+    { key: "ipca", color: SERIES_COLORS.ipca, value: ipca },
   ];
 
   return (

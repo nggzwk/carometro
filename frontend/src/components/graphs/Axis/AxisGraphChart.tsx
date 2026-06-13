@@ -11,6 +11,7 @@ import {
   Area,
 } from "recharts";
 import { basketTypesIcons } from "../../../lib/basketIcons";
+import { SERIES_COLORS } from "../../../lib/chartColors";
 import { ChartDot } from "./ChartDot";
 import { ChartTooltip } from "./ChartTooltip";
 import styles from "./AxisGraph.module.css";
@@ -44,9 +45,9 @@ export default function AxisGraphChart({
   baseSalary,
 }: AxisGraphChartProps) {
   const metricsSubtitle = [
-    { label: "DIEESE", color: "#e0aa59" },
-    { label: "SALÁRIO", color: "#2563eb" },
-    { label: "IPCA", color: "#b300ff" },
+    { label: "DIEESE", color: SERIES_COLORS.inflation },
+    { label: "SALÁRIO", color: SERIES_COLORS.wageIncrease },
+    { label: "IPCA", color: SERIES_COLORS.ipca },
   ] as const;
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -109,6 +110,8 @@ export default function AxisGraphChart({
         cx={cx}
         cy={cy}
         icon={icon}
+        color={SERIES_COLORS.inflation}
+        hoverColor={SERIES_COLORS.inflation}
         isHovered={hoveredIndex === index}
         onMouseEnter={() => handleDotInteraction(index, cx, cy)}
         onMouseLeave={handleDotLeave}
@@ -137,7 +140,7 @@ export default function AxisGraphChart({
           Gráfico de Inflação Acumulada
         </span>
         <h2
-          className="text-4xl sm:text-5xl font-bold tracking-tight text-center mt-1"
+          className="text-4xl sm:text-4xl font-bold tracking-tight text-center mt-1"
           style={{
             fontFamily: "var(--font-subheader)",
             color: "#1A120B",
@@ -167,8 +170,8 @@ export default function AxisGraphChart({
                 x2="0"
                 y2="1"
               >
-                <stop offset="5%" stopColor="#e0aa59" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#e0aa59" stopOpacity={0.02} />
+                <stop offset="5%" stopColor={SERIES_COLORS.inflation} stopOpacity={0.15} />
+                <stop offset="95%" stopColor={SERIES_COLORS.inflation} stopOpacity={0.02} />
               </linearGradient>
             </defs>
 
@@ -222,7 +225,7 @@ export default function AxisGraphChart({
               yAxisId="pct"
               type="monotone"
               dataKey="inflation"
-              stroke="#e0aa59"
+              stroke={SERIES_COLORS.inflation}
               strokeWidth={3}
               dot={renderDot}
               activeDot={false}
@@ -233,7 +236,7 @@ export default function AxisGraphChart({
               yAxisId="pct"
               type="monotone"
               dataKey="ipca"
-              stroke="#b300ff"
+              stroke={SERIES_COLORS.ipca}
               strokeWidth={1.5}
               strokeDasharray="6 4"
               dot={false}
@@ -246,7 +249,7 @@ export default function AxisGraphChart({
               yAxisId="pct"
               type="monotone"
               dataKey="wageIncrease"
-              stroke="#2563eb"
+              stroke={SERIES_COLORS.wageIncrease}
               strokeWidth={1.5}
               strokeDasharray="6 4"
               dot={false}
