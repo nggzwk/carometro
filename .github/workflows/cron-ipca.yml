@@ -1,0 +1,34 @@
+name: Cron - IPCA availability
+
+# Runs daily from the 8th of the month onward. sync_ipca upserts only the
+# months the BCB API actually publishes, so before the target month is out
+# it is a safe no-op, and the first run after publication picks it up
+# ("push the value if found"). Re-running once found is idempotent.
+on:
+  schedule:
+    - cron: "0 11 8-18 * *" # daily, 8th..18th of month, 11:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  ipca:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_RAILWAY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install deps
+        run: pip install "psycopg[binary]==3.2.9"
+
+      - name: Show latest item month we're waiting on
+        run: >
+          python -c "import os, psycopg;
+          conn = psycopg.connect(os.environ['DATABASE_URL']);
+          cur = conn.cursor();
+          cur.execute('SELECT MAX(month_ref) FROM inflacao_brasil.item_monthly_price');
+          print('Latest item_monthly_price month_ref:', cur.fetchone()[0])"
+
+      - name: Sync IPCA from BCB (writes only published months)
+        run: python data-pipeline/scripts/sync_ipca_monthly_public.py

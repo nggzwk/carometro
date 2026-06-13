@@ -1,0 +1,25 @@
+name: Cron - Weekly exchange & ARS refresh
+
+# Weekly worker. In one transaction it refreshes exchange rates, recomputes
+# the USD basket values, and upserts the Argentina SMVM (ARS salary) and USA
+# CPI for the latest Dieese month. Writes to the Railway DB (DATABASE_URL).
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays, 07:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_RAILWAY }}
+      EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install deps
+        run: pip install "psycopg[binary]==3.2.9"
+      - name: Refresh exchange rates, USD basket, ARS SMVM, USA CPI
+        run: python -m backend.scripts.refresh_exchange_rates_worker

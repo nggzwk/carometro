@@ -1,6 +1,6 @@
 import { APIRequestContext, APIResponse } from "@playwright/test";
 
-const BASE = "http://localhost:8000/api/basket";
+const BASE = `${process.env.API_BASE_URL ?? "http://localhost:8000"}/api/basket`;
 
 export class BasketClient {
   constructor(private readonly req: APIRequestContext) {}

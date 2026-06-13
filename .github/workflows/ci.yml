@@ -1,0 +1,94 @@
+name: CI
+
+# Runs on every push to a non-main branch and on every PR into main.
+# main itself is protected: direct pushes are blocked by branch protection,
+# and a PR can only merge once the required checks below are green.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+
+# Cancel superseded runs on the same ref (avoids duplicate push+PR runs).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-scan:
+    name: code-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Semgrep
+        run: pip install semgrep
+      - name: Run Semgrep
+        env:
+          # Optional: set this repo secret to use the hosted ruleset. Not required.
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        # --error fails the job on findings. --severity ERROR keeps the gate to
+        # high-severity issues; drop it to be stricter.
+        run: >
+          semgrep scan
+          --config p/default
+          --config p/python
+          --config p/typescript
+          --error
+          --severity ERROR
+
+  backend-unit:
+    name: backend-unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install backend deps
+        run: pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+      - name: Run pytest
+        run: python -m pytest backend/tests
+
+  frontend-unit:
+    name: frontend-unit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Run vitest
+        run: npm run test
+
+  functional:
+    name: functional
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      CI: "true"
+      # Deployed targets (set as repo *variables*, not secrets):
+      API_BASE_URL: ${{ vars.API_BASE_URL }}
+      FRONTEND_BASE_URL: ${{ vars.FRONTEND_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright (e2e + api) against deployed env
+        run: npx playwright test

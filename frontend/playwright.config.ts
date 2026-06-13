@@ -13,7 +13,7 @@ export default defineConfig({
       testDir: './tests/e2e',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://localhost:3000',
+        baseURL: process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000',
         trace: 'on-first-retry',
         headless: !!process.env.CI,
       },
@@ -22,7 +22,7 @@ export default defineConfig({
       name: 'api',
       testDir: './tests/api',
       use: {
-        baseURL: 'http://localhost:8000',
+        baseURL: process.env.API_BASE_URL ?? 'http://localhost:8000',
       },
     },
   ],
