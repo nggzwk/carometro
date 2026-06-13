@@ -1,0 +1,46 @@
+name: Cron - Monthly data pipeline
+
+# Once a month: download the latest monthly sheets, clean + standardize,
+# build the monthly item series, then run the basket calculus scripts.
+# Every script writes directly to the Railway DB (DATABASE_URL).
+on:
+  schedule:
+    - cron: "0 6 1 * *" # 1st of each month, 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_RAILWAY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install deps
+        run: pip install -r data-pipeline/requirements.txt
+
+      # process_data.py uses relative imports, so it must run from its own dir.
+      - name: Download monthly sheets
+        working-directory: data-pipeline/scripts
+        run: python process_data.py download --dataset cotacoes_new
+
+      - name: Clean / standardize source files
+        working-directory: data-pipeline/scripts
+        run: python process_data.py process --dataset cotacoes_new
+
+      - name: Standardize (categorize) cleaned files
+        run: >
+          python data-pipeline/scripts/csv_cleaner/standardize/standardize.py
+          --input "$GITHUB_WORKSPACE/data-pipeline/data/cleaned/new_format"
+          --output "$GITHUB_WORKSPACE/data-pipeline/data/standardized"
+
+      - name: Build monthly item series (load into Postgres)
+        run: python data-pipeline/scripts/build_monthly_item_series.py
+
+      - name: Run basket calculus (basket, vegetables, global/dieese)
+        run: |
+          python backend/scripts/calculate_basket_values.py
+          python backend/scripts/calculate_vegetable_basket.py
+          python backend/scripts/calculate_dieese_basket.py

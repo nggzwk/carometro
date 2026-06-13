@@ -1,0 +1,6 @@
+# Runtime deps for the data pipeline (download / clean / standardize / build series)
+# and the basket-calculus scripts in backend/scripts (they only need psycopg).
+pandas==3.0.1
+requests==2.32.5
+python-dateutil==2.9.0.post0
+psycopg[binary]==3.2.9

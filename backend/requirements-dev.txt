@@ -1,0 +1,4 @@
+# Dev/test-only deps. Install alongside requirements.txt to run the test suite.
+# httpx is required by fastapi.testclient.TestClient.
+pytest==9.0.3
+httpx==0.28.1
