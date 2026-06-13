@@ -56,7 +56,7 @@ export default async function Home() {
           />
 
           <p className="small-header text-xs uppercase tracking-widest">
-            aumento dos preços em Curitiba
+            inflação da cesta básica mês a mês
           </p>
         </section>
       </header>

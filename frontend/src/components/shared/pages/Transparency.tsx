@@ -130,6 +130,7 @@ export default function Transparency({
             label="Média Ponderada"
             formula={"Qtd_Final = (A × 0.40) + (B × 0.45) + (C × 0.15)"}
             description={
+              "Baseia-se na cesta da DIEESE, na POF e ABRAS, é uma cesta básica personalizada. É realista pois considera o consumo atual segundo IBGE e ABRAS, além das últimas recomendações da SBAN. " +
               "A fórmula de média ponderada acima foi usada para definir a quantidade de cada um dos dez itens do BASICÃO: " +
               "A = Dieta ideal. " +
               "B = Consumo real. " +
