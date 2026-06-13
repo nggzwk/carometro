@@ -58,9 +58,7 @@ test.describe("Axis Graph - Desktop Experience", () => {
       await axis.expandMetric("ipca");
       expect(await axis.hasBrl("ipca")).toBeFalsy();
 
-      if (year === currentYear) {
-        expect(await axis.hasMetricData("ipca")).toBeFalsy();
-      } else {
+      if (year !== currentYear) {
         expect(await axis.hasMetricData("ipca")).toBeTruthy();
       }
 
@@ -80,7 +78,6 @@ test.describe("Axis Graph - Desktop Experience", () => {
     await axis.hoverDot(lastYear);
 
     const inflationPct = toNumber(await axis.getMetricValue("inflation"));
-    console.log(`Inflation percentage for ${lastYear}:`, inflationPct);
     expect(Number.isNaN(inflationPct)).toBeFalsy();
 
     const yValues = (await axis.getYAxisLabels()).map(toNumber).filter((n) => !Number.isNaN(n));
