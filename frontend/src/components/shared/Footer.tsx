@@ -54,10 +54,8 @@ export default function Footer({
           </a>
         </div>
 
-        <p
-          className="text-sm uppercase mt-4 tracking-wide font-medium"
-          style={{ font: "var(--font-card-summary)", color: "#8B7355" }}
-        >
+        <p className="text-[10px] mt-3 text-gray-400 font-light">
+          Os dados da sua cesta personalizada não são armazenados por nós.
         </p>
       </footer>
 

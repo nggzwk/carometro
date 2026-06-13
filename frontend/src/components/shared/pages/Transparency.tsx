@@ -521,6 +521,7 @@ export default function Transparency({
               <p>Atualizações futuras:</p>
               <ul className="list-disc list-inside">
                 <li>Todos os itens disponíveis na API.</li>
+                <li>Comparação por bairro/rede</li>
                 <li>Faxinão.</li>
               </ul>
             </div>
