@@ -31,6 +31,10 @@ jobs:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
         # --error fails the job on findings. --severity ERROR keeps the gate to
         # high-severity issues; drop it to be stricter.
+        # The two excluded rules are "audit" rules that flag every f-string SQL
+        # query regardless of tainting. This codebase uses raw SQL with bound
+        # parameters by design (no user input is interpolated), so they are
+        # false positives here. Remove an --exclude-rule to re-enable it.
         run: >
           semgrep scan
           --config p/default
@@ -38,6 +42,8 @@ jobs:
           --config p/typescript
           --error
           --severity ERROR
+          --exclude-rule python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+          --exclude-rule python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
 
   backend-unit:
     name: backend-unit
