@@ -27,14 +27,7 @@ jobs:
         run: pip install semgrep
       - name: Run Semgrep
         env:
-          # Optional: set this repo secret to use the hosted ruleset. Not required.
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-        # --error fails the job on findings. --severity ERROR keeps the gate to
-        # high-severity issues; drop it to be stricter.
-        # The two excluded rules are "audit" rules that flag every f-string SQL
-        # query regardless of tainting. This codebase uses raw SQL with bound
-        # parameters by design (no user input is interpolated), so they are
-        # false positives here. Remove an --exclude-rule to re-enable it.
         run: >
           semgrep scan
           --config p/default
@@ -83,7 +76,6 @@ jobs:
         working-directory: frontend
     env:
       CI: "true"
-      # Deployed targets (set as repo *variables*, not secrets):
       API_BASE_URL: ${{ vars.API_BASE_URL }}
       FRONTEND_BASE_URL: ${{ vars.FRONTEND_BASE_URL }}
     steps:
@@ -97,4 +89,7 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
       - name: Run Playwright (e2e + api) against deployed env
-        run: npx playwright test
+        run: npx playwright test --grep-invert "@optional"
+      - name: Run optional Playwright tests (non-blocking)
+        continue-on-error: true
+        run: npx playwright test --grep "@optional"

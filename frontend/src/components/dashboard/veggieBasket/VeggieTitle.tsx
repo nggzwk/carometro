@@ -67,7 +67,10 @@ export default function VeggieTitle({ selectedMonth, currentMonthRef, isHistoryO
               type="button"
               aria-label="Inflação da cesta de hortifruti mês sobre mês"
               onClick={handleClick}
-              className="absolute left-full top-0 ml-1.5 inline-flex items-center justify-center cursor-pointer"
+              className="absolute left-full top-0 ml-1.5 inline-flex items-center justify-center cursor-pointer rounded-full"
+              whileHover={{ boxShadow: "0 0 12px 3px rgba(168,155,140,0.45)" }}
+              whileTap={{ boxShadow: "0 0 8px 2px rgba(168,155,140,0.6)" }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
             >
               <motion.span
                 className="inline-flex"

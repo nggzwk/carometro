@@ -22,6 +22,8 @@ import os
 from pathlib import Path
 from typing import Any, Protocol
 
+import _env  # noqa: F401  (loads repo-root .env into os.environ on import)
+
 
 @dataclass(frozen=True)
 class PriceObservation:

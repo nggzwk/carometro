@@ -513,7 +513,7 @@ export default function Transparency({
           <div className="text-sm font-light text-[#6B5C4E] leading-relaxed mt-4">
             <p className="mb-4">
               Para mais detalhes sobre metodologia e fontes, consulte o{" "}
-              <ExternalLink href="#">PDF(soon)</ExternalLink>
+              <ExternalLink href="/carometro_v3.pdf">PDF</ExternalLink>
             </p>
 
             <div className="mb-2">

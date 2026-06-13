@@ -13,6 +13,11 @@ from decimal import Decimal
 
 import psycopg
 
+try:
+    import _env  # noqa: F401  (run as a script: scripts/ is on sys.path)
+except ModuleNotFoundError:
+    from backend.scripts import _env  # noqa: F401  (imported as a package, e.g. pytest)
+
 
 def _load_veggie_items(conn) -> list[tuple[int, int | None, str]]:
     """Return (primary_subcategoria, fallback_subcategoria, unit_sigla) ordered by sort_order."""
@@ -90,16 +95,16 @@ def _minimum_wage(conn, month_ref: str) -> Decimal | None:
     return Decimal(str(row[0])) if row and row[0] else None
 
 VEGGIE_MULTIPLIERS: dict[int, Decimal] = {
-    50008: Decimal("1.15"),  # Tomate comum
-    50025: Decimal("1.2"),   # Banana prata
-    50005: Decimal("1.12"),  # Batata inglesa
+    50008: Decimal("0.79"),  # Tomate comum
+    50025: Decimal("0.9"),   # Banana prata
+    50005: Decimal("0.78"),  # Batata inglesa
     50002: Decimal("0.51"),  # Cebola
     50079: Decimal("1.0"),   # Alface (priced per PC/UN, not kg -> qty 1)
     50007: Decimal("0.32"),  # Cenoura
-    50021: Decimal("2.4"),   # Laranja pera
-    50017: Decimal("0.34"),  # Abobora
-    50029: Decimal("0.45"),  # Maca
-    50004: Decimal("0.28"),  # Batata doce
+    50021: Decimal("1.86"),   # Laranja pera
+    50017: Decimal("0.25"),  # Abobora
+    50029: Decimal("0.38"),  # Maca
+    50004: Decimal("0.20"),  # Batata doce
 }
 
 
