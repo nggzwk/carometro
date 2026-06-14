@@ -74,28 +74,13 @@ describe("ChartTooltip", () => {
     ).toBe("+3.00%");
   });
 
-  it("clicking the inflation metric expands the BRL value", () => {
+  it("shows the BRL value for inflation when basePrice is provided", () => {
     render(<ChartTooltip {...baseProps} inflation={10} basePrice={200} />);
-
-    const inflationMetric = document.getElementById("chart-tooltip-inflation");
-    fireEvent.click(inflationMetric!);
 
     const brl = document.getElementById("chart-tooltip-inflation-brl");
     expect(brl).not.toBeNull();
     // 200 * (1 + 10/100) = 220
     expect(brl?.textContent).toMatch(/R\$|220/);
-  });
-
-  it("clicking the expanded inflation metric collapses it", () => {
-    render(<ChartTooltip {...baseProps} inflation={10} basePrice={200} />);
-
-    const inflationMetric = document.getElementById("chart-tooltip-inflation");
-    fireEvent.click(inflationMetric!); // expand
-    fireEvent.click(inflationMetric!); // collapse
-
-    expect(
-      document.getElementById("chart-tooltip-inflation-brl"),
-    ).toBeNull();
   });
 
   it("calls onRequestClose when clicking outside the tooltip", () => {
