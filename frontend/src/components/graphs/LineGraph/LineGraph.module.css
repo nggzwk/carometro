@@ -71,19 +71,19 @@
 
 .tooltipPct {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   font-family: var(--font-card-summary, sans-serif);
-  color: #000000;
+  color: #1A120B;
   letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
 .tooltipBrl {
-  font-size: 11px;
-  font-weight: 400;
-  color: #950f0f;
+  font-size: 12px;
+  font-weight: 500;
+  color: #777;
   font-family: var(--font-card-summary, sans-serif);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   line-height: 1.2;
 }
 
