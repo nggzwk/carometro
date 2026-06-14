@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { buildItemLineSeries } from "../../src/lib/itemLines";
-import { BASICAO_SUBCATEGORIES } from "../../src/lib/basketIcons";
+import {
+  BASICAO_SUBCATEGORIES,
+  FEIRAO_SUBCATEGORIES,
+} from "../../src/lib/basketIcons";
 
 const ARROZ = 40003;
 const FEIJAO = 40012;
@@ -126,5 +129,40 @@ describe("buildItemLineSeries", () => {
     const result = buildItemLineSeries([], 2024);
     const outputSubcats = result.map((s) => s.subcategoria);
     expect(outputSubcats).toEqual(BASICAO_SUBCATEGORIES);
+  });
+
+  describe("feirão subcategories", () => {
+    const TOMATE = 50008;
+
+    it("builds series for the provided subcategory list", () => {
+      const result = buildItemLineSeries([], 2024, FEIRAO_SUBCATEGORIES);
+      const outputSubcats = result.map((s) => s.subcategoria);
+      expect(outputSubcats).toEqual(FEIRAO_SUBCATEGORIES);
+    });
+
+    it("computes points for a feirão item like a basicão item", () => {
+      const rows = [
+        { produto_subcategoria: TOMATE, month_ref: "2022-12", month_price: 20 },
+        { produto_subcategoria: TOMATE, month_ref: "2023-12", month_price: 25 },
+      ];
+      const result = buildItemLineSeries(rows, 2024, FEIRAO_SUBCATEGORIES);
+      const series = result.find((s) => s.subcategoria === TOMATE)!;
+
+      expect(series.points).toHaveLength(1);
+      expect(series.points[0]).toMatchObject({
+        year: "2023",
+        value: 25,
+        priceBrl: 25,
+      });
+    });
+
+    it("ignores basicão rows when building feirão series", () => {
+      const rows = [
+        { produto_subcategoria: ARROZ, month_ref: "2022-12", month_price: 20 },
+        { produto_subcategoria: ARROZ, month_ref: "2023-12", month_price: 25 },
+      ];
+      const result = buildItemLineSeries(rows, 2024, FEIRAO_SUBCATEGORIES);
+      expect(result.every((s) => s.points.length === 0)).toBe(true);
+    });
   });
 });

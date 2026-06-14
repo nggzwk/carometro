@@ -11,10 +11,18 @@ import {
   Area,
 } from "recharts";
 import { basketTypesIcons } from "../../../lib/basketIcons";
-import { SERIES_COLORS } from "../../../lib/chartColors";
+import {
+  SERIES_COLORS,
+  CHART_MARGIN,
+  GRID_PROPS,
+  X_AXIS_PROPS,
+  Y_AXIS_PROPS,
+} from "../shared/chartTheme";
+import { MetricsLegend } from "../shared/MetricsLegend";
+import { ChartLoading } from "../shared/ChartLoading";
 import { ChartDot } from "./ChartDot";
 import { ChartTooltip } from "./ChartTooltip";
-import styles from "./AxisGraph.module.css";
+import surfaceStyles from "../shared/chartSurface.module.css";
 
 export type DataPoint = {
   year: string;
@@ -46,23 +54,14 @@ export default function AxisGraphChart({
   basePrice,
   baseSalary,
 }: AxisGraphChartProps) {
-  const metricsSubtitle = [
-    { label: "DIEESE", color: SERIES_COLORS.inflation },
-    { label: "SALÁRIO", color: SERIES_COLORS.wageIncrease },
-    { label: "IPCA", color: SERIES_COLORS.ipca },
-  ] as const;
-
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
-  const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
 
-  const handleDotInteraction = (index: number, cx: number, cy: number) => {
-    setHoveredIndex(index);
-    setPinnedIndex(index);
-
+  const showTooltip = (index: number, cx: number, cy: number) => {
     const point = data[index];
     if (!point) return;
 
+    setHoveredIndex(index);
     setTooltipData({
       x: cx,
       y: cy,
@@ -74,25 +73,7 @@ export default function AxisGraphChart({
     });
   };
 
-  const handleDotLeave = () => {
-    if (pinnedIndex !== null) return;
-    setHoveredIndex(null);
-    setTooltipData(null);
-  };
-
-  const handleDotClick = (index: number, cx: number, cy: number) => {
-    if (pinnedIndex === index) {
-      setPinnedIndex(null);
-      setHoveredIndex(null);
-      setTooltipData(null);
-    } else {
-      setPinnedIndex(index);
-      handleDotInteraction(index, cx, cy);
-    }
-  };
-
-  const handleRequestClose = () => {
-    setPinnedIndex(null);
+  const hideTooltip = () => {
     setHoveredIndex(null);
     setTooltipData(null);
   };
@@ -116,21 +97,16 @@ export default function AxisGraphChart({
         color={SERIES_COLORS.inflation}
         hoverColor={SERIES_COLORS.inflation}
         isHovered={hoveredIndex === index}
-        onMouseEnter={() => handleDotInteraction(index, cx, cy)}
-        onMouseLeave={handleDotLeave}
-        onClick={() => handleDotClick(index, cx, cy)}
+        onMouseEnter={() => showTooltip(index, cx, cy)}
+        onMouseLeave={hideTooltip}
+        onClick={() => showTooltip(index, cx, cy)}
         onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
       />
     );
   };
 
   if (!data || data.length === 0) {
-    return (
-      <div className={styles.loading}>
-        <div className={styles.spinner}></div>
-        <p>Carregando dados...</p>
-      </div>
-    );
+    return <ChartLoading />;
   }
 
   return (
@@ -154,36 +130,34 @@ export default function AxisGraphChart({
           DIEESE<br />×<br />IPCA
         </h2>
       </div>
-      <div
-        id="axis-subtitles"
-        className={`${styles.metricsSubtitle} flex gap-6 mb-6 flex-wrap`}
-      >
-        {metricsSubtitle.map((metric) => (
-          <div
-            key={metric.label}
-            id={`axis-subtitle-${metric.label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")}`}
-            className={styles.metricsSubtitleItem}
-          >
-            <span
-              className={`${styles.metricsSubtitleSquare}`}
-              style={{ backgroundColor: metric.color }}
-              aria-hidden="true"
-            />
-            <span className={styles.metricsSubtitleLabel}>{metric.label}</span>
-          </div>
-        ))}
-      </div>
+      <MetricsLegend
+        containerId="axis-subtitles"
+        metrics={[
+          {
+            id: "axis-subtitle-dieese",
+            label: "DIEESE",
+            color: SERIES_COLORS.inflation,
+          },
+          {
+            id: "axis-subtitle-salario",
+            label: "SALÁRIO",
+            color: SERIES_COLORS.wageIncrease,
+          },
+          {
+            id: "axis-subtitle-ipca",
+            label: "IPCA",
+            color: SERIES_COLORS.ipca,
+          },
+        ]}
+      />
       <div
         id="axis-graph-chart"
-        className={`relative w-full ${styles.chartNoSelect}`}
+        className={`relative w-full ${surfaceStyles.chartNoSelect}`}
         style={{ height: "clamp(420px, 60vh, 640px)" }}
         aria-label="Gráfico de inflação anual"
       >
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
-          >
+          <LineChart data={data} margin={CHART_MARGIN}>
             <defs>
               <linearGradient
                 id="inflationGradient"
@@ -197,41 +171,16 @@ export default function AxisGraphChart({
               </linearGradient>
             </defs>
 
-            <CartesianGrid
-              stroke="#f3efe8"
-              strokeDasharray="3 3"
-              vertical={false}
-            />
+            <CartesianGrid {...GRID_PROPS} />
 
-            <XAxis
-              dataKey="year"
-              stroke="#8B7355"
-              tick={{
-                fill: "#8B7355",
-                fontSize: 13,
-                fontFamily: "var(--font-card-summary)",
-              }}
-              tickMargin={10}
-              axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
-            />
+            <XAxis {...X_AXIS_PROPS} />
 
-            {/* Single axis: cumulative % growth from 2023 for all three series */}
             <YAxis
-              yAxisId="pct"
-              stroke="#8B7355"
-              tick={{
-                fill: "#8B7355",
-                fontSize: 13,
-                fontFamily: "var(--font-card-summary)",
-              }}
-              tickFormatter={(v) => `${v}%`}
-              width={62}
-              tickMargin={4}
+              {...Y_AXIS_PROPS}
               domain={[
                 0,
                 (dataMax: number) => Math.ceil((dataMax * 1.12) / 5) * 5,
               ]}
-              axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
             />
 
             <Area
@@ -300,7 +249,7 @@ export default function AxisGraphChart({
                   : "below"
             }
             visible={true}
-            onRequestClose={handleRequestClose}
+            onRequestClose={hideTooltip}
           />
         )}
       </div>

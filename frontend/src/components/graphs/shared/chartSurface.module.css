@@ -39,62 +39,30 @@
   outline: none !important;
 }
 
-.title {
-  margin-bottom: 0;
-}
-
-.metricsSubtitle {
+/* Loading placeholder (see ChartLoading). */
+.loading {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px 16px;
-  margin-bottom: 12px;
-}
-
-@media (min-width: 769px) {
-  .metricsSubtitle {
-    justify-content: flex-end;
-  }
-}
-
-.metricsSubtitleItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.metricsSubtitleSquare {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  flex: 0 0 12px;
-}
-
-.metricsSubtitleLabel {
+  gap: 12px;
+  min-height: 320px;
+  color: #a89b8c;
+  font-family: var(--font-card-summary, sans-serif);
   font-size: 13px;
-  font-weight: 500;
-  color: #A89B8C;
-  letter-spacing: 0.3px;
-  font-family: var(--font-card-summary);
 }
 
-@media (max-width: 768px) {
-  .metricsSubtitle {
-    flex-wrap: nowrap;
-    gap: 8px 10px;
-    margin-top: -12px;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
+.spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid rgba(168, 155, 140, 0.25);
+  border-top-color: #8b7355;
+  animation: chartSpin 800ms linear infinite;
+}
 
-  .metricsSubtitleSquare {
-    width: 10px;
-    height: 10px;
-    flex: 0 0 10px;
-  }
-
-  .metricsSubtitleLabel {
-    font-size: 11px;
+@keyframes chartSpin {
+  to {
+    transform: rotate(360deg);
   }
 }

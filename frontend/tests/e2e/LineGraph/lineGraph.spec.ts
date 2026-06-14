@@ -1,7 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { LineGraphPage } from "./lineGraphPage";
+import { LineGraphPage, type Basket } from "./lineGraphPage";
 
-test.describe("Line Graph - Basicão inflation over time", () => {
+const BASKETS: Basket[] = ["basicao", "feirao"];
+
+for (const basket of BASKETS) {
+  test.describe(`Line Graph - ${basket} inflation over time`, () => {
   test.setTimeout(30000);
 
   let lg: LineGraphPage;
@@ -10,10 +13,12 @@ test.describe("Line Graph - Basicão inflation over time", () => {
     lg = new LineGraphPage(page);
     await lg.goto();
     await lg.ready();
+    await lg.selectBasket(basket);
   });
 
   test("Scenario 1: Graph loads with title, chart area, and legend", async () => {
-    await expect(lg.page.getByText("BASICÃO").first()).toBeVisible();
+    const expectedTitle = basket === "basicao" ? "BASICÃO" : "FEIRÃO";
+    await expect(lg.title).toHaveText(expectedTitle);
     await expect(lg.graph).toBeVisible();
     await expect(lg.legend).toBeVisible();
 
@@ -85,6 +90,10 @@ test.describe("Line Graph - Basicão inflation over time", () => {
     const years = await lg.getDotYears();
     await lg.clickDot(years[0]);
     expect(await lg.isTooltipVisible()).toBeTruthy();
+
+    await expect(lg.tooltipRow("item")).toBeVisible();
+    await expect(lg.tooltipRow("wageIncrease")).toBeVisible();
+    await expect(lg.tooltipRow("ipca")).toBeVisible();
   });
 
   test("Scenario 9: Switching to a different legend item updates the dots", async () => {
@@ -125,4 +134,5 @@ test.describe("Line Graph - Basicão inflation over time", () => {
     const years = xLabels.map((l) => parseInt(l.trim(), 10));
     expect(years).toContain(currentYear);
   });
-});
+  });
+}

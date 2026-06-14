@@ -10,10 +10,12 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import time
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Iterable
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 import _env  # noqa: F401  (loads repo-root .env into os.environ on import)
@@ -46,9 +48,27 @@ def _parse_decimal(value: str) -> Decimal:
         raise ValueError(f"invalid IPCA value: {value}") from exc
 
 
+def _fetch_with_retry(source_url: str, *, retries: int = 3, backoff: float = 5.0) -> list:
+    last_exc: Exception | None = None
+    for attempt in range(retries):
+        try:
+            with urlopen(source_url, timeout=30) as response:
+                return json.load(response)
+        except HTTPError as exc:
+            if exc.code < 500:
+                raise
+            last_exc = exc
+        except URLError as exc:
+            last_exc = exc
+        if attempt < retries - 1:
+            delay = backoff * 2**attempt
+            print(f"Fetch failed ({last_exc}), retrying in {delay:.0f}s …")
+            time.sleep(delay)
+    raise RuntimeError(f"BCB API unavailable after {retries} attempts: {last_exc}") from last_exc
+
+
 def _fetch_rows(source_url: str, start_month: date) -> list[IpcaRow]:
-    with urlopen(source_url) as response:
-        payload = json.load(response)
+    payload = _fetch_with_retry(source_url)
 
     rows: list[IpcaRow] = []
     start_month_str = start_month.strftime("%Y-%m")

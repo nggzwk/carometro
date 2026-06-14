@@ -124,24 +124,11 @@ export class AxisPage {
     return /\d/.test((await this.getMetricValue(key)) ?? "");
   }
 
-  async expandMetric(key: MetricKey) {
-    await this.metric(key).click();
-  }
-
   async hasBrl(key: MetricKey): Promise<boolean> {
     return (await this.metricBrl(key).count()) > 0;
   }
 
   async getMetricBrl(key: MetricKey): Promise<string | null> {
     return this.metricBrl(key).textContent();
-  }
-
-  async isTooltipVisible(): Promise<boolean> {
-    return this.tooltip.isVisible().catch(() => false);
-  }
-
-  async closeTooltipByClickingOut() {
-    await this.page.mouse.click(5, 5);
-    await expect(this.tooltip).toBeHidden({ timeout: 2000 });
   }
 }

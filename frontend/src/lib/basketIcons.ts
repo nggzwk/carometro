@@ -30,6 +30,7 @@ export function getBasketItemIcon(subcat: number): string {
 }
 
 const BASKET_ITEM_NAMES: Record<number, string> = {
+  // Basicão
   40003: "Arroz",
   40012: "Feijão",
   60001: "Óleo",
@@ -40,6 +41,17 @@ const BASKET_ITEM_NAMES: Record<number, string> = {
   20001: "Ovos",
   10011: "Frango",
   10023: "Carne",
+  // Feirão
+  50008: "Tomate",
+  50025: "Banana",
+  50005: "Inglesa",
+  50002: "Cebola",
+  50079: "Alface",
+  50007: "Cenoura",
+  50021: "Laranja",
+  50017: "Abóbora",
+  50029: "Maçã",
+  50004: "Doce",
 };
 
 export function getBasketItemName(subcat: number): string {
@@ -47,6 +59,7 @@ export function getBasketItemName(subcat: number): string {
 }
 
 const BASKET_ITEM_COLORS: Record<number, string> = {
+  // Basicão
   40003: "#8f8b61", // Arroz
   40012: "#683b2a", // Feijão
   60001: "#5e8097", // Óleo
@@ -57,6 +70,17 @@ const BASKET_ITEM_COLORS: Record<number, string> = {
   20001: "#F59E0B", // Ovos
   10011: "#D97706", // Frango
   10023: "#E11D48", // Carne
+  // Feirão (accent colors from the Villains podium)
+  50008: "#dc2f26", // Tomate
+  50025: "#cea100", // Banana
+  50005: "#D97706", // Batata Inglesa
+  50002: "#CA8A04", // Cebola
+  50079: "#16A34A", // Alface
+  50007: "#EA580C", // Cenoura
+  50021: "#ff8000", // Laranja
+  50017: "#743826", // Abóbora
+  50029: "#b4004b", // Maçã
+  50004: "#D97706", // Batata Doce
 };
 
 export function getBasketItemColor(subcat: number): string {
@@ -65,6 +89,10 @@ export function getBasketItemColor(subcat: number): string {
 
 export const BASICAO_SUBCATEGORIES: number[] = [
   40003, 40012, 60001, 40017, 90001, 30001, 80002, 20001, 10011, 10023,
+];
+
+export const FEIRAO_SUBCATEGORIES: number[] = [
+  50008, 50025, 50005, 50002, 50079, 50007, 50021, 50017, 50029, 50004,
 ];
 
 export function getBasketItemSubtitle(subcat: number): string {

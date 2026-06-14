@@ -30,5 +30,24 @@ jobs:
           cur.execute('SELECT MAX(month_ref) FROM inflacao_brasil.item_monthly_price');
           print('Latest item_monthly_price month_ref:', cur.fetchone()[0])"
 
+      - name: Check if current month IPCA is already synced
+        id: ipca_check
+        run: |
+          python - <<'EOF'
+          import os, psycopg
+          from datetime import date
+          current_month = date.today().replace(day=1).strftime("%Y-%m")
+          conn = psycopg.connect(os.environ["DATABASE_URL"])
+          cur = conn.cursor()
+          cur.execute(
+              "SELECT 1 FROM inflacao_brasil.ipca_monthly_public WHERE month_ref = %s",
+              (current_month,),
+          )
+          found = cur.fetchone() is not None
+          print(f"Current month ({current_month}) already in DB: {found}")
+          print(f"already_synced={'true' if found else 'false'}", file=open(os.environ["GITHUB_OUTPUT"], "a"))
+          EOF
+
       - name: Sync IPCA from BCB (writes only published months)
+        if: steps.ipca_check.outputs.already_synced != 'true'
         run: python data-pipeline/scripts/sync_ipca_monthly_public.py
