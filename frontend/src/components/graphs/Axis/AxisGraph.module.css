@@ -52,6 +52,12 @@
   margin-bottom: 12px;
 }
 
+@media (min-width: 769px) {
+  .metricsSubtitle {
+    justify-content: flex-end;
+  }
+}
+
 .metricsSubtitleItem {
   display: inline-flex;
   align-items: center;

@@ -1,8 +1,11 @@
 import getAnnualInflation, {
   getBaseMinimumWage,
+  getCurrentYearIpcaYtd,
   type AnnualRow,
+  type CurrentYearIpcaYtd,
 } from "../../../lib/annualInflation";
 import AxisGraphChart, { type DataPoint } from "./AxisGraphChart";
+import { formatMonthName } from "../../../lib/formatters";
 
 function compound(cumulative: number, annual: number, isFirst: boolean): number {
   return isFirst
@@ -10,14 +13,25 @@ function compound(cumulative: number, annual: number, isFirst: boolean): number 
     : (1 + cumulative / 100) * (1 + annual / 100) * 100 - 100;
 }
 
-function buildSeries(rows: AnnualRow[], basePrice: number): DataPoint[] {
+function buildSeries(
+  rows: AnnualRow[],
+  basePrice: number,
+  ipcaYtd: CurrentYearIpcaYtd | null,
+): DataPoint[] {
   let cumulativeIpca = 0;
   let cumulativeWage = 0;
   let cumulativeDieese = 0;
 
   return rows.map((r, i) => {
-    const annualIpca =
-      r.annual_ipca_pct === null ? null : Number(r.annual_ipca_pct);
+    const ipcaIsYtd =
+      ipcaYtd !== null &&
+      r.year === ipcaYtd.year &&
+      r.annual_ipca_pct === null;
+    const annualIpca = ipcaIsYtd
+      ? ipcaYtd.pct
+      : r.annual_ipca_pct === null
+        ? null
+        : Number(r.annual_ipca_pct);
     const annualWage =
       r.annual_minimum_wage_increase_pct == null
         ? null
@@ -45,6 +59,9 @@ function buildSeries(rows: AnnualRow[], basePrice: number): DataPoint[] {
       inflation:
         annualDieese !== null ? Number(cumulativeDieese.toFixed(2)) : null,
       ipca: annualIpca !== null ? Number(cumulativeIpca.toFixed(2)) : null,
+      ipcaPartialLabel: ipcaIsYtd
+        ? `até ${formatMonthName(ipcaYtd!.throughMonthRef)}`
+        : null,
       wageIncrease:
         annualWage !== null ? Number(cumulativeWage.toFixed(2)) : null,
     };
@@ -52,14 +69,15 @@ function buildSeries(rows: AnnualRow[], basePrice: number): DataPoint[] {
 }
 
 export default async function AxisGraph() {
-  const [rows, baseWage] = await Promise.all([
+  const [rows, baseWage, ipcaYtd] = await Promise.all([
     getAnnualInflation(),
     getBaseMinimumWage(),
+    getCurrentYearIpcaYtd(),
   ]);
 
   const basePrice = Number(rows?.[0]?.start_month_value_brl ?? 0);
   const baseSalary = baseWage ?? 0;
-  const data = buildSeries(rows ?? [], basePrice);
+  const data = buildSeries(rows ?? [], basePrice, ipcaYtd);
 
   return (
     <AxisGraphChart data={data} basePrice={basePrice} baseSalary={baseSalary} />

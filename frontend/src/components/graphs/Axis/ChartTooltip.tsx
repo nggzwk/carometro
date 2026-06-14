@@ -7,6 +7,7 @@ interface ChartTooltipProps {
   y: number;
   inflation: number | null;
   ipca: number | null;
+  ipcaPartialLabel?: string | null;
   wageIncrease: number | null;
   basePrice: number;
   baseSalary?: number;
@@ -20,6 +21,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   y,
   inflation,
   ipca,
+  ipcaPartialLabel = null,
   wageIncrease,
   basePrice,
   baseSalary = 0,
@@ -129,13 +131,21 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
             <div
               id={`chart-tooltip-${key}`}
               key={key}
-              className={`${styles.metric} ${brl ? styles.metricClickable : ""}`}
+              className={`${styles.metric} ${brl ? styles.metricClickable : ""} ${key === "ipca" && ipcaPartialLabel ? styles.metricPartial : ""}`}
               style={{ color }}
               onClick={brl ? () => setExpandedMetric(isExpanded ? null : key) : undefined}
             >
               <span className={styles.square} style={{ backgroundColor: color }} />
               <div className={styles.metricValues}>
                 <span id={`chart-tooltip-${key}-value`} className={styles.value}>{formatValue(value)}</span>
+                {key === "ipca" && ipcaPartialLabel && (
+                  <span
+                    id="chart-tooltip-ipca-partial"
+                    className={styles.partialLabel}
+                  >
+                    {ipcaPartialLabel}
+                  </span>
+                )}
                 {isExpanded && brl && (
                   <span id={`chart-tooltip-${key}-brl`} className={styles.brlValue}>{brl}</span>
                 )}

@@ -18,11 +18,14 @@ import {
 } from "../../../lib/basketIcons";
 import type { ItemLineSeries } from "../../../lib/itemLines";
 import { ChartDot } from "../Axis/ChartDot";
+import { SERIES_COLORS } from "../../../lib/chartColors";
 import styles from "./LineGraph.module.css";
 import axisStyles from "../Axis/AxisGraph.module.css";
 
 type LineGraphChartProps = {
   series: ItemLineSeries[];
+  ipcaByYear?: Record<number, number>;
+  ipcaPartial?: { year: number; label: string } | null;
 };
 
 type TooltipData = {
@@ -30,9 +33,15 @@ type TooltipData = {
   y: number;
   pct: number | null;
   priceBrl: number | null;
+  ipca: number | null;
+  ipcaPartialLabel: string | null;
 };
 
-export default function LineGraphChart({ series }: LineGraphChartProps) {
+export default function LineGraphChart({
+  series,
+  ipcaByYear = {},
+  ipcaPartial = null,
+}: LineGraphChartProps) {
   const selectableItems = series.filter((s) => s.points.length > 0);
 
   const [selectedSubcat, setSelectedSubcat] = useState<number | null>(
@@ -73,16 +82,33 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
   const data = selected?.points ?? [];
   const color = selectedSubcat != null ? getBasketItemColor(selectedSubcat) : "#e0aa59";
 
+  const chartData = data.map((p, i) => {
+    let factor = 1;
+    for (let j = 0; j <= i; j++) {
+      const annual = ipcaByYear[Number(data[j].year)];
+      if (annual != null) factor *= 1 + annual / 100;
+    }
+    return { ...p, ipca: Number(((factor - 1) * 100).toFixed(2)) };
+  });
+
   const handleSelect = (subcategoria: number) => {
     setSelectedSubcat((prev) => (prev === subcategoria ? null : subcategoria));
     setTooltip(null);
   };
 
   const showTooltip = useCallback((index: number, cx: number, cy: number) => {
-    const point = data[index];
+    const point = chartData[index];
     if (!point) return;
-    setTooltip({ x: cx, y: cy, pct: point.value, priceBrl: point.priceBrl });
-  }, [data]);
+    const isPartial = ipcaPartial != null && Number(point.year) === ipcaPartial.year;
+    setTooltip({
+      x: cx,
+      y: cy,
+      pct: point.value,
+      priceBrl: point.priceBrl,
+      ipca: point.ipca,
+      ipcaPartialLabel: isPartial ? ipcaPartial.label : null,
+    });
+  }, [chartData, ipcaPartial]);
 
   const renderDot = useCallback((props: { cx?: number; cy?: number; index?: number }) => {
     const { cx, cy, index } = props;
@@ -144,13 +170,27 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
       </div>
 
       <div
+        id="line-graph-ipca-legend"
+        className={`${axisStyles.metricsSubtitle} flex gap-6 mb-6 flex-wrap`}
+      >
+        <div id="line-subtitle-ipca" className={axisStyles.metricsSubtitleItem}>
+          <span
+            className={axisStyles.metricsSubtitleSquare}
+            style={{ backgroundColor: SERIES_COLORS.ipca }}
+            aria-hidden="true"
+          />
+          <span className={axisStyles.metricsSubtitleLabel}>IPCA</span>
+        </div>
+      </div>
+
+      <div
         id="line-graph-chart"
         className={`relative w-full ${axisStyles.chartNoSelect}`}
         aria-label="Gráfico de preço acumulado por item do basicão"
       >
         <ResponsiveContainer width="100%" height={420}>
           <LineChart
-            data={data}
+            data={chartData}
             margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
           >
             <defs>
@@ -218,6 +258,19 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
             <Line
               yAxisId="pct"
               type="monotone"
+              dataKey="ipca"
+              stroke={SERIES_COLORS.ipca}
+              strokeWidth={1.5}
+              strokeDasharray="6 4"
+              dot={false}
+              activeDot={false}
+              connectNulls={true}
+              isAnimationActive={false}
+            />
+
+            <Line
+              yAxisId="pct"
+              type="monotone"
               dataKey="value"
               stroke={color}
               strokeWidth={3}
@@ -246,19 +299,47 @@ export default function LineGraphChart({ series }: LineGraphChartProps) {
               style={tooltipPos ? { left: tooltipPos.arrowLeft } : undefined}
               aria-hidden="true"
             />
-            <span className={styles.tooltipPct}>
-              {tooltip.pct == null
-                ? "—"
-                : `${tooltip.pct > 0 ? "+" : ""}${tooltip.pct.toFixed(2)}%`}
-            </span>
-            <span className={styles.tooltipBrl}>
-              {tooltip.priceBrl == null
-                ? "—"
-                : tooltip.priceBrl.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-            </span>
+            <div className={styles.tooltipMetric}>
+              <span
+                className={styles.tooltipSquare}
+                style={{ backgroundColor: color }}
+                aria-hidden="true"
+              />
+              <div className={styles.tooltipValues}>
+                <span className={styles.tooltipPct}>
+                  {tooltip.pct == null
+                    ? "—"
+                    : `${tooltip.pct > 0 ? "+" : ""}${tooltip.pct.toFixed(2)}%`}
+                </span>
+                <span className={styles.tooltipBrl}>
+                  {tooltip.priceBrl == null
+                    ? "—"
+                    : tooltip.priceBrl.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                </span>
+              </div>
+            </div>
+            <div className={styles.tooltipMetric}>
+              <span
+                className={styles.tooltipSquare}
+                style={{ backgroundColor: SERIES_COLORS.ipca }}
+                aria-hidden="true"
+              />
+              <div className={styles.tooltipValues}>
+                <span className={styles.tooltipPct}>
+                  {tooltip.ipca == null
+                    ? "—"
+                    : `${tooltip.ipca > 0 ? "+" : ""}${tooltip.ipca.toFixed(2)}%`}
+                </span>
+                {tooltip.ipcaPartialLabel && (
+                  <span className={styles.tooltipIpcaPartial}>
+                    {tooltip.ipcaPartialLabel}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

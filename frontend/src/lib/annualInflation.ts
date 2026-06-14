@@ -78,7 +78,7 @@ export async function getAnnualMinimumWageIncrease(): Promise<Record<
 > | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/basket/wage`, {
-      next: { revalidate: 604800 },
+      next: { revalidate: 86400 },
     });
     if (!res.ok) return null;
 
@@ -92,7 +92,7 @@ export async function getAnnualMinimumWageIncrease(): Promise<Record<
 export async function getBaseMinimumWage(): Promise<number | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/basket/wage`, {
-      next: { revalidate: 604800 },
+      next: { revalidate: 86400 },
     });
     if (!res.ok) return null;
 
@@ -112,7 +112,7 @@ export async function getAnnualInflation(): Promise<AnnualRow[] | null> {
   try {
     const [inflationRes, wageIncreaseByYear] = await Promise.all([
       fetch(`${API_BASE_URL}/api/global-baskets/dieese/inflation/annual`, {
-        next: { revalidate: 604800 },
+        next: { revalidate: 86400 },
       }),
       getAnnualMinimumWageIncrease(),
     ]);
@@ -137,6 +137,64 @@ export async function getAnnualInflation(): Promise<AnnualRow[] | null> {
   }
 }
 
+export type CurrentYearIpcaYtd = {
+  year: number;
+  pct: number;
+  throughMonthRef: string;
+};
+
+export async function getCurrentYearIpcaYtd(): Promise<CurrentYearIpcaYtd | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/basket/inflation/month`, {
+      next: { revalidate: 86400 },
+    });
+    if (!res.ok) return null;
+
+    const rows = (await res.json()) as Array<{
+      month_ref: string;
+      ipca_monthly_pct: number | null;
+    }>;
+
+    const withIpca = rows
+      .filter((r) => r.month_ref && toNumber(r.ipca_monthly_pct) !== null)
+      .sort((a, b) => String(a.month_ref).localeCompare(String(b.month_ref)));
+
+    if (withIpca.length === 0) return null;
+
+    // Year of the most recent month that has an IPCA value.
+    const latestRef = withIpca[withIpca.length - 1].month_ref;
+    const year = Number(String(latestRef).slice(0, 4));
+
+    const monthly = withIpca.filter((r) =>
+      String(r.month_ref).startsWith(`${year}-`),
+    );
+
+    const factor = monthly.reduce(
+      (acc, r) => acc * (1 + Number(r.ipca_monthly_pct) / 100),
+      1,
+    );
+    const pct = Number(((factor - 1) * 100).toFixed(2));
+
+    return { year, pct, throughMonthRef: monthly[monthly.length - 1].month_ref };
+  } catch {
+    return null;
+  }
+}
+
+export async function getAnnualIpcaByYear(): Promise<Record<number, number>> {
+  const [rows, ytd] = await Promise.all([
+    getAnnualInflation(),
+    getCurrentYearIpcaYtd(),
+  ]);
+
+  const map: Record<number, number> = {};
+  for (const r of rows ?? []) {
+    if (r.annual_ipca_pct !== null) map[r.year] = Number(r.annual_ipca_pct);
+  }
+  if (ytd && map[ytd.year] === undefined) map[ytd.year] = ytd.pct;
+  return map;
+}
+
 export type DieeseRow = { year: string; annual: string; cumulative: string };
 
 function formatPct(value: number): string {
@@ -146,7 +204,7 @@ export async function getDieeseTableRows(): Promise<DieeseRow[]> {
   try {
     const res = await fetch(
       `${API_BASE_URL}/api/global-baskets/dieese/inflation/annual`,
-      { next: { revalidate: 604800 } },
+      { next: { revalidate: 86400 } },
     );
     if (!res.ok) return [];
 

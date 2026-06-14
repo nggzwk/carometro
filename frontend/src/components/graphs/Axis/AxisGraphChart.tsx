@@ -21,6 +21,7 @@ export type DataPoint = {
   value: number | null;
   inflation: number | null;
   ipca: number | null;
+  ipcaPartialLabel: string | null;
   wageIncrease: number | null;
 };
 
@@ -30,6 +31,7 @@ type TooltipData = {
   index: number;
   inflation: number | null;
   ipca: number | null;
+  ipcaPartialLabel: string | null;
   wageIncrease: number | null;
 };
 
@@ -67,6 +69,7 @@ export default function AxisGraphChart({
       index,
       inflation: point.inflation,
       ipca: point.ipca,
+      ipcaPartialLabel: point.ipcaPartialLabel,
       wageIncrease: point.wageIncrease,
     });
   };
@@ -150,6 +153,25 @@ export default function AxisGraphChart({
         >
           DIEESE<br />×<br />IPCA
         </h2>
+      </div>
+      <div
+        id="axis-subtitles"
+        className={`${styles.metricsSubtitle} flex gap-6 mb-6 flex-wrap`}
+      >
+        {metricsSubtitle.map((metric) => (
+          <div
+            key={metric.label}
+            id={`axis-subtitle-${metric.label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")}`}
+            className={styles.metricsSubtitleItem}
+          >
+            <span
+              className={`${styles.metricsSubtitleSquare}`}
+              style={{ backgroundColor: metric.color }}
+              aria-hidden="true"
+            />
+            <span className={styles.metricsSubtitleLabel}>{metric.label}</span>
+          </div>
+        ))}
       </div>
       <div
         id="axis-graph-chart"
@@ -266,6 +288,7 @@ export default function AxisGraphChart({
             y={tooltipData.y + 10}
             inflation={tooltipData.inflation}
             ipca={tooltipData.ipca}
+            ipcaPartialLabel={tooltipData.ipcaPartialLabel}
             wageIncrease={tooltipData.wageIncrease}
             basePrice={basePrice}
             baseSalary={baseSalary}
@@ -280,25 +303,6 @@ export default function AxisGraphChart({
             onRequestClose={handleRequestClose}
           />
         )}
-      </div>
-      <div
-        id="axis-subtitles"
-        className={`${styles.metricsSubtitle} flex justify-center gap-6 mt-4 flex-wrap`}
-      >
-        {metricsSubtitle.map((metric) => (
-          <div
-            key={metric.label}
-            id={`axis-subtitle-${metric.label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")}`}
-            className={styles.metricsSubtitleItem}
-          >
-            <span
-              className={`${styles.metricsSubtitleSquare}`}
-              style={{ backgroundColor: metric.color }}
-              aria-hidden="true"
-            />
-            <span className={styles.metricsSubtitleLabel}>{metric.label}</span>
-          </div>
-        ))}
       </div>
     </div>
   );

@@ -17,3 +17,10 @@ export function shortName(name: string): string {
   const first = name.split(" ")[0];
   return first ? first.toUpperCase() : "";
 }
+
+export function formatMonthName(monthRef: string): string {
+  const [year, month] = monthRef.split("-").map(Number);
+  return new Date(year, month - 1, 1)
+    .toLocaleString("pt-BR", { month: "long" })
+    .replace(".", "");
+}
