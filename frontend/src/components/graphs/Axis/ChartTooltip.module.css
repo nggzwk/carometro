@@ -43,17 +43,7 @@
   height: 9px;
   border-radius: 3px;
   flex-shrink: 0;
-  /* Optically center the square on the bold value's first line so it stays
-     aligned with the value (not the row center) when the row expands. */
   margin-top: 3px;
-}
-
-.metricClickable {
-  cursor: pointer;
-}
-
-.metricClickable:hover {
-  background: rgba(0, 0, 0, 0.04);
 }
 
 .metricValues {
@@ -66,9 +56,9 @@
 .value {
   font-family: var(--font-card-summary, sans-serif);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: -0.01em;
-  color: #5c5247;
+  color: #000000;
   line-height: 1.2;
 }
 

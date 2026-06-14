@@ -31,11 +31,6 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
 }) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [clampedX, setClampedX] = useState<number>(x);
-  const [expandedMetric, setExpandedMetric] = useState<"inflation" | "ipca" | "wageIncrease" | null>(null);
-
-  useEffect(() => {
-    setExpandedMetric(null);
-  }, [x, y]);
 
   useEffect(() => {
     if (!visible) return;
@@ -126,14 +121,12 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
             : key === "wageIncrease"
             ? formatBRL(value, baseSalary)
             : null;
-          const isExpanded = expandedMetric === key;
           return (
             <div
               id={`chart-tooltip-${key}`}
               key={key}
-              className={`${styles.metric} ${brl ? styles.metricClickable : ""} ${key === "ipca" && ipcaPartialLabel ? styles.metricPartial : ""}`}
+              className={`${styles.metric} ${key === "ipca" && ipcaPartialLabel ? styles.metricPartial : ""}`}
               style={{ color }}
-              onClick={brl ? () => setExpandedMetric(isExpanded ? null : key) : undefined}
             >
               <span className={styles.square} style={{ backgroundColor: color }} />
               <div className={styles.metricValues}>
@@ -146,7 +139,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
                     {ipcaPartialLabel}
                   </span>
                 )}
-                {isExpanded && brl && (
+                {brl && (
                   <span id={`chart-tooltip-${key}-brl`} className={styles.brlValue}>{brl}</span>
                 )}
               </div>
