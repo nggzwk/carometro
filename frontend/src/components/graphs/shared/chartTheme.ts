@@ -1,4 +1,3 @@
-/** Colors for each data series, shared across graphs, legends and tooltips. */
 export const SERIES_COLORS = {
   inflation: "#3971268e",
   wageIncrease: "#5c83ae",
@@ -26,3 +25,21 @@ export const GRID_PROPS = {
 } as const;
 
 export const pctTickFormatter = (value: number) => `${value}%`;
+
+export const X_AXIS_PROPS = {
+  dataKey: "year",
+  stroke: AXIS_STROKE,
+  tick: AXIS_TICK,
+  tickMargin: 10,
+  axisLine: AXIS_LINE,
+} as const;
+
+export const Y_AXIS_PROPS = {
+  yAxisId: "pct",
+  stroke: AXIS_STROKE,
+  tick: AXIS_TICK,
+  tickFormatter: pctTickFormatter,
+  width: 62,
+  tickMargin: 4,
+  axisLine: AXIS_LINE,
+} as const;

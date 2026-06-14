@@ -1,3 +1,24 @@
+.menuArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  color: #1a120b;
+  font-size: 11px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: background 200ms, transform 150ms;
+}
+
+.menuArrow:hover {
+  background: #fff8ee;
+  transform: scale(1.06);
+}
+
 .tooltip {
   position: absolute;
   z-index: 20;

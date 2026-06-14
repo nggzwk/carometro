@@ -1,0 +1,55 @@
+.metricsSubtitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 16px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 769px) {
+  .metricsSubtitle {
+    justify-content: flex-end;
+  }
+}
+
+.metricsSubtitleItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metricsSubtitleSquare {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex: 0 0 12px;
+}
+
+.metricsSubtitleLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #a89b8c;
+  letter-spacing: 0.3px;
+  font-family: var(--font-card-summary);
+}
+
+@media (max-width: 768px) {
+  .metricsSubtitle {
+    flex-wrap: nowrap;
+    gap: 8px 10px;
+    margin-top: -12px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .metricsSubtitleSquare {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+  }
+
+  .metricsSubtitleLabel {
+    font-size: 11px;
+  }
+}

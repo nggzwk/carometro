@@ -1,4 +1,4 @@
-import { BASICAO_SUBCATEGORIES } from "./basketIcons";
+import { BASICAO_SUBCATEGORIES, FEIRAO_SUBCATEGORIES } from "./basketIcons";
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
 
@@ -30,6 +30,7 @@ function toNumber(value: number | string | null | undefined): number | null {
 export function buildItemLineSeries(
   rows: ItemsPriceApiResponse["items"],
   currentYear: number,
+  subcategories: number[] = BASICAO_SUBCATEGORIES,
 ): ItemLineSeries[] {
   // subcategoria -> { "YYYY-MM": price }
   const byItem = new Map<number, Map<string, number>>();
@@ -44,7 +45,7 @@ export function buildItemLineSeries(
     months.set(row.month_ref, price);
   }
 
-  return BASICAO_SUBCATEGORIES.map((subcategoria) => {
+  return subcategories.map((subcategoria) => {
     const months = byItem.get(subcategoria);
     if (!months || months.size === 0) {
       return { subcategoria, points: [] };
@@ -94,17 +95,31 @@ export function buildItemLineSeries(
   });
 }
 
-export async function getItemLineSeries(): Promise<ItemLineSeries[]> {
+async function fetchItemLineSeries(
+  endpoint: string,
+  subcategories: number[],
+): Promise<ItemLineSeries[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/basket/items/price`, {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       next: { revalidate: 604800 },
     });
     if (!res.ok) return [];
 
     const data = (await res.json()) as ItemsPriceApiResponse;
     const currentYear = new Date().getFullYear();
-    return buildItemLineSeries(data.items ?? [], currentYear);
+    return buildItemLineSeries(data.items ?? [], currentYear, subcategories);
   } catch {
     return [];
   }
+}
+
+export function getItemLineSeries(): Promise<ItemLineSeries[]> {
+  return fetchItemLineSeries("/api/basket/items/price", BASICAO_SUBCATEGORIES);
+}
+
+export function getFeiraoItemLineSeries(): Promise<ItemLineSeries[]> {
+  return fetchItemLineSeries(
+    "/api/vegetable-basket/items/price",
+    FEIRAO_SUBCATEGORIES,
+  );
 }
