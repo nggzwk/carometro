@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./ChartTooltip.module.css";
-import { SERIES_COLORS } from "../../../lib/chartColors";
+import { SERIES_COLORS } from "../shared/chartTheme";
+import { formatBrlFromBase } from "../../../lib/formatters";
+import {
+  ChartTooltipRow,
+  type TooltipMetric,
+} from "../shared/ChartTooltipRow";
 
 interface ChartTooltipProps {
   x: number;
@@ -78,19 +83,6 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
 
   if (!visible) return null;
 
-  const formatValue = (value: number | null) => {
-    if (value === null) return "-";
-    if (value > 0) return `+${value.toFixed(2)}%`;
-    if (value < 0) return `${value.toFixed(2)}%`;
-    return `0.00%`;
-  };
-
-  const formatBRL = (value: number | null, base: number) => {
-    if (value === null || base === 0) return null;
-    const brl = base * (1 + value / 100);
-    return brl.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  };
-
   const DOT_RADIUS = 20;
   const GAP = 6;
 
@@ -101,10 +93,25 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
       ? { left: x - DOT_RADIUS - GAP, top: y, transform: "translate(-100%, -50%)" }
       : { left: clampedX, top: y + DOT_RADIUS + GAP, transform: "translate(-50%, 0)" };
 
-  const metrics: { key: "inflation" | "ipca" | "wageIncrease"; color: string; value: number | null }[] = [
-    { key: "inflation", color: SERIES_COLORS.inflation, value: inflation },
-    { key: "wageIncrease", color: SERIES_COLORS.wageIncrease, value: wageIncrease },
-    { key: "ipca", color: SERIES_COLORS.ipca, value: ipca },
+  const metrics: TooltipMetric[] = [
+    {
+      key: "inflation",
+      color: SERIES_COLORS.inflation,
+      value: inflation,
+      brl: formatBrlFromBase(inflation, basePrice),
+    },
+    {
+      key: "wageIncrease",
+      color: SERIES_COLORS.wageIncrease,
+      value: wageIncrease,
+      brl: formatBrlFromBase(wageIncrease, baseSalary),
+    },
+    {
+      key: "ipca",
+      color: SERIES_COLORS.ipca,
+      value: ipca,
+      partialLabel: ipcaPartialLabel,
+    },
   ];
 
   return (
@@ -115,37 +122,9 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
       style={positionStyle}
     >
       <div className={styles.tooltip}>
-        {metrics.map(({ key, color, value }) => {
-          const brl = key === "inflation"
-            ? formatBRL(value, basePrice)
-            : key === "wageIncrease"
-            ? formatBRL(value, baseSalary)
-            : null;
-          return (
-            <div
-              id={`chart-tooltip-${key}`}
-              key={key}
-              className={`${styles.metric} ${key === "ipca" && ipcaPartialLabel ? styles.metricPartial : ""}`}
-              style={{ color }}
-            >
-              <span className={styles.square} style={{ backgroundColor: color }} />
-              <div className={styles.metricValues}>
-                <span id={`chart-tooltip-${key}-value`} className={styles.value}>{formatValue(value)}</span>
-                {key === "ipca" && ipcaPartialLabel && (
-                  <span
-                    id="chart-tooltip-ipca-partial"
-                    className={styles.partialLabel}
-                  >
-                    {ipcaPartialLabel}
-                  </span>
-                )}
-                {brl && (
-                  <span id={`chart-tooltip-${key}-brl`} className={styles.brlValue}>{brl}</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {metrics.map((metric) => (
+          <ChartTooltipRow key={metric.key} metric={metric} />
+        ))}
       </div>
     </div>
   );

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { plusJakartaSans, jetbrainsMono } from "./fonts";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const siteUrl = "https://ocarometro.com";
-const title = "Carômetro - Aumento dos preços em Curitiba";
+const title = "Carômetro - Aumento do supermercado em Curitiba";
 const description =
     "Acompanhe o aumento dos preços em Curitiba: custo de mercado, cesta básica e hortifruti monitorados mês a mês, ranking de itens e os vilões que mais pesam no bolso.";
 
@@ -108,6 +109,7 @@ export default function RootLayout({
         >
             {children}
             <Analytics />
+            <SpeedInsights />
         </body>
         </html>
     );

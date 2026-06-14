@@ -11,7 +11,15 @@ import {
   Area,
 } from "recharts";
 import { basketTypesIcons } from "../../../lib/basketIcons";
-import { SERIES_COLORS } from "../../../lib/chartColors";
+import {
+  SERIES_COLORS,
+  CHART_MARGIN,
+  AXIS_STROKE,
+  AXIS_TICK,
+  AXIS_LINE,
+  GRID_PROPS,
+  pctTickFormatter,
+} from "../shared/chartTheme";
 import { ChartDot } from "./ChartDot";
 import { ChartTooltip } from "./ChartTooltip";
 import styles from "./AxisGraph.module.css";
@@ -180,10 +188,7 @@ export default function AxisGraphChart({
         aria-label="Gráfico de inflação anual"
       >
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
-          >
+          <LineChart data={data} margin={CHART_MARGIN}>
             <defs>
               <linearGradient
                 id="inflationGradient"
@@ -197,41 +202,28 @@ export default function AxisGraphChart({
               </linearGradient>
             </defs>
 
-            <CartesianGrid
-              stroke="#f3efe8"
-              strokeDasharray="3 3"
-              vertical={false}
-            />
+            <CartesianGrid {...GRID_PROPS} />
 
             <XAxis
               dataKey="year"
-              stroke="#8B7355"
-              tick={{
-                fill: "#8B7355",
-                fontSize: 13,
-                fontFamily: "var(--font-card-summary)",
-              }}
+              stroke={AXIS_STROKE}
+              tick={AXIS_TICK}
               tickMargin={10}
-              axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
+              axisLine={AXIS_LINE}
             />
 
-            {/* Single axis: cumulative % growth from 2023 for all three series */}
             <YAxis
               yAxisId="pct"
-              stroke="#8B7355"
-              tick={{
-                fill: "#8B7355",
-                fontSize: 13,
-                fontFamily: "var(--font-card-summary)",
-              }}
-              tickFormatter={(v) => `${v}%`}
+              stroke={AXIS_STROKE}
+              tick={AXIS_TICK}
+              tickFormatter={pctTickFormatter}
               width={62}
               tickMargin={4}
               domain={[
                 0,
                 (dataMax: number) => Math.ceil((dataMax * 1.12) / 5) * 5,
               ]}
-              axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
+              axisLine={AXIS_LINE}
             />
 
             <Area

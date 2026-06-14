@@ -1,0 +1,74 @@
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 7px 14px;
+  border-bottom: 1px solid rgba(168, 155, 140, 0.14);
+}
+
+.metric:last-child {
+  border-bottom: none;
+}
+
+.square {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.metricValues {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.value {
+  font-family: var(--font-card-summary, sans-serif);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: #000000;
+  line-height: 1.2;
+}
+
+.metricPartial {
+  position: relative;
+  padding-bottom: 26px;
+}
+
+.partialLabel {
+  position: absolute;
+  right: 14px;
+  bottom: 7px;
+  font-family: var(--font-card-summary, sans-serif);
+  font-weight: 400;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  color: #998f85;
+  white-space: nowrap;
+}
+
+.brlValue {
+  font-family: var(--font-card-summary, sans-serif);
+  font-weight: 400;
+  font-size: 11px;
+  color: #a23c2b;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 768px) {
+  .metric {
+    padding: 6px 12px;
+    gap: 14px;
+  }
+
+  .value {
+    font-size: 12px;
+  }
+}

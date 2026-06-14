@@ -18,7 +18,20 @@ import {
 } from "../../../lib/basketIcons";
 import type { ItemLineSeries } from "../../../lib/itemLines";
 import { ChartDot } from "../Axis/ChartDot";
-import { SERIES_COLORS } from "../../../lib/chartColors";
+import { formatBrlFromBase, formatBrlValue } from "../../../lib/formatters";
+import {
+  SERIES_COLORS,
+  CHART_MARGIN,
+  AXIS_STROKE,
+  AXIS_TICK,
+  AXIS_LINE,
+  GRID_PROPS,
+  pctTickFormatter,
+} from "../shared/chartTheme";
+import {
+  ChartTooltipRow,
+  type TooltipMetric,
+} from "../shared/ChartTooltipRow";
 import styles from "./LineGraph.module.css";
 import axisStyles from "../Axis/AxisGraph.module.css";
 
@@ -26,6 +39,8 @@ type LineGraphChartProps = {
   series: ItemLineSeries[];
   ipcaByYear?: Record<number, number>;
   ipcaPartial?: { year: number; label: string } | null;
+  wageByYear?: Record<number, number | null>;
+  baseSalary?: number;
 };
 
 type TooltipData = {
@@ -35,12 +50,15 @@ type TooltipData = {
   priceBrl: number | null;
   ipca: number | null;
   ipcaPartialLabel: string | null;
+  wageIncrease: number | null;
 };
 
 export default function LineGraphChart({
   series,
   ipcaByYear = {},
   ipcaPartial = null,
+  wageByYear = {},
+  baseSalary = 0,
 }: LineGraphChartProps) {
   const selectableItems = series.filter((s) => s.points.length > 0);
 
@@ -83,12 +101,26 @@ export default function LineGraphChart({
   const color = selectedSubcat != null ? getBasketItemColor(selectedSubcat) : "#e0aa59";
 
   const chartData = data.map((p, i) => {
-    let factor = 1;
+    let ipcaFactor = 1;
+    let wageFactor = 1;
+    let hasWage = false;
     for (let j = 0; j <= i; j++) {
-      const annual = ipcaByYear[Number(data[j].year)];
-      if (annual != null) factor *= 1 + annual / 100;
+      const year = Number(data[j].year);
+      const annualIpca = ipcaByYear[year];
+      if (annualIpca != null) ipcaFactor *= 1 + annualIpca / 100;
+      const annualWage = wageByYear[year];
+      if (annualWage != null) {
+        wageFactor *= 1 + annualWage / 100;
+        hasWage = true;
+      }
     }
-    return { ...p, ipca: Number(((factor - 1) * 100).toFixed(2)) };
+    return {
+      ...p,
+      ipca: Number(((ipcaFactor - 1) * 100).toFixed(2)),
+      wageIncrease: hasWage
+        ? Number(((wageFactor - 1) * 100).toFixed(2))
+        : null,
+    };
   });
 
   const handleSelect = (subcategoria: number) => {
@@ -107,6 +139,7 @@ export default function LineGraphChart({
       priceBrl: point.priceBrl,
       ipca: point.ipca,
       ipcaPartialLabel: isPartial ? ipcaPartial.label : null,
+      wageIncrease: point.wageIncrease,
     });
   }, [chartData, ipcaPartial]);
 
@@ -189,10 +222,7 @@ export default function LineGraphChart({
         aria-label="Gráfico de preço acumulado por item do basicão"
       >
         <ResponsiveContainer width="100%" height={420}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
-          >
+          <LineChart data={chartData} margin={CHART_MARGIN}>
             <defs>
               <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={color} stopOpacity={0.15} />
@@ -200,33 +230,21 @@ export default function LineGraphChart({
               </linearGradient>
             </defs>
 
-            <CartesianGrid
-              stroke="#f3efe8"
-              strokeDasharray="3 3"
-              vertical={false}
-            />
+            <CartesianGrid {...GRID_PROPS} />
 
             <XAxis
               dataKey="year"
-              stroke="#8B7355"
-              tick={{
-                fill: "#8B7355",
-                fontSize: 13,
-                fontFamily: "var(--font-card-summary)",
-              }}
+              stroke={AXIS_STROKE}
+              tick={AXIS_TICK}
               tickMargin={10}
-              axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
+              axisLine={AXIS_LINE}
             />
 
             <YAxis
               yAxisId="pct"
-              stroke="#8B7355"
-              tick={{
-                fill: "#8B7355",
-                fontSize: 13,
-                fontFamily: "var(--font-card-summary)",
-              }}
-              tickFormatter={(v) => `${v}%`}
+              stroke={AXIS_STROKE}
+              tick={AXIS_TICK}
+              tickFormatter={pctTickFormatter}
               width={62}
               tickMargin={4}
               domain={[
@@ -235,7 +253,7 @@ export default function LineGraphChart({
                 (dataMax: number) =>
                   dataMax <= 0 ? 0 : Math.ceil((dataMax * 1.12) / 5) * 5,
               ]}
-              axisLine={{ stroke: "#d4c4b0", strokeWidth: 1.5 }}
+              axisLine={AXIS_LINE}
             />
 
             <ReferenceLine
@@ -299,47 +317,34 @@ export default function LineGraphChart({
               style={tooltipPos ? { left: tooltipPos.arrowLeft } : undefined}
               aria-hidden="true"
             />
-            <div className={styles.tooltipMetric}>
-              <span
-                className={styles.tooltipSquare}
-                style={{ backgroundColor: color }}
-                aria-hidden="true"
+            {(
+              [
+                {
+                  key: "item",
+                  color,
+                  value: tooltip.pct,
+                  brl: formatBrlValue(tooltip.priceBrl),
+                },
+                {
+                  key: "wageIncrease",
+                  color: SERIES_COLORS.wageIncrease,
+                  value: tooltip.wageIncrease,
+                  brl: formatBrlFromBase(tooltip.wageIncrease, baseSalary),
+                },
+                {
+                  key: "ipca",
+                  color: SERIES_COLORS.ipca,
+                  value: tooltip.ipca,
+                  partialLabel: tooltip.ipcaPartialLabel,
+                },
+              ] satisfies TooltipMetric[]
+            ).map((metric) => (
+              <ChartTooltipRow
+                key={metric.key}
+                metric={metric}
+                idPrefix="line-tooltip"
               />
-              <div className={styles.tooltipValues}>
-                <span className={styles.tooltipPct}>
-                  {tooltip.pct == null
-                    ? "—"
-                    : `${tooltip.pct > 0 ? "+" : ""}${tooltip.pct.toFixed(2)}%`}
-                </span>
-                <span className={styles.tooltipBrl}>
-                  {tooltip.priceBrl == null
-                    ? "—"
-                    : tooltip.priceBrl.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                </span>
-              </div>
-            </div>
-            <div className={styles.tooltipMetric}>
-              <span
-                className={styles.tooltipSquare}
-                style={{ backgroundColor: SERIES_COLORS.ipca }}
-                aria-hidden="true"
-              />
-              <div className={styles.tooltipValues}>
-                <span className={styles.tooltipPct}>
-                  {tooltip.ipca == null
-                    ? "—"
-                    : `${tooltip.ipca > 0 ? "+" : ""}${tooltip.ipca.toFixed(2)}%`}
-                </span>
-                {tooltip.ipcaPartialLabel && (
-                  <span className={styles.tooltipIpcaPartial}>
-                    {tooltip.ipcaPartialLabel}
-                  </span>
-                )}
-              </div>
-            </div>
+            ))}
           </div>
         )}
       </div>
