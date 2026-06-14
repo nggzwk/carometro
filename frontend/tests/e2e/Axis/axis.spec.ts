@@ -44,30 +44,24 @@ test.describe("Axis Graph - Desktop Experience", () => {
       const squareCount = await axis.getSquareCount();
       expect(squareCount).toBeGreaterThanOrEqual(2);
 
-      // Scenario 4: clicking the yellow (inflation) square reveals a BRL value.
-      await axis.expandMetric("inflation");
+      // Scenario 4: the yellow (inflation) square shows a BRL value.
       expect(await axis.hasBrl("inflation")).toBeTruthy();
       expect(await axis.getMetricBrl("inflation")).toMatch(/R\$|\d/);
 
-      // Scenario 5: clicking the blue (wageIncrease) square reveals a BRL value.
-      await axis.expandMetric("wageIncrease");
+      // Scenario 5: the blue (wageIncrease) square shows a BRL value.
       expect(await axis.hasBrl("wageIncrease")).toBeTruthy();
       expect(await axis.getMetricBrl("wageIncrease")).toMatch(/R\$|\d/);
 
       // Scenario 6: the pink (ipca) square shows no extra BRL info.
-      await axis.expandMetric("ipca");
       expect(await axis.hasBrl("ipca")).toBeFalsy();
 
       if (year !== currentYear) {
         expect(await axis.hasMetricData("ipca")).toBeTruthy();
       }
 
-      // Scenario 8: hovering pins the tooltip — it stays after mouse-away…
+      // Scenario 8: the tooltip is hover-driven — moving the mouse away hides it.
       await axis.page.mouse.move(0, 0);
-      expect(await axis.isTooltipVisible()).toBeTruthy();
-
-      await axis.closeTooltipByClickingOut();
-      expect(await axis.isTooltipVisible()).toBeFalsy();
+      await expect(axis.tooltip).toBeHidden({ timeout: 2000 });
     }
   });
 

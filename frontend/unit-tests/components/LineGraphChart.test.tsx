@@ -76,9 +76,9 @@ describe("LineGraphChart", () => {
       ];
       render(<LineGraphChart series={series} />);
 
-      expect(screen.getByTitle("Arroz")).toBeInTheDocument();
-      expect(screen.getByTitle("Óleo")).toBeInTheDocument();
-      expect(screen.queryByTitle("Feijão")).not.toBeInTheDocument();
+      expect(screen.getByLabelText("Arroz")).toBeInTheDocument();
+      expect(screen.getByLabelText("Óleo")).toBeInTheDocument();
+      expect(screen.queryByLabelText("Feijão")).not.toBeInTheDocument();
     });
 
     it("renders a legend button for each item that has points", () => {
@@ -95,8 +95,8 @@ describe("LineGraphChart", () => {
       const series = [makeSeries(ARROZ), makeSeries(FEIJAO)];
       render(<LineGraphChart series={series} />);
 
-      expect(screen.getByTitle("Arroz")).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByTitle("Feijão")).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByLabelText("Arroz")).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByLabelText("Feijão")).toHaveAttribute("aria-pressed", "false");
     });
 
     it("selects the first item with data even when earlier items are empty", () => {
@@ -106,7 +106,7 @@ describe("LineGraphChart", () => {
       ];
       render(<LineGraphChart series={series} />);
 
-      expect(screen.getByTitle("Feijão")).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByLabelText("Feijão")).toHaveAttribute("aria-pressed", "true");
     });
   });
 
@@ -115,30 +115,30 @@ describe("LineGraphChart", () => {
       const series = [makeSeries(ARROZ), makeSeries(FEIJAO)];
       render(<LineGraphChart series={series} />);
 
-      fireEvent.click(screen.getByTitle("Feijão"));
+      fireEvent.click(screen.getByLabelText("Feijão"));
 
-      expect(screen.getByTitle("Feijão")).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByTitle("Arroz")).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByLabelText("Feijão")).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByLabelText("Arroz")).toHaveAttribute("aria-pressed", "false");
     });
 
     it("clicking the active item deselects it, leaving no item active", () => {
       const series = [makeSeries(ARROZ), makeSeries(FEIJAO)];
       render(<LineGraphChart series={series} />);
 
-      fireEvent.click(screen.getByTitle("Arroz"));
+      fireEvent.click(screen.getByLabelText("Arroz"));
 
-      expect(screen.getByTitle("Arroz")).toHaveAttribute("aria-pressed", "false");
-      expect(screen.getByTitle("Feijão")).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByLabelText("Arroz")).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByLabelText("Feijão")).toHaveAttribute("aria-pressed", "false");
     });
 
     it("toggling back re-selects a previously deselected item", () => {
       const series = [makeSeries(ARROZ), makeSeries(FEIJAO)];
       render(<LineGraphChart series={series} />);
 
-      fireEvent.click(screen.getByTitle("Arroz"));
-      fireEvent.click(screen.getByTitle("Arroz"));
+      fireEvent.click(screen.getByLabelText("Arroz"));
+      fireEvent.click(screen.getByLabelText("Arroz"));
 
-      expect(screen.getByTitle("Arroz")).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByLabelText("Arroz")).toHaveAttribute("aria-pressed", "true");
     });
   });
 
@@ -157,12 +157,124 @@ describe("LineGraphChart", () => {
       expect(document.getElementById("line-graph-legend")).toBeInTheDocument();
     });
 
-    it("each legend button has a title matching the item name", () => {
+    it("each legend button has an accessible label matching the item name", () => {
       const series = [makeSeries(ARROZ), makeSeries(FEIJAO)];
       render(<LineGraphChart series={series} />);
 
-      expect(screen.getByTitle("Arroz")).toBeInTheDocument();
-      expect(screen.getByTitle("Feijão")).toBeInTheDocument();
+      expect(screen.getByLabelText("Arroz")).toBeInTheDocument();
+      expect(screen.getByLabelText("Feijão")).toBeInTheDocument();
+    });
+
+    it("legend buttons no longer use the native title tooltip", () => {
+      render(<LineGraphChart series={[makeSeries(ARROZ)]} />);
+      const button = document.getElementById(`line-legend-${ARROZ}`);
+      expect(button).not.toHaveAttribute("title");
+    });
+  });
+
+  describe("salário / ipca subtitle", () => {
+    it("renders both the SALÁRIO and IPCA subtitle entries", () => {
+      render(<LineGraphChart series={[makeSeries(ARROZ)]} />);
+
+      expect(document.getElementById("line-subtitle-salario")).toBeInTheDocument();
+      expect(document.getElementById("line-subtitle-ipca")).toBeInTheDocument();
+      expect(screen.getByText("SALÁRIO")).toBeInTheDocument();
+      expect(screen.getByText("IPCA")).toBeInTheDocument();
+    });
+  });
+
+  describe("menu switcher (basicão / feirão)", () => {
+    const TOMATE = 50008;
+    const BATATA_INGLESA = 50005;
+    const BATATA_DOCE = 50004;
+
+    const feiraoSeries: ItemLineSeries[] = [
+      makeSeries(TOMATE),
+      makeSeries(BATATA_INGLESA),
+      makeSeries(BATATA_DOCE),
+    ];
+
+    const clickNext = () =>
+      fireEvent.click(document.getElementById("line-graph-next")!);
+    const clickPrev = () =>
+      fireEvent.click(document.getElementById("line-graph-prev")!);
+
+    it("renders the previous/next arrow controls", () => {
+      render(<LineGraphChart series={[makeSeries(ARROZ)]} />);
+
+      expect(document.getElementById("line-graph-prev")).toBeInTheDocument();
+      expect(document.getElementById("line-graph-next")).toBeInTheDocument();
+    });
+
+    it("shows BASICÃO by default and switches to FEIRÃO on toggle", () => {
+      render(
+        <LineGraphChart series={[makeSeries(ARROZ)]} feiraoSeries={feiraoSeries} />,
+      );
+      expect(document.getElementById("line-graph-title")?.textContent).toBe(
+        "BASICÃO",
+      );
+
+      clickNext();
+      expect(document.getElementById("line-graph-title")?.textContent).toBe(
+        "FEIRÃO",
+      );
+    });
+
+    it("renders feirão legend items (with the batata labels) after switching", () => {
+      render(
+        <LineGraphChart series={[makeSeries(ARROZ)]} feiraoSeries={feiraoSeries} />,
+      );
+      expect(screen.queryByLabelText("Tomate")).not.toBeInTheDocument();
+
+      clickNext();
+
+      expect(screen.getByLabelText("Tomate")).toBeInTheDocument();
+      expect(screen.getByLabelText("Inglesa")).toBeInTheDocument();
+      expect(screen.getByLabelText("Doce")).toBeInTheDocument();
+      expect(screen.queryByLabelText("Arroz")).not.toBeInTheDocument();
+    });
+
+    it("selects the first feirão item when switching menus", () => {
+      render(
+        <LineGraphChart series={[makeSeries(ARROZ)]} feiraoSeries={feiraoSeries} />,
+      );
+      clickNext();
+
+      expect(screen.getByLabelText("Tomate")).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
+    it("toggles back to BASICÃO", () => {
+      render(
+        <LineGraphChart series={[makeSeries(ARROZ)]} feiraoSeries={feiraoSeries} />,
+      );
+      clickNext();
+      clickPrev();
+
+      expect(document.getElementById("line-graph-title")?.textContent).toBe(
+        "BASICÃO",
+      );
+      expect(screen.getByLabelText("Arroz")).toBeInTheDocument();
+    });
+
+    it("does not show loading when only the feirão series has data", () => {
+      const emptyBasicao = BASICAO_SUBCATS.map((s) => ({
+        subcategoria: s,
+        points: [],
+      }));
+      render(
+        <LineGraphChart series={emptyBasicao} feiraoSeries={feiraoSeries} />,
+      );
+
+      expect(screen.queryByText("Carregando dados...")).not.toBeInTheDocument();
+      expect(screen.getByTestId("recharts-container")).toBeInTheDocument();
+    });
+
+    it("shows loading only when both baskets are empty", () => {
+      render(<LineGraphChart series={[]} feiraoSeries={[]} />);
+      expect(screen.getByText("Carregando dados...")).toBeInTheDocument();
     });
   });
 });

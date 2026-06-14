@@ -1,5 +1,12 @@
 import { Page, Locator, expect } from "@playwright/test";
 
+export type Basket = "basicao" | "feirao";
+
+const BASKET_LABELS: Record<Basket, string> = {
+  basicao: "BASICÃO",
+  feirao: "FEIRÃO",
+};
+
 export class LineGraphPage {
   readonly page: Page;
 
@@ -10,6 +17,9 @@ export class LineGraphPage {
   readonly legendItems: Locator;
   readonly dots: Locator;
 
+  readonly prevArrow: Locator;
+  readonly nextArrow: Locator;
+
   constructor(page: Page) {
     this.page = page;
     this.graph = page.locator("div[id='line-graph-chart'] div[class='recharts-responsive-container'] div div[class='recharts-wrapper'] svg");
@@ -18,6 +28,8 @@ export class LineGraphPage {
     this.tooltip = page.locator("#line-graph-tooltip");
     this.legendItems = page.locator('[id^="line-legend-"]');
     this.dots = page.locator('[id^="line-dot-"]');
+    this.prevArrow = page.locator("#line-graph-prev");
+    this.nextArrow = page.locator("#line-graph-next");
   }
 
   // ---------- Navigation ----------
@@ -31,6 +43,17 @@ export class LineGraphPage {
     await expect(this.graph).toBeVisible({ timeout: 10000 });
     await this.graph.scrollIntoViewIfNeeded();
     await expect(this.graph).toBeVisible({ timeout: 5000 });
+    await this.dots.first().waitFor({ state: "attached", timeout: 10000 });
+  }
+
+  // ---------- Basket switching ----------
+
+  async selectBasket(basket: Basket) {
+    const label = BASKET_LABELS[basket];
+    if ((await this.title.textContent())?.trim() === label) return;
+
+    await this.nextArrow.click();
+    await expect(this.title).toHaveText(label);
     await this.dots.first().waitFor({ state: "attached", timeout: 10000 });
   }
 
@@ -91,6 +114,10 @@ export class LineGraphPage {
 
   async isTooltipVisible(): Promise<boolean> {
     return this.tooltip.isVisible().catch(() => false);
+  }
+
+  tooltipRow(key: "item" | "wageIncrease" | "ipca"): Locator {
+    return this.tooltip.locator(`#line-tooltip-${key}`);
   }
 
   async getTooltipText(): Promise<string | null> {

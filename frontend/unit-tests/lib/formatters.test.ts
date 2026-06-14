@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { formatPct, formatBrl, shortName } from "../../src/lib/formatters";
+import {
+  formatPct,
+  formatBrl,
+  shortName,
+  formatSignedPct,
+  formatBrlFromBase,
+  formatBrlValue,
+} from "../../src/lib/formatters";
 
 describe("formatPct", () => {
   it("returns '0%' for null", () => {
@@ -50,6 +57,62 @@ describe("formatBrl", () => {
 
   it("formats large value", () => {
     expect(formatBrl(1234.56)).toBe("R$1234,56");
+  });
+});
+
+describe("formatSignedPct", () => {
+  it("returns '-' for null", () => {
+    expect(formatSignedPct(null)).toBe("-");
+  });
+
+  it("returns '-' for NaN", () => {
+    expect(formatSignedPct(NaN)).toBe("-");
+  });
+
+  it("adds '+' sign for positive values", () => {
+    expect(formatSignedPct(12.5)).toBe("+12.50%");
+  });
+
+  it("keeps '-' sign for negative values", () => {
+    expect(formatSignedPct(-3.2)).toBe("-3.20%");
+  });
+
+  it("renders zero without a sign", () => {
+    expect(formatSignedPct(0)).toBe("0.00%");
+  });
+});
+
+describe("formatBrlFromBase", () => {
+  it("returns null when the value is null", () => {
+    expect(formatBrlFromBase(null, 200)).toBeNull();
+  });
+
+  it("returns null when the base is zero", () => {
+    expect(formatBrlFromBase(10, 0)).toBeNull();
+  });
+
+  it("applies the cumulative percentage to the base value", () => {
+    const result = formatBrlFromBase(10, 200);
+    // 200 * (1 + 10/100) = 220
+    expect(result).toMatch(/R\$/);
+    expect(result).toMatch(/220/);
+  });
+
+  it("supports negative percentages", () => {
+    const result = formatBrlFromBase(-50, 200);
+    expect(result).toMatch(/100/);
+  });
+});
+
+describe("formatBrlValue", () => {
+  it("returns null for null", () => {
+    expect(formatBrlValue(null)).toBeNull();
+  });
+
+  it("formats an absolute value as BRL currency", () => {
+    const result = formatBrlValue(25);
+    expect(result).toMatch(/R\$/);
+    expect(result).toMatch(/25/);
   });
 });
 
