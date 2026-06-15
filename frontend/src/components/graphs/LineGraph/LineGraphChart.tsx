@@ -113,38 +113,26 @@ export default function LineGraphChart({
   const data = selected?.points ?? [];
   const color = selectedSubcat != null ? getBasketItemColor(selectedSubcat) : "#e0aa59";
 
-  const firstWageYear =
-    data.find((p) => wageByYear[Number(p.year)] != null)?.year ?? null;
+  const baseHasWage =
+    data.length > 0 && wageByYear[Number(data[0].year)] != null;
 
   const chartData = data.map((p, i) => {
     let ipcaFactor = 1;
     let wageFactor = 1;
-    let hasWage = false;
-    let wageBaseSeen = false;
-    for (let j = 0; j <= i; j++) {
+    for (let j = 1; j <= i; j++) {
       const year = Number(data[j].year);
       const annualIpca = ipcaByYear[year];
       if (annualIpca != null) ipcaFactor *= 1 + annualIpca / 100;
       const annualWage = wageByYear[year];
-      if (annualWage != null) {
-        if (!wageBaseSeen) {
-          wageBaseSeen = true;
-        } else {
-          wageFactor *= 1 + annualWage / 100;
-        }
-        hasWage = true;
-      }
+      if (annualWage != null) wageFactor *= 1 + annualWage / 100;
     }
     return {
       ...p,
       ipca: Number(((ipcaFactor - 1) * 100).toFixed(2)),
-      wageIncrease: hasWage
+      wageIncrease: baseHasWage
         ? Number(((wageFactor - 1) * 100).toFixed(2))
         : null,
-      wagePartialLabel:
-        firstWageYear != null && p.year === firstWageYear
-          ? "início do cálculo"
-          : null,
+      wagePartialLabel: i === 0 && baseHasWage ? "início do cálculo" : null,
     };
   });
 

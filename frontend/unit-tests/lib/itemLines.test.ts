@@ -27,11 +27,11 @@ describe("buildItemLineSeries", () => {
 
     expect(series.points).toHaveLength(1);
     expect(series.points[0].year).toBe("2023");
-    expect(series.points[0].value).toBe(25);
+    expect(series.points[0].value).toBe(0);
     expect(series.points[0].priceBrl).toBe(25);
   });
 
-  it("calculates cumulative percentages across multiple years using the earliest prior December as base", () => {
+  it("calculates cumulative percentages across multiple years using the first plotted year as base", () => {
     const rows = [
       { produto_subcategoria: ARROZ, month_ref: "2021-12", month_price: 10 },
       { produto_subcategoria: ARROZ, month_ref: "2022-12", month_price: 12 },
@@ -41,8 +41,8 @@ describe("buildItemLineSeries", () => {
     const series = result.find((s) => s.subcategoria === ARROZ)!;
 
     expect(series.points).toHaveLength(2);
-    expect(series.points[0]).toMatchObject({ year: "2022", value: 20, priceBrl: 12 });
-    expect(series.points[1]).toMatchObject({ year: "2023", value: 50, priceBrl: 15 });
+    expect(series.points[0]).toMatchObject({ year: "2022", value: 0, priceBrl: 12 });
+    expect(series.points[1]).toMatchObject({ year: "2023", value: 25, priceBrl: 15 });
   });
 
   it("returns empty points when the prior December price is missing", () => {
@@ -56,8 +56,8 @@ describe("buildItemLineSeries", () => {
 
   it("returns empty points when the base price is zero (division guard)", () => {
     const rows = [
-      { produto_subcategoria: ARROZ, month_ref: "2022-12", month_price: 0 },
-      { produto_subcategoria: ARROZ, month_ref: "2023-12", month_price: 25 },
+      { produto_subcategoria: ARROZ, month_ref: "2022-12", month_price: 20 },
+      { produto_subcategoria: ARROZ, month_ref: "2023-12", month_price: 0 },
     ];
     const result = buildItemLineSeries(rows, 2024);
     const series = result.find((s) => s.subcategoria === ARROZ)!;
@@ -84,7 +84,7 @@ describe("buildItemLineSeries", () => {
 
     expect(series.points).toHaveLength(1);
     expect(series.points[0].year).toBe("2024");
-    expect(series.points[0].value).toBe(10);
+    expect(series.points[0].value).toBe(0);
     expect(series.points[0].priceBrl).toBe(22);
   });
 
@@ -107,7 +107,7 @@ describe("buildItemLineSeries", () => {
     const series = result.find((s) => s.subcategoria === ARROZ)!;
 
     expect(series.points).toHaveLength(1);
-    expect(series.points[0].value).toBe(25);
+    expect(series.points[0].value).toBe(0);
   });
 
   it("keeps different subcategories independent of each other", () => {
@@ -121,8 +121,8 @@ describe("buildItemLineSeries", () => {
     const arroz = result.find((s) => s.subcategoria === ARROZ)!;
     const feijao = result.find((s) => s.subcategoria === FEIJAO)!;
 
-    expect(arroz.points[0].value).toBe(25);
-    expect(feijao.points[0].value).toBe(40);
+    expect(arroz.points[0]).toMatchObject({ value: 0, priceBrl: 25 });
+    expect(feijao.points[0]).toMatchObject({ value: 0, priceBrl: 14 });
   });
 
   it("preserves the order of BASICAO_SUBCATEGORIES in the output", () => {
@@ -151,7 +151,7 @@ describe("buildItemLineSeries", () => {
       expect(series.points).toHaveLength(1);
       expect(series.points[0]).toMatchObject({
         year: "2023",
-        value: 25,
+        value: 0,
         priceBrl: 25,
       });
     });

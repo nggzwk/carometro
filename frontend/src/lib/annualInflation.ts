@@ -90,26 +90,17 @@ export async function getAnnualMinimumWageIncrease(): Promise<Record<
   }
 }
 
-export async function getBaseMinimumWage(): Promise<number | null> {
+export async function getMinimumWageByYear(): Promise<Record<number, number>> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/basket/wage`, {
       next: { revalidate: 86400 },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return {};
 
     const wageRows = (await res.json()) as WageRow[];
-    if (!wageRows.length) return null;
-
-    const wageByYear = latestWageByYear(wageRows);
-    const years = Object.keys(wageByYear)
-      .map((y) => Number(y))
-      .sort((a, b) => a - b);
-    if (years.length === 0) return null;
-
-    const baseYear = years.length > 1 ? years[1] : years[0];
-    return wageByYear[baseYear] ?? null;
+    return latestWageByYear(wageRows);
   } catch {
-    return null;
+    return {};
   }
 }
 
