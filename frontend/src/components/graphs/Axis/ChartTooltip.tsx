@@ -14,7 +14,6 @@ interface ChartTooltipProps {
   ipca: number | null;
   ipcaPartialLabel?: string | null;
   wageIncrease: number | null;
-  wagePartialLabel?: string | null;
   basePrice: number;
   baseSalary?: number;
   visible: boolean;
@@ -29,7 +28,6 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   ipca,
   ipcaPartialLabel = null,
   wageIncrease,
-  wagePartialLabel = null,
   basePrice,
   baseSalary = 0,
   visible,
@@ -98,7 +96,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   const metrics: TooltipMetric[] = [
     {
       key: "inflation",
-      color: SERIES_COLORS.inflation,
+      color: SERIES_COLORS.dieese,
       value: inflation,
       brl: formatBrlFromBase(inflation, basePrice),
     },
@@ -106,7 +104,6 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
       key: "wageIncrease",
       color: SERIES_COLORS.wageIncrease,
       value: wageIncrease,
-      partialLabel: wagePartialLabel,
       brl: formatBrlFromBase(wageIncrease, baseSalary),
     },
     {

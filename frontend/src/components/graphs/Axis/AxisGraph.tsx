@@ -20,8 +20,7 @@ function buildSeries(
   let cumulativeWage = 0;
   let cumulativeDieese = 0;
 
-  // The first year is the start of the calculus: every series is 0% there and
-  // accumulates from the following year.
+
   return rows.map((r, i) => {
     const isYtdYear = ipcaYtd !== null && r.year === ipcaYtd.year;
     const ipcaIsYtd = isYtdYear && r.annual_ipca_pct === null;
@@ -58,12 +57,13 @@ function buildSeries(
         annualDieese !== null ? Number(cumulativeDieese.toFixed(2)) : null,
       ipca: annualIpca !== null ? Number(cumulativeIpca.toFixed(2)) : null,
       ipcaPartialLabel:
-        isYtdYear && annualIpca !== null
-          ? `até ${formatMonthName(ipcaYtd!.throughMonthRef)}`
-          : null,
+        i === 0 && annualIpca !== null
+          ? "início do cálculo"
+          : isYtdYear && annualIpca !== null
+            ? `até ${formatMonthName(ipcaYtd!.throughMonthRef)}`
+            : null,
       wageIncrease:
         annualWage !== null ? Number(cumulativeWage.toFixed(2)) : null,
-      wagePartialLabel: i === 0 && annualWage !== null ? "início do cálculo" : null,
     };
   });
 }
@@ -75,7 +75,6 @@ export default async function AxisGraph() {
     getCurrentYearIpcaYtd(),
   ]);
 
-  // The first year is the base (0%), so prices/wages are measured from it.
   const baseYear = Number(rows?.[0]?.year);
   const basePrice = Number(rows?.[0]?.end_month_value_brl ?? 0);
   const baseSalary = wageByYear[baseYear] ?? 0;

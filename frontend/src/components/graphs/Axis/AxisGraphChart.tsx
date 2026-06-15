@@ -11,6 +11,7 @@ import {
   Area,
 } from "recharts";
 import { basketTypesIcons } from "../../../lib/basketIcons";
+import dieesseIcon from "./dieese2.png";
 import {
   SERIES_COLORS,
   CHART_MARGIN,
@@ -31,7 +32,6 @@ export type DataPoint = {
   ipca: number | null;
   ipcaPartialLabel: string | null;
   wageIncrease: number | null;
-  wagePartialLabel: string | null;
 };
 
 type TooltipData = {
@@ -42,7 +42,6 @@ type TooltipData = {
   ipca: number | null;
   ipcaPartialLabel: string | null;
   wageIncrease: number | null;
-  wagePartialLabel: string | null;
 };
 
 type AxisGraphChartProps = {
@@ -72,7 +71,6 @@ export default function AxisGraphChart({
       ipca: point.ipca,
       ipcaPartialLabel: point.ipcaPartialLabel,
       wageIncrease: point.wageIncrease,
-      wagePartialLabel: point.wagePartialLabel,
     });
   };
 
@@ -97,8 +95,9 @@ export default function AxisGraphChart({
         cx={cx}
         cy={cy}
         icon={icon}
-        color={SERIES_COLORS.inflation}
-        hoverColor={SERIES_COLORS.inflation}
+        iconSrc={dieesseIcon.src}
+        color={SERIES_COLORS.dieese}
+        hoverColor={SERIES_COLORS.dieese}
         isHovered={hoveredIndex === index}
         onMouseEnter={() => showTooltip(index, cx, cy)}
         onMouseLeave={hideTooltip}
@@ -139,7 +138,7 @@ export default function AxisGraphChart({
           {
             id: "axis-subtitle-dieese",
             label: "DIEESE",
-            color: SERIES_COLORS.inflation,
+            color: SERIES_COLORS.dieese,
           },
           {
             id: "axis-subtitle-salario",
@@ -169,8 +168,8 @@ export default function AxisGraphChart({
                 x2="0"
                 y2="1"
               >
-                <stop offset="5%" stopColor={SERIES_COLORS.inflation} stopOpacity={0.15} />
-                <stop offset="95%" stopColor={SERIES_COLORS.inflation} stopOpacity={0.02} />
+                <stop offset="5%" stopColor={SERIES_COLORS.dieese} stopOpacity={0.15} />
+                <stop offset="95%" stopColor={SERIES_COLORS.dieese} stopOpacity={0.02} />
               </linearGradient>
             </defs>
 
@@ -199,7 +198,7 @@ export default function AxisGraphChart({
               yAxisId="pct"
               type="monotone"
               dataKey="inflation"
-              stroke={SERIES_COLORS.inflation}
+              stroke={SERIES_COLORS.dieese}
               strokeWidth={3}
               dot={renderDot}
               activeDot={false}
@@ -242,7 +241,6 @@ export default function AxisGraphChart({
             ipca={tooltipData.ipca}
             ipcaPartialLabel={tooltipData.ipcaPartialLabel}
             wageIncrease={tooltipData.wageIncrease}
-            wagePartialLabel={tooltipData.wagePartialLabel}
             basePrice={basePrice}
             baseSalary={baseSalary}
             side={

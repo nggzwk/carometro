@@ -59,7 +59,6 @@ type TooltipData = {
   ipca: number | null;
   ipcaPartialLabel: string | null;
   wageIncrease: number | null;
-  wagePartialLabel: string | null;
 };
 
 export default function LineGraphChart({
@@ -132,7 +131,6 @@ export default function LineGraphChart({
       wageIncrease: baseHasWage
         ? Number(((wageFactor - 1) * 100).toFixed(2))
         : null,
-      wagePartialLabel: i === 0 && baseHasWage ? "início do cálculo" : null,
     };
   });
 
@@ -163,9 +161,13 @@ export default function LineGraphChart({
       pct: point.value,
       priceBrl: point.priceBrl,
       ipca: point.ipca,
-      ipcaPartialLabel: isPartial ? ipcaPartial.label : null,
+      ipcaPartialLabel:
+        index === 0
+          ? "início do cálculo"
+          : isPartial
+            ? ipcaPartial.label
+            : null,
       wageIncrease: point.wageIncrease,
-      wagePartialLabel: point.wagePartialLabel,
     });
   }, [chartData, ipcaPartial]);
 
@@ -387,7 +389,6 @@ export default function LineGraphChart({
                   key: "wageIncrease",
                   color: SERIES_COLORS.wageIncrease,
                   value: tooltip.wageIncrease,
-                  partialLabel: tooltip.wagePartialLabel,
                   brl: formatBrlFromBase(tooltip.wageIncrease, baseSalary),
                 },
                 {

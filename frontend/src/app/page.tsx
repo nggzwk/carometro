@@ -12,7 +12,7 @@ import LineGraph from "../components/graphs/LineGraph/LineGraph";
 import Ranking from "../components/graphs/Ranking/Ranking";
 import CustomBasket from "../components/custom/CustomBasket";
 import Footer from "../components/shared/Footer";
-import { getDieeseTableRows } from "../lib/annualInflation";
+import { getDieeseTableRows, getMinimumWageByYear } from "../lib/annualInflation";
 
 export default async function Home() {
   const [
@@ -21,13 +21,20 @@ export default async function Home() {
     feiraoVillains,
     basicaoVillains,
     dieeseRows,
+    wageByYear,
   ] = await Promise.all([
     getBasketSummaryProps(),
     getVeggieBasketSummaryProps(),
     getLatestFeiraoVillains(),
     getLatestVillainsMonth(),
     getDieeseTableRows(),
+    getMinimumWageByYear(),
   ]);
+
+  const wageYears = Object.keys(wageByYear)
+    .map(Number)
+    .sort((a, b) => b - a);
+  const minimumWage = wageYears.length > 0 ? wageByYear[wageYears[0]] : 0;
 
   const Divider = () => (
     <div className="w-full h-[0.5px] bg-black/10 my-10" aria-hidden="true" />
@@ -73,6 +80,7 @@ export default async function Home() {
           <CustomBasket
             basicaoItems={basketSummary.items}
             feiraoItems={feiraoSummary.items}
+            minimumWage={minimumWage}
           />
         </section>
 

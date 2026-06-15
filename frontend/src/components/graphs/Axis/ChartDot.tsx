@@ -5,6 +5,7 @@ interface ChartDotProps {
   cx: number;
   cy: number;
   icon: string;
+  iconSrc?: string;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onClick: () => void;
@@ -19,6 +20,7 @@ export const ChartDot: React.FC<ChartDotProps> = ({
   cx,
   cy,
   icon,
+  iconSrc,
   onMouseEnter,
   onMouseLeave,
   onClick,
@@ -81,19 +83,36 @@ export const ChartDot: React.FC<ChartDotProps> = ({
         }}
       />
 
-      <text
-        x={0}
-        y={isHovered ? 7 : 6}
-        textAnchor="middle"
-        fontSize={isHovered ? 18 : 16}
-        pointerEvents="none"
-        className={styles.icon}
-        style={{
-          transition: "font-size 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-        }}
-      >
-        {icon}
-      </text>
+      {iconSrc ? (
+        <image
+          href={iconSrc}
+          // Match the emoji's rendered footprint (fontSize 16 / 18), centered.
+          width={isHovered ? 20 : 18}
+          height={isHovered ? 20 : 18}
+          x={isHovered ? -10 : -9}
+          y={isHovered ? -10 : -9}
+          pointerEvents="none"
+          className={styles.icon}
+          style={{
+            transition:
+              "width 300ms cubic-bezier(0.4, 0, 0.2, 1), height 300ms cubic-bezier(0.4, 0, 0.2, 1), x 300ms, y 300ms",
+          }}
+        />
+      ) : (
+        <text
+          x={0}
+          y={isHovered ? 7 : 6}
+          textAnchor="middle"
+          fontSize={isHovered ? 18 : 16}
+          pointerEvents="none"
+          className={styles.icon}
+          style={{
+            transition: "font-size 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          {icon}
+        </text>
+      )}
     </g>
   );
 };
