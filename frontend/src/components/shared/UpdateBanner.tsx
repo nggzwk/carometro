@@ -16,10 +16,18 @@ const UpdateBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [done, setDone] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [atTop, setAtTop] = useState(true);
   const iterationsRef = useRef(0);
 
   useEffect(() => {
     setVisible(true);
+
+    const handleScroll = () => {
+      setAtTop(window.scrollY === 0);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleIteration = () => {
@@ -36,7 +44,7 @@ const UpdateBanner: React.FC = () => {
       <div className="h-10 md:h-12" aria-hidden="true" />
 
       <AnimatePresence>
-        {!done && visible && (
+        {!done && visible && atTop && (
           <motion.div
             key="banner"
             initial={{ opacity: 0, x: "100%" }}

@@ -33,32 +33,33 @@ function getYearFromMonthRef(monthRef: string): number | null {
   return Number.isFinite(year) ? year : null;
 }
 
+function latestWageByYear(wageRows: WageRow[]): Record<number, number> {
+  return wageRows.reduce<Record<number, number>>((acc, row) => {
+    const year = getYearFromMonthRef(row.month_ref);
+    const wage = toNumber(row.minimum_wage_brl);
+    if (year === null || wage === null) return acc;
+
+    const current = acc[year];
+    if (current === undefined || wage > current) {
+      acc[year] = wage;
+    }
+    return acc;
+  }, {});
+}
+
 export function calculateAnnualMinimumWageIncrease(
   wageRows: WageRow[],
 ): Record<number, number | null> {
-  const latestWageByYear = wageRows.reduce<Record<number, number>>(
-    (acc, row) => {
-      const year = getYearFromMonthRef(row.month_ref);
-      const wage = toNumber(row.minimum_wage_brl);
-      if (year === null || wage === null) return acc;
+  const wageByYear = latestWageByYear(wageRows);
 
-      const current = acc[year];
-      if (current === undefined || wage > current) {
-        acc[year] = wage;
-      }
-      return acc;
-    },
-    {},
-  );
-
-  const years = Object.keys(latestWageByYear)
+  const years = Object.keys(wageByYear)
     .map((y) => Number(y))
     .sort((a, b) => a - b);
 
   const increaseByYear: Record<number, number | null> = {};
   for (const year of years) {
-    const currentWage = latestWageByYear[year];
-    const previousWage = latestWageByYear[year - 1];
+    const currentWage = wageByYear[year];
+    const previousWage = wageByYear[year - 1];
 
     if (previousWage === undefined || previousWage === 0) {
       increaseByYear[year] = null;
@@ -99,10 +100,14 @@ export async function getBaseMinimumWage(): Promise<number | null> {
     const wageRows = (await res.json()) as WageRow[];
     if (!wageRows.length) return null;
 
-    const sorted = [...wageRows].sort((a, b) =>
-      String(a.month_ref).localeCompare(String(b.month_ref)),
-    );
-    return toNumber(sorted[0].minimum_wage_brl);
+    const wageByYear = latestWageByYear(wageRows);
+    const years = Object.keys(wageByYear)
+      .map((y) => Number(y))
+      .sort((a, b) => a - b);
+    if (years.length === 0) return null;
+
+    const baseYear = years.length > 1 ? years[1] : years[0];
+    return wageByYear[baseYear] ?? null;
   } catch {
     return null;
   }
