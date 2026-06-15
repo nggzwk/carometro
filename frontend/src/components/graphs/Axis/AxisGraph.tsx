@@ -21,14 +21,13 @@ function buildSeries(
   let cumulativeIpca = 0;
   let cumulativeWage = 0;
   let cumulativeDieese = 0;
+  let wageBaseSeen = false;
 
   return rows.map((r, i) => {
-    const ipcaIsYtd =
-      ipcaYtd !== null &&
-      r.year === ipcaYtd.year &&
-      r.annual_ipca_pct === null;
+    const isYtdYear = ipcaYtd !== null && r.year === ipcaYtd.year;
+    const ipcaIsYtd = isYtdYear && r.annual_ipca_pct === null;
     const annualIpca = ipcaIsYtd
-      ? ipcaYtd.pct
+      ? ipcaYtd!.pct
       : r.annual_ipca_pct === null
         ? null
         : Number(r.annual_ipca_pct);
@@ -41,8 +40,15 @@ function buildSeries(
 
     if (annualIpca !== null)
       cumulativeIpca = compound(cumulativeIpca, annualIpca, i === 0);
-    if (annualWage !== null)
-      cumulativeWage = compound(cumulativeWage, annualWage, i === 0);
+    let wageIsBase = false;
+    if (annualWage !== null) {
+      if (!wageBaseSeen) {
+        wageBaseSeen = true;
+        wageIsBase = true;
+      } else {
+        cumulativeWage = compound(cumulativeWage, annualWage, false);
+      }
+    }
     if (annualDieese !== null)
       cumulativeDieese = compound(cumulativeDieese, annualDieese, i === 0);
 
@@ -59,11 +65,13 @@ function buildSeries(
       inflation:
         annualDieese !== null ? Number(cumulativeDieese.toFixed(2)) : null,
       ipca: annualIpca !== null ? Number(cumulativeIpca.toFixed(2)) : null,
-      ipcaPartialLabel: ipcaIsYtd
-        ? `até ${formatMonthName(ipcaYtd!.throughMonthRef)}`
-        : null,
+      ipcaPartialLabel:
+        isYtdYear && annualIpca !== null
+          ? `até ${formatMonthName(ipcaYtd!.throughMonthRef)}`
+          : null,
       wageIncrease:
         annualWage !== null ? Number(cumulativeWage.toFixed(2)) : null,
+      wagePartialLabel: wageIsBase ? "início do cálculo" : null,
     };
   });
 }

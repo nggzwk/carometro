@@ -59,6 +59,7 @@ type TooltipData = {
   ipca: number | null;
   ipcaPartialLabel: string | null;
   wageIncrease: number | null;
+  wagePartialLabel: string | null;
 };
 
 export default function LineGraphChart({
@@ -112,17 +113,25 @@ export default function LineGraphChart({
   const data = selected?.points ?? [];
   const color = selectedSubcat != null ? getBasketItemColor(selectedSubcat) : "#e0aa59";
 
+  const firstWageYear =
+    data.find((p) => wageByYear[Number(p.year)] != null)?.year ?? null;
+
   const chartData = data.map((p, i) => {
     let ipcaFactor = 1;
     let wageFactor = 1;
     let hasWage = false;
+    let wageBaseSeen = false;
     for (let j = 0; j <= i; j++) {
       const year = Number(data[j].year);
       const annualIpca = ipcaByYear[year];
       if (annualIpca != null) ipcaFactor *= 1 + annualIpca / 100;
       const annualWage = wageByYear[year];
       if (annualWage != null) {
-        wageFactor *= 1 + annualWage / 100;
+        if (!wageBaseSeen) {
+          wageBaseSeen = true;
+        } else {
+          wageFactor *= 1 + annualWage / 100;
+        }
         hasWage = true;
       }
     }
@@ -132,6 +141,10 @@ export default function LineGraphChart({
       wageIncrease: hasWage
         ? Number(((wageFactor - 1) * 100).toFixed(2))
         : null,
+      wagePartialLabel:
+        firstWageYear != null && p.year === firstWageYear
+          ? "início do cálculo"
+          : null,
     };
   });
 
@@ -164,6 +177,7 @@ export default function LineGraphChart({
       ipca: point.ipca,
       ipcaPartialLabel: isPartial ? ipcaPartial.label : null,
       wageIncrease: point.wageIncrease,
+      wagePartialLabel: point.wagePartialLabel,
     });
   }, [chartData, ipcaPartial]);
 
@@ -331,6 +345,19 @@ export default function LineGraphChart({
             <Line
               yAxisId="pct"
               type="monotone"
+              dataKey="wageIncrease"
+              stroke={SERIES_COLORS.wageIncrease}
+              strokeWidth={1.5}
+              strokeDasharray="6 4"
+              dot={false}
+              activeDot={false}
+              connectNulls={true}
+              isAnimationActive={false}
+            />
+
+            <Line
+              yAxisId="pct"
+              type="monotone"
               dataKey="value"
               stroke={color}
               strokeWidth={3}
@@ -372,6 +399,7 @@ export default function LineGraphChart({
                   key: "wageIncrease",
                   color: SERIES_COLORS.wageIncrease,
                   value: tooltip.wageIncrease,
+                  partialLabel: tooltip.wagePartialLabel,
                   brl: formatBrlFromBase(tooltip.wageIncrease, baseSalary),
                 },
                 {

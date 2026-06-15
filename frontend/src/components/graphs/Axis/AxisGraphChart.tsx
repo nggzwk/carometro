@@ -31,6 +31,7 @@ export type DataPoint = {
   ipca: number | null;
   ipcaPartialLabel: string | null;
   wageIncrease: number | null;
+  wagePartialLabel: string | null;
 };
 
 type TooltipData = {
@@ -41,6 +42,7 @@ type TooltipData = {
   ipca: number | null;
   ipcaPartialLabel: string | null;
   wageIncrease: number | null;
+  wagePartialLabel: string | null;
 };
 
 type AxisGraphChartProps = {
@@ -70,6 +72,7 @@ export default function AxisGraphChart({
       ipca: point.ipca,
       ipcaPartialLabel: point.ipcaPartialLabel,
       wageIncrease: point.wageIncrease,
+      wagePartialLabel: point.wagePartialLabel,
     });
   };
 
@@ -239,6 +242,7 @@ export default function AxisGraphChart({
             ipca={tooltipData.ipca}
             ipcaPartialLabel={tooltipData.ipcaPartialLabel}
             wageIncrease={tooltipData.wageIncrease}
+            wagePartialLabel={tooltipData.wagePartialLabel}
             basePrice={basePrice}
             baseSalary={baseSalary}
             side={
