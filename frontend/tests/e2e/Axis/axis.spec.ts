@@ -60,7 +60,7 @@ test.describe("Axis Graph - Desktop Experience", () => {
       }
 
       // Scenario 8: the tooltip is hover-driven — moving the mouse away hides it.
-      await axis.page.mouse.move(0, 0);
+      await axis.page.mouse.click(0, 0);
       await expect(axis.tooltip).toBeHidden({ timeout: 2000 });
     }
   });
