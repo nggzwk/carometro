@@ -520,9 +520,10 @@ export default function Transparency({
             <div className="mb-2">
               <p>Atualizações futuras:</p>
               <ul className="list-disc list-inside">
-                <li>Todos os itens disponíveis na API.</li>
+                <li>Todos os itens disponíveis na API</li>
+                <li>Reduflação</li>
                 <li>Comparação por bairro/rede</li>
-                <li>Faxinão.</li>
+                <li>Faxinão</li>
               </ul>
             </div>
           </div>

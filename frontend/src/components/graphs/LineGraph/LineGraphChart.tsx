@@ -192,6 +192,7 @@ export default function LineGraphChart({
         onMouseEnter={() => showTooltip(index, cx, cy)}
         onMouseLeave={hideTooltip}
         onClick={() => showTooltip(index, cx, cy)}
+        onPointerDown={(e) => e.stopPropagation()}
       />
     );
   }, [data, color, selectedSubcat, hoveredIndex, showTooltip, hideTooltip]);
@@ -272,6 +273,7 @@ export default function LineGraphChart({
         id="line-graph-chart"
         className={`relative w-full ${surfaceStyles.chartNoSelect}`}
         aria-label="Gráfico de preço acumulado por item do basicão"
+        onPointerDown={hideTooltip}
       >
         <ResponsiveContainer width="100%" height={420}>
           <LineChart data={chartData} margin={CHART_MARGIN}>
@@ -345,6 +347,7 @@ export default function LineGraphChart({
             id="line-graph-tooltip"
             ref={tooltipRef}
             className={styles.tooltip}
+            onPointerDown={(e) => e.stopPropagation()}
             style={{
               left: tooltipPos ? tooltipPos.left : tooltip.x,
               top: tooltip.y + 28,
