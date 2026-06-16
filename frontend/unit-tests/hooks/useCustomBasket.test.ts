@@ -5,6 +5,7 @@ import type { BasketItemData } from "../../src/lib/basketTypes";
 
 vi.mock("../../src/components/custom/helpers", () => ({
   itemDisplayName: (item: BasketItemData) => item.item_name ?? "ITEM",
+  itemFullName: (item: BasketItemData) => item.item_name ?? "ITEM",
 }));
 
 vi.mock("../../src/lib/basketIcons", () => ({
