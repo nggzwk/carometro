@@ -1,9 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { CiShare1 } from "react-icons/ci";
+import { IoListOutline, IoCheckmarkOutline } from "react-icons/io5";
 import { formatBrl } from "../../lib/formatters";
 import { EASE_IN, EASE_OUT } from "./constants";
 import type { CartLine } from "./types";
+import type { CopyStatus, ShareStatus } from "./useShareBasket";
 import "./TotalCart.css";
 
 interface TotalCartProps {
@@ -14,6 +17,10 @@ interface TotalCartProps {
   onToggle: () => void;
   onRemove: (subcat: number) => void;
   onClear: () => void;
+  onShare: () => void;
+  shareStatus: ShareStatus;
+  onCopy: () => void;
+  copyStatus: CopyStatus;
 }
 
 export default function TotalCart({
@@ -24,6 +31,10 @@ export default function TotalCart({
   onToggle,
   onRemove,
   onClear,
+  onShare,
+  shareStatus,
+  onCopy,
+  copyStatus,
 }: TotalCartProps) {
   const isEmpty = lines.length === 0;
 
@@ -154,6 +165,31 @@ export default function TotalCart({
                       <span className="total-cart__total-label">TOTAL</span>
                       <span className="total-cart__total-big">{formatBrl(total)}</span>
                     </div>
+                  </div>
+
+                  <div className="total-cart__actions">
+                    <button
+                      type="button"
+                      className="total-cart__action-btn"
+                      onClick={onCopy}
+                      aria-label="Copiar lista de compras"
+                    >
+                      {copyStatus === "copied" ? (
+                        <><IoCheckmarkOutline aria-hidden="true" /> Copiado</>
+                      ) : (
+                        <><IoListOutline aria-hidden="true" /> Copiar lista</>
+                      )}
+                    </button>
+                    <span className="total-cart__actions-divider" aria-hidden="true" />
+                    <button
+                      type="button"
+                      className="total-cart__action-btn"
+                      onClick={onShare}
+                      disabled={shareStatus === "sharing"}
+                      aria-label="Compartilhar minha lista"
+                    >
+                      <CiShare1 aria-hidden="true" /> Compartilhar
+                    </button>
                   </div>
                 </>
               )}

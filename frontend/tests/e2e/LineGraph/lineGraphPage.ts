@@ -127,6 +127,7 @@ export class LineGraphPage {
   async dismissTooltip() {
     const titleBox = await this.page.locator("#line-graph-title").boundingBox();
     if (!titleBox) throw new Error("Locator not found");
+    await this.page.waitForTimeout(500);
     await this.page.locator("#line-graph-title").click();
     await expect(this.tooltip).toBeHidden({ timeout: 2000 });
   }

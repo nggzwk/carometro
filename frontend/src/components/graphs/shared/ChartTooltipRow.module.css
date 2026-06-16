@@ -36,15 +36,7 @@
   line-height: 1.2;
 }
 
-.metricPartial {
-  position: relative;
-  padding-bottom: 26px;
-}
-
 .partialLabel {
-  position: absolute;
-  right: 14px;
-  bottom: 7px;
   font-family: var(--font-card-summary, sans-serif);
   font-weight: 400;
   font-size: 9px;

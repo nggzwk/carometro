@@ -29,17 +29,29 @@ interface MenuSwitcherProps {
   onToggle: () => void;
 }
 
+interface ArrowButtonProps {
+  direction: "prev" | "next";
+  onClick: () => void;
+}
+
+function ArrowButton({ direction, onClick }: ArrowButtonProps) {
+  const isPrev = direction === "prev";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={isPrev ? "Menu anterior" : "Próximo menu"}
+      style={arrowStyle}
+    >
+      {isPrev ? "◀" : "▶"}
+    </button>
+  );
+}
+
 export default function MenuSwitcher({ menu, onToggle }: MenuSwitcherProps) {
   return (
     <div className="flex items-center justify-center gap-5">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label="Menu anterior"
-        style={arrowStyle}
-      >
-        ◀
-      </button>
+      <ArrowButton direction="prev" onClick={onToggle} />
 
       <div style={{ minWidth: 100 }}>
         <AnimatePresence mode="wait">
@@ -63,14 +75,7 @@ export default function MenuSwitcher({ menu, onToggle }: MenuSwitcherProps) {
         </AnimatePresence>
       </div>
 
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label="Próximo menu"
-        style={arrowStyle}
-      >
-        ▶
-      </button>
+      <ArrowButton direction="next" onClick={onToggle} />
     </div>
   );
 }

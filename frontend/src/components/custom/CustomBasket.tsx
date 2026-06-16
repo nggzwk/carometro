@@ -9,24 +9,30 @@ import Cart from "./Cart";
 import TotalCart from "./TotalCart";
 import MenuSwitcher from "./MenuSwitcher";
 import OverLimitToast from "./OverLimitToast";
+import ShareCard from "./ShareCard";
 import { useCustomBasket } from "./useCustomBasket";
-import { itemDisplayName, menuItemIcon } from "./helpers";
+import { useShareBasket } from "./useShareBasket";
+import { itemDisplayName, menuItemIcon, splitLinesForShare } from "./helpers";
 import { RING_RADIUS } from "./constants";
 import type { Menu } from "./types";
 
 interface CustomBasketProps {
   basicaoItems: BasketItemData[];
   feiraoItems: BasketItemData[];
+  minimumWage: number;
 }
 
 export default function CustomBasket({
   basicaoItems,
   feiraoItems,
+  minimumWage,
 }: CustomBasketProps) {
   const [menu, setMenu] = useState<Menu>("basicao");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { lines, count, total, overLimit, popTick, addItem, removeItem, clearCart } =
     useCustomBasket();
+  const { cardRef, status: shareStatus, share, copyStatus, copyList } =
+    useShareBasket();
 
   const items = menu === "basicao" ? basicaoItems : feiraoItems;
   const latestMonthRef = basicaoItems[0]?.month_ref ?? feiraoItems[0]?.month_ref ?? null;
@@ -141,7 +147,35 @@ export default function CustomBasket({
           onToggle={toggleCart}
           onRemove={removeItem}
           onClear={clearCart}
+          onShare={() => share(total)}
+          shareStatus={shareStatus}
+          onCopy={() => copyList(lines, total)}
+          copyStatus={copyStatus}
         />
+      </div>
+
+      <div
+        ref={cardRef}
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-99999px",
+          top: 0,
+          pointerEvents: "none",
+        }}
+      >
+        {splitLinesForShare(lines).map((part, i) => (
+          <ShareCard
+            key={i}
+            lines={part.lines}
+            total={total}
+            count={count}
+            minimumWage={minimumWage}
+            monthLabel={monthLabel}
+            partLabel={part.partLabel}
+            showTotal={part.showTotal}
+          />
+        ))}
       </div>
     </motion.div>
   );

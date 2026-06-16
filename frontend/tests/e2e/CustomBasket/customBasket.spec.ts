@@ -78,4 +78,20 @@ test.describe("Custom Basket — Monte sua Cesta", () => {
     const computedSum = lineValues.reduce((acc, v) => acc + v, 0);
     expect(Math.abs(computedSum - displayedTotal)).toBeLessThanOrEqual(0.02);
   });
+
+  test("Scenario 4: Both share and copy buttons are visible when the total is expanded", async () => {
+    test.setTimeout(60000);
+
+    // Hidden while the cart is collapsed/empty.
+    await expect(basket.shareButton).toHaveCount(0);
+    await expect(basket.copyListButton).toHaveCount(0);
+
+    await basket.ensureBasicao();
+    await basket.clickItem(0);
+
+    await basket.openTotalCart();
+
+    await expect(basket.copyListButton).toBeVisible();
+    await expect(basket.shareButton).toBeVisible();
+  });
 });

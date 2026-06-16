@@ -1,0 +1,155 @@
+.share-card {
+  width: 1080px;
+  box-sizing: border-box;
+  padding: 96px 80px 88px;
+  background: #fbf7f1;
+  font-family: var(--font-subheader);
+  color: #1a120b;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+.share-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.share-card__brand {
+  font-family: var(--font-card-summary);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a89b8c;
+}
+
+.share-card__title {
+  font-size: 120px;
+  font-weight: 100;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.share-card__eyebrow {
+  font-family: var(--font-card-summary);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #a89b8c;
+}
+
+.share-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.share-card__row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 30px 8px;
+  border-bottom: 2px solid rgba(200, 185, 170, 0.35);
+  font-size: 44px;
+}
+
+.share-card__check {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 3px solid #1a120b;
+  border-radius: 10px;
+}
+
+.share-card__row-icon {
+  flex: 0 0 auto;
+  font-size: 52px;
+}
+
+.share-card__row-qty {
+  flex: 0 0 auto;
+  min-width: 72px;
+  font-family: var(--font-card-summary);
+  font-weight: 700;
+}
+
+.share-card__row-name {
+  flex: 1 1 auto;
+  font-family: var(--font-card-summary);
+  font-weight: 300;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.share-card__row-sigla {
+  flex: 0 0 auto;
+  font-family: var(--font-card-summary);
+  font-size: 30px;
+  text-transform: uppercase;
+  color: #a89b8c;
+}
+
+.share-card__row-price {
+  flex: 0 0 auto;
+  margin-left: 12px;
+  font-family: var(--font-card-summary);
+  font-weight: 600;
+}
+
+.share-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 28px;
+  border-top: 3px solid #1a120b;
+}
+
+.share-card__total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.share-card__total-label {
+  font-family: var(--font-card-summary);
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a89b8c;
+}
+
+.share-card__total-value {
+  font-size: 96px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.share-card__wage {
+  font-family: var(--font-card-summary);
+  font-size: 28px;
+  color: #a89b8c;
+}
+
+.share-card__footer--continues {
+  border-top-color: rgba(200, 185, 170, 0.45);
+}
+
+.share-card__continues {
+  font-family: var(--font-card-summary);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #a89b8c;
+}

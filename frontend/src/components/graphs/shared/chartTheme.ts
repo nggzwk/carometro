@@ -1,12 +1,17 @@
 export const SERIES_COLORS = {
-  inflation: "#3971268e",
-  wageIncrease: "#5c83ae",
+  wageIncrease: "#34b17f",
   ipca: "#ddb03f",
+  dieese: "#2d2272",
 } as const;
 
 export type SeriesKey = keyof typeof SERIES_COLORS;
 
-export const CHART_MARGIN = { top: 20, right: 30, left: 5, bottom: 20 } as const;
+export const CHART_MARGIN = {
+  top: 20,
+  right: 30,
+  left: 5,
+  bottom: 20,
+} as const;
 
 export const AXIS_STROKE = "#8B7355";
 

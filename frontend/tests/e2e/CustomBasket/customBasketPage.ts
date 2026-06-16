@@ -23,6 +23,10 @@ export class CustomBasketPage {
   readonly clearBtn: Locator;
   readonly itemCountLabel: Locator;
 
+  // ---- Share --------------------------------------------------------------
+  readonly shareButton: Locator;
+  readonly copyListButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -45,6 +49,13 @@ export class CustomBasketPage {
     this.totalBig = page.locator(".total-cart__total-big").first();
     this.clearBtn = page.locator("button.total-cart__clear").first();
     this.itemCountLabel = page.locator(".total-cart__label").first();
+
+    this.shareButton = page.getByRole("button", {
+      name: "Compartilhar minha lista",
+    });
+    this.copyListButton = page.getByRole("button", {
+      name: "Copiar lista de compras",
+    });
   }
 
   // ---- Navigation ---------------------------------------------------------

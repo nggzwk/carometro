@@ -76,7 +76,7 @@ export function buildItemLineSeries(
       .sort((a, b) => a - b);
     if (plotYears.length === 0) return { subcategoria, points: [] };
 
-    const basePrice = months.get(`${plotYears[0] - 1}-12`);
+    const basePrice = anchorByYear.get(plotYears[0]);
     if (basePrice === undefined || basePrice === 0) {
       return { subcategoria, points: [] };
     }

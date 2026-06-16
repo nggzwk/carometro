@@ -23,7 +23,7 @@ export const ChartTooltipRow: React.FC<ChartTooltipRowProps> = ({
   return (
     <div
       id={`${idPrefix}-${key}`}
-      className={`${styles.metric} ${partialLabel ? styles.metricPartial : ""}`}
+      className={styles.metric}
       style={{ color }}
     >
       <span
@@ -35,14 +35,14 @@ export const ChartTooltipRow: React.FC<ChartTooltipRowProps> = ({
         <span id={`${idPrefix}-${key}-value`} className={styles.value}>
           {formatSignedPct(value)}
         </span>
-        {partialLabel && (
-          <span id={`${idPrefix}-${key}-partial`} className={styles.partialLabel}>
-            {partialLabel}
-          </span>
-        )}
         {brl && (
           <span id={`${idPrefix}-${key}-brl`} className={styles.brlValue}>
             {brl}
+          </span>
+        )}
+        {partialLabel && (
+          <span id={`${idPrefix}-${key}-partial`} className={styles.partialLabel}>
+            {partialLabel}
           </span>
         )}
       </div>

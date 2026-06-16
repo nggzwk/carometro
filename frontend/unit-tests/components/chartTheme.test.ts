@@ -7,7 +7,7 @@ import {
 
 describe("chartTheme (shared)", () => {
   it("exposes a color for each data series", () => {
-    expect(SERIES_COLORS.inflation).toBeTruthy();
+    expect(SERIES_COLORS.dieese).toBeTruthy();
     expect(SERIES_COLORS.wageIncrease).toBeTruthy();
     expect(SERIES_COLORS.ipca).toBeTruthy();
   });

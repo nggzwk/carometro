@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { BasketItemData } from "../../lib/basketTypes";
 import { getQtdEmbalagemSigla } from "../../lib/basketIcons";
 import { ITEM_LIMIT, OVER_LIMIT_DURATION_MS } from "./constants";
-import { itemDisplayName } from "./helpers";
+import { itemDisplayName, itemFullName } from "./helpers";
 import type { CartEntry, CartLine } from "./types";
 
 const STORAGE_KEY = "carometro_basket";
@@ -65,10 +65,11 @@ export function useCustomBasket(): CustomBasketState {
     const computed: CartLine[] = Object.values(cart)
       .map(({ item, icon, qty, insertOrder }) => {
         const price = parseFloat(item.month_price) || 0;
+        const name = itemDisplayName(item);
         return {
           subcat: item.produto_subcategoria,
-          name: itemDisplayName(item),
-          fullName: item.item_name ?? itemDisplayName(item),
+          name,
+          fullName: itemFullName(item),
           sigla: getQtdEmbalagemSigla(
             item.qtd_embalagem,
             item.produto_subcategoria,

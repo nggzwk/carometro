@@ -9,7 +9,6 @@ interface ItemsCircleProps {
   label?: string;
   delay?: number;
   onClick: () => void;
-  id?: string;
 }
 
 export default function ItemsCircle({
@@ -17,11 +16,9 @@ export default function ItemsCircle({
   label,
   delay = 0,
   onClick,
-  id,
 }: ItemsCircleProps) {
   return (
     <motion.button
-      id={id}
       type="button"
       onClick={onClick}
       initial={{ opacity: 0, scale: 0.4 }}

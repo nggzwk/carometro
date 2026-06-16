@@ -32,6 +32,10 @@ const noopProps = {
   onToggle: () => {},
   onRemove: () => {},
   onClear: () => {},
+  onShare: () => {},
+  shareStatus: "idle" as const,
+  onCopy: () => {},
+  copyStatus: "idle" as const,
 };
 
 describe("TotalCart", () => {
