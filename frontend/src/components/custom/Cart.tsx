@@ -8,10 +8,9 @@ interface CartProps {
   count: number;
   popTick: number;
   onClick: () => void;
-  id?: string;
 }
 
-export default function Cart({ count, popTick, onClick, id }: CartProps) {
+export default function Cart({ count, popTick, onClick }: CartProps) {
   const controls = useAnimation();
 
   useEffect(() => {
@@ -24,7 +23,6 @@ export default function Cart({ count, popTick, onClick, id }: CartProps) {
 
   return (
     <motion.button
-      id={id}
       type="button"
       onClick={onClick}
       animate={controls}

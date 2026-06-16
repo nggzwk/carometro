@@ -20,7 +20,7 @@ function getFallbackIcon(name: string): string {
   const lower = name.toLowerCase();
   if (lower.includes("ovo")) return "🍳";
   if (lower.includes("óleo") || lower.includes("oleo")) return "🫙";
-  if (lower.includes("trigo") || lower.includes("farinha")) return "🍞";
+  if (lower.includes("trigo") || lower.includes("farinha")) return "🌾";
   if (lower.includes("café") || lower.includes("cafe")) return "☕";
   if (lower.includes("açúcar") || lower.includes("acucar")) return "🍬";
   if (lower.includes("leite")) return "🥛";
