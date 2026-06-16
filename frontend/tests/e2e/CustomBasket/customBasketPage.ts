@@ -25,6 +25,7 @@ export class CustomBasketPage {
 
   // ---- Share --------------------------------------------------------------
   readonly shareButton: Locator;
+  readonly copyListButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -50,7 +51,10 @@ export class CustomBasketPage {
     this.itemCountLabel = page.locator(".total-cart__label").first();
 
     this.shareButton = page.getByRole("button", {
-      name: "Compartilhar minha cesta",
+      name: "Compartilhar minha lista",
+    });
+    this.copyListButton = page.getByRole("button", {
+      name: "Copiar lista de compras",
     });
   }
 
