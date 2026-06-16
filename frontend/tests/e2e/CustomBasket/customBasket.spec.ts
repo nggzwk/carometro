@@ -78,4 +78,15 @@ test.describe("Custom Basket — Monte sua Cesta", () => {
     const computedSum = lineValues.reduce((acc, v) => acc + v, 0);
     expect(Math.abs(computedSum - displayedTotal)).toBeLessThanOrEqual(0.02);
   });
+
+  test("Scenario 4: Share button is hidden until the cart has items", async () => {
+    test.setTimeout(60000);
+
+    await expect(basket.shareButton).toHaveCount(0);
+
+    await basket.ensureBasicao();
+    await basket.clickItem(0);
+
+    await expect(basket.shareButton).toBeVisible();
+  });
 });
