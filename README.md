@@ -13,7 +13,7 @@ IPCA and minimum wage), and serves it all through a dashboard at
 
 The basket is tracked in three flavours:
 
-- **Cestão / mercado** — the supermarket basket.
+- **Basicão / mercado** — the supermarket basket.
 - **Feirão / hortifruti** — the street-market vegetable basket.
 - **Global baskets** — DIEESE basket plus international comparisons (USD value,
   USA CPI, Argentina SMVM) for cross-country context.

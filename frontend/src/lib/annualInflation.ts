@@ -212,7 +212,7 @@ export async function getDieeseTableRows(): Promise<DieeseRow[]> {
       if (annual !== null) {
         cumulative =
           i === 0
-            ? annual
+            ? 0
             : (1 + cumulative / 100) * (1 + annual / 100) * 100 - 100;
       }
       return {

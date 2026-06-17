@@ -4,7 +4,7 @@ export const BASICAO_EMOJIS: Record<string, string> = {
   "40003": "🍚", // Arroz
   "40012": "🫘", // Feijão
   "60001": "🫙", // Óleo
-  "40017": "🌾 ", // Trigo
+  "40017": "🌾", // Trigo
   "90001": "☕", // Café
   "30001": "🥛", // Leite
   "80002": "🍬", // Açúcar
