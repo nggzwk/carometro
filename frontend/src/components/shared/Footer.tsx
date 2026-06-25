@@ -43,7 +43,7 @@ export default function Footer({
           </a>
 
           <a
-            href="https://github.com/nggzwk"
+            href="https://github.com/narazdt"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"

@@ -540,7 +540,7 @@ export default function Transparency({
             </a>
 
             <a
-              href="https://x.com/nggzwk"
+              href="https://x.com/narazdt"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#8B7355] hover:text-black transition-colors"
@@ -550,7 +550,7 @@ export default function Transparency({
             </a>
 
             <a
-              href="https://github.com/nggzwk/carometro"
+              href="https://github.com/narazdt/carometro"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#8B7355] hover:text-black transition-colors"
